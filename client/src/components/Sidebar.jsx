@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Flex, VStack, Icon, Text, Button, Divider, Tooltip } from '@chakra-ui/react';
 import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
+  const { logout, currentUser } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
 
   const navItems = [
