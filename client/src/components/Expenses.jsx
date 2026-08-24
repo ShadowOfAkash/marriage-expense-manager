@@ -210,7 +210,7 @@ export default function Expenses() {
       </Flex>
 
       {/* ── Add Expense Modal ── */}
-      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
+      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="3xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
           <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
@@ -530,7 +530,7 @@ export default function Expenses() {
       </Card>
 
       {/* ── Edit Modal ── */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="md">
+      <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="2xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
           <Box h="3px" bgGradient="linear(to-r, blue.400, plum.500)" />

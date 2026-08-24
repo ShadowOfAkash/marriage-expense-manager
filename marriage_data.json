@@ -189,6 +189,26 @@
       "status": "approved",
       "receipt_url": "",
       "created_at": "2026-08-24T21:55:17.077Z"
+    },
+    {
+      "id": 21,
+      "category": "Miscellaneous",
+      "description": "Not a receipt yhg",
+      "amount": 8766,
+      "date": "2024-03-30",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:01:38.861Z"
+    },
+    {
+      "id": 22,
+      "category": "Catering",
+      "description": "jhj",
+      "amount": 8786,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:02:01.655Z"
     }
   ],
   "savings": [
@@ -241,7 +261,7 @@
       "created_at": "2026-08-24T05:44:20.469Z"
     }
   ],
-  "_nextExpenseId": 21,
+  "_nextExpenseId": 23,
   "_nextSavingsId": 7,
   "telegram_codes": {},
   "telegram_links": {

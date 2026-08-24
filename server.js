@@ -642,7 +642,7 @@ app.post('/api/expenses', requireAuth, async (req, res) => {
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
+    const expense = { id: d._nextExpenseId++, user_id: req.user.uid, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
     d.expenses.push(expense); writeJSON(d);
     res.status(201).json(expense);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -719,14 +719,14 @@ app.post('/api/savings', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       const r = await dbRun(
-        'INSERT INTO savings (month, year, amount, note) VALUES (?, ?, ?, ?)',
-        [month, parseInt(year), Number(amount), note || '']
+        'INSERT INTO savings (month, year, amount, note, user_id) VALUES (?, ?, ?, ?, ?)',
+        [month, parseInt(year), Number(amount), note || '', req.user.uid]
       );
       const row = await dbGet('SELECT * FROM savings WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const saving = { id: d._nextSavingsId++, month, year: parseInt(year), amount: Number(amount), note: note || '', created_at: new Date().toISOString() };
+    const saving = { id: d._nextSavingsId++, user_id: req.user.uid, month, year: parseInt(year), amount: Number(amount), note: note || '', created_at: new Date().toISOString() };
     d.savings.push(saving); writeJSON(d); res.status(201).json(saving);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
