@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Flex, VStack, Icon, Text, Button, Divider, Tooltip } from '@chakra-ui/react';
-import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab }) {
   const { logout, currentUser } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -43,23 +43,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
         >
           {isExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </Button>
-  
-      <Box mt="auto">
-        <Text fontSize="11px" color="brand.400" mb={2} px={2} isTruncated>{currentUser?.email}</Text>
-        <Button
-          w="100%"
-          variant="ghost"
-          color="gray.400"
-          justifyContent="flex-start"
-          leftIcon={<LogOut size={18} />}
-          _hover={{ bg: 'whiteAlpha.100', color: 'white' }}
-          onClick={logout}
-        >
-          Sign Out
-        </Button>
-      </Box>
-    </Flex>
-
+      </Flex>
 
       <Divider borderColor="whiteAlpha.300" mb={4} />
 
@@ -91,6 +75,13 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
 
       <Divider borderColor="whiteAlpha.300" mt={4} />
       
+      {isExpanded && currentUser && (
+        <Flex px={4} py={2} align="center" mt={2}>
+          <Icon as={User} boxSize={4} color="brand.200" mr={2} />
+          <Text fontSize="xs" color="brand.200" isTruncated>{currentUser.email}</Text>
+        </Flex>
+      )}
+
       <Box p={3}>
         <Tooltip label={!isExpanded ? "Logout" : ''} placement="right">
           <Flex
@@ -101,7 +92,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
             cursor="pointer"
             color="red.300"
             _hover={{ bg: 'whiteAlpha.100', color: 'red.400' }}
-            onClick={onLogout}
+            onClick={logout}
             justify={isExpanded ? "flex-start" : "center"}
           >
             <Icon as={LogOut} boxSize={5} />
