@@ -124,6 +124,8 @@ function SectionHeader({ icon: Icon, title, subtitle }) {
 }
 
 export default function Expenses() {
+  function today() { return new Date().toISOString().split('T')[0] }
+
   const [expenses,  setExpenses]  = useState([])
   const [form,      setForm]      = useState({ ...EMPTY_FORM, date: today() })
   const [editItem,  setEditItem]  = useState(null)
@@ -151,7 +153,6 @@ export default function Expenses() {
     }
   }, [location.state, onAddOpen])
 
-  function today() { return new Date().toISOString().split('T')[0] }
 
   const load = useCallback(async () => {
     try {
