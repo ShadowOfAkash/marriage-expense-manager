@@ -12,14 +12,16 @@ const USERS = [
   { email: 'akashtiwari.mnnit@gmail.com', password: 'Akashcse@25274', name: 'Akash Tiwari' }
 ];
 
-const admin = require('firebase-admin');
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+  if (process.env.FIREBASE_SERVICE_ACCOUNT && getApps().length === 0) {
+    initializeApp({
+      credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
     });
     console.log('✅ Firebase Admin initialized');
-  } else {
+  } else if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
     console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT not found in environment');
   }
 } catch (e) {
@@ -144,8 +146,8 @@ async function requireAuth(req, res, next) {
   
   try {
     // Check if Firebase is initialized and verify the token
-    if (admin.apps.length > 0) {
-      const decodedToken = await admin.auth().verifyIdToken(token);
+    if (getApps().length > 0) {
+      const decodedToken = await getAuth().verifyIdToken(token);
       req.user = decodedToken; // contains .uid
       return next();
     }
@@ -155,7 +157,7 @@ async function requireAuth(req, res, next) {
   }
 
   // Fallback to legacy mock auth ONLY if Firebase isn't configured yet
-  if (!admin.apps.length && validTokens.has(token)) {
+  if (getApps().length === 0 && validTokens.has(token)) {
     req.user = { uid: 'legacy_user' };
     return next();
   }
