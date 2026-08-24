@@ -156,6 +156,39 @@
       "status": "approved",
       "receipt_url": "/uploads/tg_1787607867980_eidngg.jpg",
       "created_at": "2026-08-24T21:44:27.981Z"
+    },
+    {
+      "id": 18,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Catering",
+      "description": "Food expense",
+      "amount": 2000,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:54:10.189Z"
+    },
+    {
+      "id": 19,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Catering",
+      "description": "Food expense",
+      "amount": 2200,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:54:50.441Z"
+    },
+    {
+      "id": 20,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Miscellaneous",
+      "description": "Playground game",
+      "amount": 300,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:55:17.077Z"
     }
   ],
   "savings": [
@@ -208,7 +241,7 @@
       "created_at": "2026-08-24T05:44:20.469Z"
     }
   ],
-  "_nextExpenseId": 18,
+  "_nextExpenseId": 21,
   "_nextSavingsId": 7,
   "telegram_codes": {},
   "telegram_links": {
