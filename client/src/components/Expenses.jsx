@@ -215,7 +215,7 @@ export default function Expenses() {
       <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-          <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Add New Expense</Text></HStack>
           </ModalHeader>
@@ -522,7 +522,7 @@ export default function Expenses() {
       <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="md">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-          <Box h="3px" bgGradient="linear(to-r, blue.400, plum.500)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}><Pencil size={16} color="#3B82F6" /><Text>Edit Expense</Text></HStack>
           </ModalHeader>

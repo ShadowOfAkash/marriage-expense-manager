@@ -287,7 +287,7 @@ export default function Dashboard({ setActiveTab }) {
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="sm">
         <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.3)">
-          <Box h="3px" bgGradient="linear(to-r, brand.500, plum.500, gold.500)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}>
               <Target size={18} color="#BE185D" />
