@@ -281,7 +281,7 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
     // 2. Process with Gemini
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
     const prompt = `You are a receipt data extractor. Extract the following from this receipt/bill image:
     1. amount (number, the total final amount paid)
