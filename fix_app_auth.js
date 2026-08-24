@@ -1,4 +1,7 @@
-import React, { useState } from 'react'
+const fs = require('fs');
+let code = fs.readFileSync('client/src/App.jsx', 'utf8');
+
+const newApp = `import React, { useState } from 'react'
 import { Box, Flex } from '@chakra-ui/react'
 import Login     from './components/Login'
 import Sidebar   from './components/Sidebar'
@@ -35,3 +38,7 @@ export default function App() {
     </AuthProvider>
   )
 }
+`;
+
+fs.writeFileSync('client/src/App.jsx', newApp);
+console.log('App.jsx FIXED for AuthContext!');
