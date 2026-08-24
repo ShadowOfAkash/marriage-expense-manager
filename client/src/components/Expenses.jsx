@@ -42,6 +42,7 @@ export default function Expenses() {
   const [catFilter, setCatFilter] = useState('')
   const [loading,   setLoading]   = useState(true)
   const [delId,     setDelId]     = useState(null)
+  const [viewerUrl, setViewerUrl] = useState(null)
   const [saving,    setSaving]    = useState(false)
   const [scanning,  setScanning]  = useState(false)
   const fileInputRef = React.useRef(null)
