@@ -512,8 +512,8 @@ app.post('/api/expenses', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       const r = await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
-        [category, description || '', Number(amount), date, finalStatus, receipt_url || '']
+        'INSERT INTO expenses (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [category, description || '', Number(amount), date, finalStatus, receipt_url || '', req.user.uid]
       );
       const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
@@ -578,11 +578,11 @@ const MONTH_ORDER = ['January','February','March','April','May','June',
 app.get('/api/savings', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
-      const rows = await dbAll('SELECT * FROM savings ORDER BY year DESC, id DESC');
+      const rows = await dbAll('SELECT * FROM savings WHERE user_id = ? ORDER BY year DESC, id DESC', [req.user.uid]);
       return res.json(rows);
     }
     const d = readJSON();
-    res.json([...d.savings].sort((a, b) => {
+    res.json([...d.savings].filter(s => s.user_id === req.user.uid).sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       return MONTH_ORDER.indexOf(b.month) - MONTH_ORDER.indexOf(a.month);
     }));
