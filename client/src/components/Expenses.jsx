@@ -11,7 +11,7 @@ import {
 } from '@chakra-ui/react'
 import {
   Receipt, Plus, Search, Pencil, Trash2, IndianRupee,
-  Calendar, Tag, AlignLeft, FilterX, LayoutList,
+  Calendar, Tag, AlignLeft, FilterX, LayoutList, Camera, Check, Image as ImageIcon, Paperclip
 } from 'lucide-react'
 import { api, fmt, formatDate, CATEGORIES } from '../utils/api'
 
@@ -43,6 +43,8 @@ export default function Expenses() {
   const [loading,   setLoading]   = useState(true)
   const [delId,     setDelId]     = useState(null)
   const [saving,    setSaving]    = useState(false)
+  const [scanning,  setScanning]  = useState(false)
+  const fileInputRef = React.useRef(null)
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
   const { isOpen: isDelOpen,  onOpen: onDelOpen,  onClose: onDelClose  } = useDisclosure()
@@ -64,12 +66,59 @@ export default function Expenses() {
 
   useEffect(() => { load() }, [load])
 
+  const handleScan = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setScanning(true)
+    try {
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const base64String = reader.result.split(',')[1]
+        try {
+          const aiData = await api.scanReceipt(base64String, file.type)
+          setForm({
+            category: aiData.category || '',
+            description: aiData.description || '',
+            amount: aiData.amount ? String(aiData.amount) : '',
+            date: aiData.date || today()
+          })
+          toast({ title: 'Receipt Scanned!', description: 'Please review the fields before saving.', status: 'success', duration: 3000 })
+        } catch (err) {
+          toast({ title: 'Scan Failed', description: err.message, status: 'error', duration: 3000 })
+        } finally {
+          setScanning(false)
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (e) {
+      setScanning(false)
+      toast({ title: 'Error reading image', status: 'error', duration: 3000 })
+    }
+    // reset input so same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const filtered = expenses.filter(e => {
     const matchCat = !catFilter || e.category === catFilter
     const q = search.toLowerCase()
     return matchCat && (!q || e.description.toLowerCase().includes(q) || e.category.toLowerCase().includes(q))
   })
+  filtered.sort((a, b) => {
+    if (a.status === 'draft' && b.status !== 'draft') return -1;
+    if (a.status !== 'draft' && b.status === 'draft') return 1;
+    return 0;
+  });
   const filteredTotal = filtered.reduce((s, e) => s + e.amount, 0)
+
+  const handleApprove = async (exp) => {
+    try {
+      await api.updateExpense(exp.id, { ...exp, status: 'approved' });
+      toast({ title: 'Expense Approved', status: 'success', duration: 2000 });
+      load();
+    } catch {
+      toast({ title: 'Error approving', status: 'error', duration: 3000 });
+    }
+  };
 
   const handleAdd = async () => {
     if (!form.category) return toast({ title: 'Select a category', status: 'warning', duration: 2000 })
@@ -131,7 +180,24 @@ export default function Expenses() {
       {/* ── Add Form ── */}
       <Card mb={5} border="1px solid" borderColor="gray.100" shadow="0 2px 12px rgba(0,0,0,0.05)">
         <CardBody p={6}>
-          <SectionHeader icon={Plus} title="Add New Expense" subtitle="Log a wedding expense entry" />
+          <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
+            <SectionHeader icon={Plus} title="Add New Expense" subtitle="Log a wedding expense entry" />
+            <Button
+              size="sm"
+              colorScheme="purple"
+              variant="outline"
+              leftIcon={<Camera size={14} />}
+              onClick={() => fileInputRef.current?.click()}
+              isLoading={scanning}
+              loadingText="Analyzing..."
+              borderRadius="10px"
+              mb={5}
+            >
+              Scan Receipt 📸
+            </Button>
+            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleScan} style={{ display: 'none' }} />
+          </Flex>
+          
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
@@ -326,39 +392,56 @@ export default function Expenses() {
             <Table size="sm" variant="simple">
               <Thead bg="gray.50">
                 <Tr>
-                  {['#','Date','Category','Description','Amount','Actions'].map(h => (
+                  {['#','Date','Category','Description','Amount','Receipt','Actions'].map(h => (
                     <Th key={h} color="gray.500" fontSize="10px" fontWeight="700" textTransform="uppercase" letterSpacing="wider" borderColor="gray.100" isNumeric={h === 'Amount'}>{h}</Th>
                   ))}
                 </Tr>
               </Thead>
               <Tbody>
-                {filtered.map((e, i) => (
-                  <Tr key={e.id} _hover={{ bg: 'gray.50' }} transition="background 0.12s">
-                    <Td fontSize="11px" color="gray.400" borderColor="gray.50" w={8}>{i + 1}</Td>
-                    <Td fontSize="xs" color="gray.500" borderColor="gray.50" whiteSpace="nowrap">{formatDate(e.date)}</Td>
-                    <Td borderColor="gray.50">
-                      <Badge
-                        bg="brand.50" color="brand.700" fontSize="10px"
-                        border="1px solid" borderColor="brand.100"
-                        borderRadius="6px" px={2} py={0.5} fontWeight="600"
-                      >
-                        {e.category}
-                      </Badge>
-                    </Td>
-                    <Td fontSize="sm" color="gray.700" maxW="220px" borderColor="gray.50">
-                      <Text noOfLines={1}>{e.description || <Text as="span" color="gray.300">—</Text>}</Text>
-                    </Td>
-                    <Td isNumeric fontWeight="700" color="gray.800" borderColor="gray.50">{fmt(e.amount)}</Td>
-                    <Td borderColor="gray.50">
-                      <HStack spacing={1}>
-                        <Button size="xs" variant="ghost" colorScheme="blue" leftIcon={<Pencil size={11} />}
-                          onClick={() => openEdit(e)} borderRadius="7px" fontSize="10px">Edit</Button>
-                        <Button size="xs" variant="ghost" colorScheme="red"  leftIcon={<Trash2 size={11} />}
-                          onClick={() => confirmDelete(e.id)} borderRadius="7px" fontSize="10px">Del</Button>
-                      </HStack>
-                    </Td>
-                  </Tr>
-                ))}
+                {filtered.map((e, i) => {
+                  const isDraft = e.status === 'draft';
+                  return (
+                    <Tr key={e.id} bg={isDraft ? 'orange.50' : 'transparent'} _hover={{ bg: isDraft ? 'orange.100' : 'gray.50' }} transition="background 0.12s">
+                      <Td fontSize="11px" color="gray.400" borderColor={isDraft ? 'orange.100' : 'gray.50'} w={8}>{i + 1}</Td>
+                      <Td fontSize="xs" color="gray.500" borderColor={isDraft ? 'orange.100' : 'gray.50'} whiteSpace="nowrap">{formatDate(e.date)}</Td>
+                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'}>
+                        <Badge
+                          bg={isDraft ? 'orange.100' : 'brand.50'} color={isDraft ? 'orange.800' : 'brand.700'} fontSize="10px"
+                          border="1px solid" borderColor={isDraft ? 'orange.200' : 'brand.100'}
+                          borderRadius="6px" px={2} py={0.5} fontWeight="600"
+                        >
+                          {e.category}
+                        </Badge>
+                      </Td>
+                      <Td fontSize="sm" color="gray.700" maxW="220px" borderColor={isDraft ? 'orange.100' : 'gray.50'}>
+                        <HStack>
+                          {isDraft && <Badge colorScheme="orange" fontSize="9px" borderRadius="4px">DRAFT</Badge>}
+                          <Text noOfLines={1}>{e.description || <Text as="span" color="gray.300">—</Text>}</Text>
+                        </HStack>
+                      </Td>
+                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'} textAlign="center">
+                        {e.receipt_url ? (
+                          <Button size="xs" variant="ghost" colorScheme="purple" p={1} h="auto" onClick={() => window.open(e.receipt_url, '_blank')} title="View Document">
+                            <ImageIcon size={14} />
+                          </Button>
+                        ) : <Text color="gray.300" fontSize="10px">—</Text>}
+                      </Td>
+                      <Td isNumeric fontWeight="700" color="gray.800" borderColor={isDraft ? 'orange.100' : 'gray.50'}>{fmt(e.amount)}</Td>
+                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'}>
+                        <HStack spacing={1}>
+                          {isDraft && (
+                            <Button size="xs" colorScheme="orange" leftIcon={<Check size={11} />}
+                              onClick={() => handleApprove(e)} borderRadius="7px" fontSize="10px">Approve</Button>
+                          )}
+                          <Button size="xs" variant="ghost" colorScheme="blue" leftIcon={<Pencil size={11} />}
+                            onClick={() => openEdit(e)} borderRadius="7px" fontSize="10px">Edit</Button>
+                          <Button size="xs" variant="ghost" colorScheme="red"  leftIcon={<Trash2 size={11} />}
+                            onClick={() => confirmDelete(e.id)} borderRadius="7px" fontSize="10px">Del</Button>
+                        </HStack>
+                      </Td>
+                    </Tr>
+                  );
+                })}
               </Tbody>
             </Table>
           </Box>

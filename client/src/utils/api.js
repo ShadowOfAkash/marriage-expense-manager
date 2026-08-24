@@ -44,6 +44,10 @@ export const api = {
     }).then(handleResponse),
   deleteExpense:  (id) =>
     fetch(`/api/expenses/${id}`, { method: 'DELETE', headers: getHeaders() }).then(handleResponse),
+  scanReceipt: (image, mimeType) =>
+    fetch('/api/expenses/scan', {
+      method: 'POST', headers: getHeaders(), body: JSON.stringify({ image, mimeType })
+    }).then(handleResponse),
 
   // Savings
   getSavings:    ()     => fetch('/api/savings', { headers: getHeaders() }).then(handleResponse),

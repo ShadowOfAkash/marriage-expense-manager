@@ -16,7 +16,8 @@ const validTokens = new Set();
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Database Setup ───────────────────────────────────────────────────────────
@@ -68,6 +69,8 @@ async function initDB() {
         created_at TEXT    DEFAULT (datetime('now'))
       );
     `);
+    try { await db.execute("ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'approved'"); } catch(e){}
+    try { await db.execute("ALTER TABLE expenses ADD COLUMN receipt_url TEXT DEFAULT ''"); } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
     console.log('📁 Using local JSON file database');
@@ -193,9 +196,245 @@ app.get('/api/summary', requireAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+
+app.post('/api/whatsapp/webhook', async (req, res) => {
+  const { MediaUrl0, MediaContentType0, Body, From } = req.body;
+  
+  if (!MediaUrl0) {
+     return res.send('<Response><Message>Please send a photo of a receipt/bill.</Message></Response>');
+  }
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.send('<Response><Message>API Key missing on server.</Message></Response>');
+
+    // 1. Fetch image from Twilio
+    const imgRes = await fetch(MediaUrl0);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const imgBuffer = Buffer.from(arrayBuffer);
+    const base64Image = imgBuffer.toString('base64');
+    const filename = `tg_${Date.now()}.jpg`;
+    const fs = require('fs');
+    fs.writeFileSync(require('path').join(__dirname, 'public/uploads', filename), imgBuffer);
+    const receipt_url = `/uploads/${filename}`;
+    const mimeType = MediaContentType0 || 'image/jpeg';
+
+    // 2. Process with Gemini
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+
+    const prompt = `You are a receipt data extractor. Extract the following from this receipt/bill image:
+    1. amount (number, the total final amount paid)
+    2. date (string, YYYY-MM-DD format, guess the year if missing based on recent times)
+    3. description (string, short summary of the vendor/items, max 5 words)
+    4. category (string, MUST be exactly one of these: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
+
+    Return ONLY a raw JSON object with these keys (amount, date, description, category).`;
+
+    const imageParts = [{ inlineData: { data: base64Image, mimeType: mimeType } }];
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const response = await result.response;
+    const text = response.text().trim().replace(/^\s*```json/i, '').replace(/^\s*```/i, '').replace(/```\s*$/i, '').trim();
+    
+    let aiData = JSON.parse(text);
+
+    // 3. Save to database as DRAFT
+    const finalAmount = Number(aiData.amount) || 0;
+    const finalDate = aiData.date || new Date().toISOString().split('T')[0];
+    const finalCat = aiData.category || 'Miscellaneous';
+    const finalDesc = aiData.description || 'WhatsApp Upload';
+    
+    if (useLibSQL) {
+      await dbRun(
+        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
+        [finalCat, finalDesc, finalAmount, finalDate, 'draft', receipt_url]
+      );
+    } else {
+      const d = readJSON();
+      d.expenses.push({ id: d._nextExpenseId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() });
+      writeJSON(d);
+    }
+
+    res.send(`<Response><Message>✅ Receipt scanned successfully! 
+Total: ₹${finalAmount}
+Category: ${finalCat}
+
+Saved to your portal as a DRAFT. Please review and approve it on the dashboard.</Message></Response>`);
+  } catch (e) {
+    console.error("WhatsApp Webhook error:", e);
+    res.send(`<Response><Message>❌ Error processing receipt: ${e.message}</Message></Response>`);
+  }
+});
+
+
+app.post('/api/telegram/webhook', async (req, res) => {
+  res.sendStatus(200); // Acknowledge immediately to stop Telegram retries
+
+  console.log('Received webhook body:', JSON.stringify(req.body));
+  const msg = req.body.message;
+  if (!msg) return;
+
+  const chatId = msg.chat.id;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  
+  async function sendReply(text) {
+    if (!botToken) return;
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ chat_id: chatId, text })
+    });
+  }
+
+  if (!msg.photo || msg.photo.length === 0) {
+    return sendReply("Please send a photo of a receipt/bill.");
+  }
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return sendReply("API Key missing on server.");
+
+    await sendReply("📸 Receipt received! Analyzing with AI...");
+
+    // Get largest photo
+    const fileId = msg.photo[msg.photo.length - 1].file_id;
+    
+    // Fetch file path
+    const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
+    const fileData = await fileRes.json();
+    const filePath = fileData.result.file_path;
+
+    // Download image
+    const imgRes = await fetch(`https://api.telegram.org/file/bot${botToken}/${filePath}`);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const base64Image = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = 'image/jpeg';
+
+    // Process with Gemini
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+
+    const prompt = `You are a receipt data extractor. Extract the following from this receipt/bill image:
+    1. amount (number, the total final amount paid)
+    2. date (string, YYYY-MM-DD format, guess the year if missing based on recent times)
+    3. description (string, short summary of the vendor/items, max 5 words)
+    4. category (string, MUST be exactly one of these: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
+
+    Return ONLY a raw JSON object with these keys (amount, date, description, category).`;
+
+    const imageParts = [{ inlineData: { data: base64Image, mimeType } }];
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const response = await result.response;
+    const text = response.text().trim().replace(/^\s*```json/i, '').replace(/^\s*```/i, '').replace(/```\s*$/i, '').trim();
+    
+    let aiData = JSON.parse(text);
+
+    // 3. Save to database as DRAFT
+    const finalAmount = Number(aiData.amount) || 0;
+    const finalDate = aiData.date || new Date().toISOString().split('T')[0];
+    const finalCat = aiData.category || 'Miscellaneous';
+    const finalDesc = aiData.description || 'Telegram Upload';
+    
+    if (useLibSQL) {
+      await dbRun(
+        'INSERT INTO expenses (category, description, amount, date, status) VALUES (?, ?, ?, ?, ?)',
+        [finalCat, finalDesc, finalAmount, finalDate, 'draft']
+      );
+    } else {
+      const d = readJSON();
+      d.expenses.push({ id: d._nextExpenseId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', created_at: new Date().toISOString() });
+      writeJSON(d);
+    }
+
+    sendReply(`✅ Receipt scanned successfully!\nTotal: ₹${finalAmount}\nCategory: ${finalCat}\n\nSaved to your portal as a DRAFT. Review it on the dashboard.`);
+  } catch (e) {
+    console.error("Telegram Webhook error:", e);
+    sendReply(`❌ Error processing receipt: ${e.message}`);
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // EXPENSES
+
+
 // ═══════════════════════════════════════════════════════════════════════════
+app.post('/api/expenses/scan', requireAuth, async (req, res) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+    }
+
+    const { image, mimeType } = req.body;
+    const imgBuffer = Buffer.from(image, 'base64');
+    const filename = `scan_${Date.now()}.jpg`;
+    const fs = require('fs');
+    fs.writeFileSync(require('path').join(__dirname, 'public/uploads', filename), imgBuffer);
+    const receipt_url = `/uploads/${filename}`;
+    if (!image || !mimeType) {
+      return res.status(400).json({ error: 'Image data and mimeType are required.' });
+    }
+
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+
+    const prompt = `You are a receipt data extractor. Extract the following from this receipt/bill image:
+    1. amount (number, the total final amount paid)
+    2. date (string, YYYY-MM-DD format, guess the year if missing based on recent times)
+    3. description (string, short summary of the vendor/items, max 5 words)
+    4. category (string, MUST be exactly one of these: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
+
+    Return ONLY a raw JSON object with these keys (amount, date, description, category). Do NOT wrap it in markdown code blocks like \`\`\`json. Return pure JSON only.`;
+
+    const imageParts = [
+      {
+        inlineData: {
+          data: image,
+          mimeType: mimeType
+        }
+      }
+    ];
+
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const response = await result.response;
+    const text = response.text().trim().replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+    
+    let parsedData;
+    try {
+      parsedData = JSON.parse(text);
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response:", text);
+      return res.status(500).json({ error: 'Failed to parse AI response' });
+    }
+
+    res.json({ ...parsedData, receipt_url });
+  } catch (e) {
+    console.error("Scan error:", e);
+    res.status(500).json({ error: 'Failed to scan receipt: ' + e.message });
+  }
+});
+
+
+app.post('/api/upload', requireAuth, (req, res) => {
+  try {
+    const { file, filename } = req.body;
+    if (!file) return res.status(400).json({ error: 'No file provided' });
+    const buffer = Buffer.from(file, 'base64');
+    const safeName = (filename || 'doc.bin').replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const finalName = `doc_${Date.now()}_${safeName}`;
+    const fs = require('fs');
+    const path = require('path');
+    fs.writeFileSync(path.join(__dirname, 'public/uploads', finalName), buffer);
+    res.json({ url: `/uploads/${finalName}` });
+  } catch(e) {
+    console.error("Upload error:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/expenses', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses ORDER BY date DESC, id DESC'));
@@ -204,19 +443,20 @@ app.get('/api/expenses', requireAuth, async (req, res) => {
 });
 
 app.post('/api/expenses', requireAuth, async (req, res) => {
-  const { category, description, amount, date } = req.body;
+  const { category, description, amount, date, status, receipt_url } = req.body;
+  const finalStatus = status || 'approved';
   if (!category || !amount || !date) return res.status(400).json({ error: 'Category, amount and date required' });
   try {
     if (useLibSQL) {
       const r = await dbRun(
-        'INSERT INTO expenses (category, description, amount, date) VALUES (?, ?, ?, ?)',
-        [category, description || '', Number(amount), date]
+        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
+        [category, description || '', Number(amount), date, finalStatus, receipt_url || '']
       );
       const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, created_at: new Date().toISOString() };
+    const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
     d.expenses.push(expense); writeJSON(d);
     res.status(201).json(expense);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -224,17 +464,18 @@ app.post('/api/expenses', requireAuth, async (req, res) => {
 
 app.put('/api/expenses/:id', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
-  const { category, description, amount, date } = req.body;
+  const { category, description, amount, date, status, receipt_url } = req.body;
+  const finalStatus = status || 'approved';
   try {
     if (useLibSQL) {
-      await dbRun('UPDATE expenses SET category=?,description=?,amount=?,date=? WHERE id=?',
-        [category, description || '', Number(amount), date, id]);
+      await dbRun('UPDATE expenses SET category=?,description=?,amount=?,date=?,status=?,receipt_url=? WHERE id=?',
+        [category, description || '', Number(amount), date, finalStatus, receipt_url || '', id]);
       const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [id]);
       return res.json(row);
     }
     const d = readJSON(); const idx = d.expenses.findIndex(e => e.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    d.expenses[idx] = { ...d.expenses[idx], category, description: description || '', amount: Number(amount), date };
+    d.expenses[idx] = { ...d.expenses[idx], category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || d.expenses[idx].receipt_url || '' };
     writeJSON(d); res.json(d.expenses[idx]);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
