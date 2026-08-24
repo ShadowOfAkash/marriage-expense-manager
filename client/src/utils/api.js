@@ -23,6 +23,8 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 export const api = {
+  // Telegram
+  generateTelegramCode: () => fetchWithAuth('/api/telegram/link-code', { method: 'POST' }),
   // Budget
   getBudget:  ()       => fetchWithAuth('/api/budget'),
   saveBudget: (amount) => fetchWithAuth('/api/budget', { method: 'POST', body: JSON.stringify({ amount }) }),

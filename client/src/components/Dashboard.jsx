@@ -152,6 +152,21 @@ export default function Dashboard({ setActiveTab }) {
   const [budget,     setBudget]     = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
+  const [telegramCode, setTelegramCode] = useState(null)
+  const [generatingCode, setGeneratingCode] = useState(false)
+
+  const handleGenerateTelegramCode = async () => {
+    try {
+      setGeneratingCode(true);
+      const res = await api.generateTelegramCode();
+      setTelegramCode(res.code);
+      toast({ title: 'Code Generated', description: 'Send this code to the Telegram bot!', status: 'success' });
+    } catch (e) {
+      toast({ title: 'Failed to generate code', description: e.message, status: 'error' });
+    } finally {
+      setGeneratingCode(false);
+    }
+  }
 
   const loadAll = useCallback(async () => {
     try {
