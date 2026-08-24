@@ -63,6 +63,16 @@ async function initDB() {
   if (useLibSQL) {
     // Create tables in Turso
     await db.executeMultiple(`
+      
+      CREATE TABLE IF NOT EXISTS telegram_links (
+        chat_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS telegram_codes (
+        code TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
       CREATE TABLE IF NOT EXISTS user_budget (
         user_id    TEXT PRIMARY KEY,
         amount     REAL    NOT NULL DEFAULT 0,
@@ -316,6 +326,30 @@ Saved to your portal as a DRAFT. Please review and approve it on the dashboard.<
   }
 });
 
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TELEGRAM ACCOUNT LINKING
+// ═══════════════════════════════════════════════════════════════════════════
+app.post('/api/telegram/link-code', requireAuth, async (req, res) => {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit code
+  try {
+    if (useLibSQL) {
+      await dbRun('DELETE FROM telegram_codes WHERE user_id = ?', [req.user.uid]); // clear old
+      await dbRun('INSERT INTO telegram_codes (code, user_id) VALUES (?, ?)', [code, req.user.uid]);
+    } else {
+      const d = readJSON();
+      if (!d.telegram_codes) d.telegram_codes = {};
+      // clear old codes for this user
+      for (const [k, v] of Object.entries(d.telegram_codes)) {
+        if (v === req.user.uid) delete d.telegram_codes[k];
+      }
+      d.telegram_codes[code] = req.user.uid;
+      writeJSON(d);
+    }
+    res.json({ code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 app.post('/api/telegram/webhook', async (req, res) => {
   res.sendStatus(200); // Acknowledge immediately to stop Telegram retries
