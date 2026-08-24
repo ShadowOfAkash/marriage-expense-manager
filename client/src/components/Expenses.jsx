@@ -105,6 +105,7 @@ function FullScreenViewer({ url, isPdf, onClose }) {
   )
 }
 
+const EMPTY_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' }
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
