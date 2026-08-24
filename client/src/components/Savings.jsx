@@ -6,7 +6,7 @@ import {
   useToast, useDisclosure, Spinner, Center, Stat, StatLabel,
   StatNumber, InputGroup, InputLeftAddon, Progress, Divider,
   AlertDialog, AlertDialogOverlay, AlertDialogContent,
-  AlertDialogHeader, AlertDialogBody, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody,
 } from '@chakra-ui/react'
 import {
   PiggyBank, Plus, Trash2, IndianRupee, CalendarDays,
