@@ -1,17 +1,15 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function test() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  const genAI = new GoogleGenerativeAI(apiKey);
-  
+async function run() {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent("Hello");
-    console.log("Success with gemini-1.5-flash:", result.response.text());
+    // There is no listModels in the SDK easily available, let's just do a raw fetch to list models.
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+    const data = await res.json();
+    console.log(data.models.map(m => m.name));
   } catch (e) {
-    console.log("Error with gemini-1.5-flash:", e.message);
+    console.error(e);
   }
 }
-
-test();
+run();

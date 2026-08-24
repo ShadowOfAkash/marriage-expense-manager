@@ -1,94 +1,78 @@
-const handleResponse = async (res) => {
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Request failed')
-  return data
-}
+import { auth } from '../contexts/AuthContext';
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
-})
+const handleResponse = async (res) => {
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+};
+
+const fetchWithAuth = async (url, options = {}) => {
+  let token = '';
+  if (auth.currentUser) {
+    token = await auth.currentUser.getIdToken();
+  }
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+    ...options.headers
+  };
+  
+  const res = await fetch(url, { ...options, headers });
+  return handleResponse(res);
+};
 
 export const api = {
-  // Auth
-  login: (email, password) =>
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    }).then(handleResponse),
-
-  logout: () =>
-    fetch('/api/auth/logout', { method: 'POST', headers: getHeaders() }).then(handleResponse),
-
+  // Telegram
+  generateTelegramCode: () => fetchWithAuth('/api/telegram/link-code', { method: 'POST' }),
+  getTelegramStatus: () => fetchWithAuth('/api/telegram/status'),
   // Budget
-  getBudget:  ()       => fetch('/api/budget', { headers: getHeaders() }).then(handleResponse),
-  saveBudget: (amount) =>
-    fetch('/api/budget', {
-      method: 'POST', headers: getHeaders(), body: JSON.stringify({ amount }),
-    }).then(handleResponse),
+  getBudget:  ()       => fetchWithAuth('/api/budget'),
+  saveBudget: (amount) => fetchWithAuth('/api/budget', { method: 'POST', body: JSON.stringify({ amount }) }),
 
   // Summary
-  getSummary: () => fetch('/api/summary', { headers: getHeaders() }).then(handleResponse),
+  getSummary: () => fetchWithAuth('/api/summary'),
 
   // Expenses
-  getExpenses:    ()       => fetch('/api/expenses', { headers: getHeaders() }).then(handleResponse),
-  getCategories:  ()       => fetch('/api/expenses/categories', { headers: getHeaders() }).then(handleResponse),
-  addExpense:     (data)   =>
-    fetch('/api/expenses', {
-      method: 'POST', headers: getHeaders(), body: JSON.stringify(data),
-    }).then(handleResponse),
-  updateExpense:  (id, data) =>
-    fetch(`/api/expenses/${id}`, {
-      method: 'PUT', headers: getHeaders(), body: JSON.stringify(data),
-    }).then(handleResponse),
-  deleteExpense:  (id) =>
-    fetch(`/api/expenses/${id}`, { method: 'DELETE', headers: getHeaders() }).then(handleResponse),
-  scanReceipt: (image, mimeType) =>
-    fetch('/api/expenses/scan', {
-      method: 'POST', headers: getHeaders(), body: JSON.stringify({ image, mimeType })
-    }).then(handleResponse),
-
-  uploadDocument: (fileBase64, filename) =>
-    fetch('/api/upload', {
-      method: 'POST', headers: getHeaders(), body: JSON.stringify({ file: fileBase64, filename })
-    }).then(handleResponse),
+  getExpenses:    ()       => fetchWithAuth('/api/expenses'),
+  getCategories:  ()       => fetchWithAuth('/api/expenses/categories'),
+  addExpense:     (data)   => fetchWithAuth('/api/expenses', { method: 'POST', body: JSON.stringify(data) }),
+  updateExpense:  (id, data) => fetchWithAuth(`/api/expenses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteExpense:  (id) => fetchWithAuth(`/api/expenses/${id}`, { method: 'DELETE' }),
+  scanReceipt: (image, mimeType) => fetchWithAuth('/api/expenses/scan', { method: 'POST', body: JSON.stringify({ image, mimeType }) }),
+  uploadDocument: (fileBase64, filename) => fetchWithAuth('/api/upload', { method: 'POST', body: JSON.stringify({ file: fileBase64, filename }) }),
 
   // Savings
-  getSavings:    ()     => fetch('/api/savings', { headers: getHeaders() }).then(handleResponse),
-  addSavings:    (data) =>
-    fetch('/api/savings', {
-      method: 'POST', headers: getHeaders(), body: JSON.stringify(data),
-    }).then(handleResponse),
-  deleteSavings: (id)   =>
-    fetch(`/api/savings/${id}`, { method: 'DELETE', headers: getHeaders() }).then(handleResponse),
-}
+  getSavings:    ()     => fetchWithAuth('/api/savings'),
+  addSavings:    (data) => fetchWithAuth('/api/savings', { method: 'POST', body: JSON.stringify(data) }),
+  deleteSavings: (id)   => fetchWithAuth(`/api/savings/${id}`, { method: 'DELETE' }),
+};
 
 // Currency formatter
 export const fmt = (n) =>
-  '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
 // Compact formatter for chart axes
 export const fmtK = (n) =>
   n >= 100000 ? `₹${(n / 100000).toFixed(1)}L`
   : n >= 1000  ? `₹${(n / 1000).toFixed(0)}K`
-  : `₹${n}`
+  : `₹${n}`;
 
 // Date formatter
 export const formatDate = (d) => {
-  if (!d) return '—'
-  const [y, m, day] = d.split('-')
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`
-}
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
+};
 
 export const CATEGORIES = [
   'Venue', 'Catering', 'Photography', 'Decoration', 'Clothing',
   'Jewellery', 'Invitation Cards', 'Music / DJ', 'Mehendi', 'Makeup',
   'Travel', 'Accommodation', 'Gifts', 'Miscellaneous',
-]
+];
 
 export const MONTH_NAMES = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
-]
+];

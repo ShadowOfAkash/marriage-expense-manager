@@ -145,6 +145,103 @@
       "status": "approved",
       "receipt_url": "/uploads/tg_1787602730185_24qius.jpg",
       "created_at": "2026-08-24T20:18:50.187Z"
+    },
+    {
+      "id": 17,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Miscellaneous",
+      "description": "T-shirt, snacks, shampoo, LED bulb",
+      "amount": 30180,
+      "date": "2025-07-30",
+      "status": "approved",
+      "receipt_url": "/uploads/tg_1787607867980_eidngg.jpg",
+      "created_at": "2026-08-24T21:44:27.981Z"
+    },
+    {
+      "id": 18,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Catering",
+      "description": "Food expense",
+      "amount": 2000,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:54:10.189Z"
+    },
+    {
+      "id": 19,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Catering",
+      "description": "Food expense",
+      "amount": 2200,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:54:50.441Z"
+    },
+    {
+      "id": 20,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Miscellaneous",
+      "description": "Playground game",
+      "amount": 300,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T21:55:17.077Z"
+    },
+    {
+      "id": 21,
+      "category": "Miscellaneous",
+      "description": "Not a receipt yhg",
+      "amount": 8766,
+      "date": "2024-03-30",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:01:38.861Z"
+    },
+    {
+      "id": 22,
+      "category": "Catering",
+      "description": "jhj",
+      "amount": 8786,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:02:01.655Z"
+    },
+    {
+      "id": 23,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Miscellaneous",
+      "description": "UI/UX Design Services",
+      "amount": 14880,
+      "date": "2021-01-01",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:05:36.193Z"
+    },
+    {
+      "id": 24,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Accommodation",
+      "description": "UI UX Design services",
+      "amount": 555,
+      "date": "2021-01-01",
+      "status": "approved",
+      "receipt_url": "/uploads/scan_1787609447063.jpg",
+      "created_at": "2026-08-24T22:11:07.943Z"
+    },
+    {
+      "id": 25,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Catering",
+      "description": "Catering expense",
+      "amount": 125000,
+      "date": "2026-06-01",
+      "status": "approved",
+      "receipt_url": "",
+      "created_at": "2026-08-24T22:15:13.465Z"
     }
   ],
   "savings": [
@@ -195,8 +292,21 @@
       "amount": 150000,
       "note": "Came from Shivangi's side",
       "created_at": "2026-08-24T05:44:20.469Z"
+    },
+    {
+      "id": 7,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "month": "August",
+      "year": 2026,
+      "amount": 55456,
+      "note": "gdrfg fbgdf",
+      "created_at": "2026-08-24T22:12:09.833Z"
     }
   ],
-  "_nextExpenseId": 17,
-  "_nextSavingsId": 7
+  "_nextExpenseId": 26,
+  "_nextSavingsId": 8,
+  "telegram_codes": {},
+  "telegram_links": {
+    "1256918427": "jzSCJChQ1OTinp3PESQzSNeCGlp1"
+  }
 }

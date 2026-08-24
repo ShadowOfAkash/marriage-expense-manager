@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Box, Container, Card, CardBody, Heading, Text,
   SimpleGrid, FormControl, FormLabel, Input, Select, Button,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react'
 import { api, fmt, fmtK, formatDate, CATEGORIES } from '../utils/api'
 
-const EMPTY_FORM = { category: '', description: '', amount: '', date: '' }
+const EMPTY_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' }
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
@@ -52,6 +53,15 @@ export default function Expenses() {
   const { isOpen: isAddOpen,  onOpen: onAddOpen,  onClose: onAddClose  } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      onAddOpen()
+      // Clear the state so it doesn't reopen on refresh
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, onAddOpen])
 
   function today() { return new Date().toISOString().split('T')[0] }
 
@@ -104,12 +114,14 @@ export default function Expenses() {
         const base64String = reader.result.split(',')[1]
         try {
           const aiData = await api.scanReceipt(base64String, file.type)
-          setForm({
+          setForm(prev => ({
+            ...prev,
             category: aiData.category || '',
             description: aiData.description || '',
             amount: aiData.amount ? String(aiData.amount) : '',
-            date: aiData.date || today()
-          })
+            date: aiData.date || today(),
+            receipt_url: aiData.receipt_url || ''
+          }))
           toast({ title: 'Receipt Scanned!', description: 'Please review the fields before saving.', status: 'success', duration: 3000 })
         } catch (err) {
           toast({ title: 'Scan Failed', description: err.message, status: 'error', duration: 3000 })
@@ -213,31 +225,53 @@ export default function Expenses() {
       <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-          <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Add New Expense</Text></HStack>
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-          <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
-            
-            <Button
-              size="sm"
-              colorScheme="purple"
-              variant="outline"
-              leftIcon={<Camera size={14} />}
-              onClick={() => fileInputRef.current?.click()}
-              isLoading={scanning}
-              loadingText="Analyzing..."
-              borderRadius="10px"
-              mb={5}
-            >
-              Scan Receipt 📸
-            </Button>
-            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleScan} style={{ display: 'none' }} />
-          </Flex>
+          <Box
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleScan({ target: { files: [e.dataTransfer.files[0]] } });
+              }
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            border="2px dashed"
+            borderColor="brand.300"
+            borderRadius="16px"
+            p={8}
+            textAlign="center"
+            bg="brand.50"
+            _hover={{ bg: 'brand.100', cursor: 'pointer' }}
+            transition="all 0.2s"
+            mb={6}
+          >
+            <Flex direction="column" align="center" gap={3}>
+              {form.receipt_url ? (
+                <>
+                  <ImageIcon size={32} color="#10B981" />
+                  <Text fontWeight="700" color="green.600" fontSize="md">Document Uploaded Successfully!</Text>
+                  <Text fontSize="sm" color="gray.500">Click or drag another to replace</Text>
+                  <Button size="xs" colorScheme="blue" variant="outline" mt={2} onClick={(e) => { e.stopPropagation(); setViewerUrl(form.receipt_url); }}>View Document</Button>
+                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
+                </>
+              ) : (
+                <>
+                  <Camera size={32} color="#1B2CC1" />
+                  <Text fontWeight="700" color="brand.900" fontSize="md">Drag & Drop Receipt (Image/PDF)</Text>
+                  <Text fontSize="sm" color="gray.500">or click to browse your files</Text>
+                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
+                </>
+              )}
+            </Flex>
+            <input type="file" accept="image/*,application/pdf" ref={fileInputRef} onChange={handleScan} style={{ display: 'none' }} />
+          </Box>
           
-          <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={5}>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
                 <HStack spacing={1.5} mb={1}><Tag size={12} /><Text>Category</Text></HStack>
@@ -343,32 +377,7 @@ export default function Expenses() {
               Clear
             </Button>
             
-            <Button
-              as="label"
-              htmlFor="doc-upload"
-              size="sm"
-              variant="outline"
-              colorScheme="gray"
-              borderRadius="10px"
-              leftIcon={<Paperclip size={14} />}
-              isLoading={isUploading}
-              cursor="pointer"
-              ml={2}
-            >
-              {form.receipt_url ? 'Change Doc' : 'Attach Doc'}
-              <input
-                id="doc-upload"
-                type="file"
-                accept="image/*,application/pdf"
-                style={{ display: 'none' }}
-                onChange={(e) => handleDocUpload(e, false)}
-              />
-            </Button>
-            {form.receipt_url && (
-              <Button size="sm" variant="ghost" colorScheme="purple" p={1} onClick={() => setViewerUrl(form.receipt_url)} title="View Attached Document">
-                <ImageIcon size={14} />
-              </Button>
-            )}
+            
           </HStack>
           </ModalBody>
         </ModalContent>
@@ -523,14 +532,14 @@ export default function Expenses() {
       <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="md">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-          <Box h="3px" bgGradient="linear(to-r, blue.400, plum.500)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}><Pencil size={16} color="#3B82F6" /><Text>Edit Expense</Text></HStack>
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {editItem && (
-              <VStack spacing={4}>
+              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
                 <FormControl>
                   <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Category</FormLabel>
                   <Select value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))} focusBorderColor="blue.500" borderRadius="10px">
@@ -552,7 +561,7 @@ export default function Expenses() {
                   <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Description</FormLabel>
                   <Input value={editItem.description} onChange={e => setEditItem(p => ({ ...p, description: e.target.value }))} focusBorderColor="blue.500" borderRadius="10px" />
                 </FormControl>
-              </VStack>
+              </SimpleGrid>
             )}
           </ModalBody>
           <ModalFooter gap={2}>

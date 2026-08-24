@@ -1,58 +1,123 @@
 const fs = require('fs');
 let code = fs.readFileSync('client/src/components/Dashboard.jsx', 'utf8');
 
-const quickActions = `
-      {/* ── Quick Actions ── */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={7}>
-        <Button
-          h="100px"
-          bg="brand.500"
-          color="white"
-          _hover={{ bg: 'brand.600', transform: 'translateY(-2px)', shadow: 'xl' }}
-          transition="all 0.2s"
-          borderRadius="12px"
-          onClick={() => setActiveTab('expenses')}
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          gap={2}
-          shadow="lg"
-        >
-          <Receipt size={24} />
-          <Text fontSize="lg" fontWeight="700">Add New Expense</Text>
-        </Button>
+const importReplacement = `import { Wallet, Target, Receipt, CreditCard, ChevronRight, PieChart as PieIcon, UploadCloud, Smartphone } from 'lucide-react'`;
+code = code.replace(`import { Wallet, Target, Receipt, CreditCard, ChevronRight, PieChart as PieIcon, UploadCloud } from 'lucide-react'`, importReplacement);
 
-        <Button
-          h="100px"
-          bg="white"
-          color="brand.900"
-          border="1px solid"
-          borderColor="gray.200"
-          _hover={{ bg: 'gray.50', transform: 'translateY(-2px)', shadow: 'xl' }}
-          transition="all 0.2s"
-          borderRadius="12px"
-          onClick={() => setActiveTab('savings')}
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          gap={2}
-          shadow="sm"
-        >
-          <PiggyBank size={24} />
-          <Text fontSize="lg" fontWeight="700">Log Saving</Text>
-        </Button>
-      </SimpleGrid>
+const telegramState = `  const [telegramCode, setTelegramCode] = useState(null)
+  const [generatingCode, setGeneratingCode] = useState(false)
 
-      {/* ── Top metrics row ── */}`;
+  const handleGenerateTelegramCode = async () => {
+    try {
+      setGeneratingCode(true);
+      const res = await api.generateTelegramCode();
+      setTelegramCode(res.code);
+      toast({ title: 'Code Generated', description: 'Send this code to the Telegram bot!', status: 'success' });
+    } catch (e) {
+      toast({ title: 'Failed to generate code', description: e.message, status: 'error' });
+    } finally {
+      setGeneratingCode(false);
+    }
+  }`;
 
-code = code.replace("{/* ── Top metrics row ── */}", quickActions);
+code = code.replace("  const toast = useToast()", "  const toast = useToast()\n" + telegramState);
 
-// Also need to import PiggyBank if not already imported
-if (!code.includes('PiggyBank')) {
-  code = code.replace("Receipt,", "Receipt, PiggyBank,");
-}
+const actionCardsOld = `{/* Quick Action Cards */}
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={8}>
+          <Card bg="white" cursor="pointer" onClick={() => setActiveTab('expenses')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
+            <CardBody p={5}>
+              <Flex align="center" justify="space-between">
+                <Flex align="center" gap={4}>
+                  <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                    <Receipt size={24} />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight="700" color="brand.900">Add New Expense</Text>
+                    <Text fontSize="sm" color="gray.500">Log a new payment</Text>
+                  </Box>
+                </Flex>
+                <ChevronRight size={20} color="#CBD5E1" />
+              </Flex>
+            </CardBody>
+          </Card>
+          
+          <Card bg="white" cursor="pointer" onClick={() => setActiveTab('savings')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
+            <CardBody p={5}>
+              <Flex align="center" justify="space-between">
+                <Flex align="center" gap={4}>
+                  <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                    <Target size={24} />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight="700" color="brand.900">Log Saving</Text>
+                    <Text fontSize="sm" color="gray.500">Record a new deposit</Text>
+                  </Box>
+                </Flex>
+                <ChevronRight size={20} color="#CBD5E1" />
+              </Flex>
+            </CardBody>
+          </Card>
+        </SimpleGrid>`;
+
+const actionCardsNew = `{/* Quick Action Cards */}
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+          <Card bg="white" cursor="pointer" onClick={() => setActiveTab('expenses')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
+            <CardBody p={5}>
+              <Flex align="center" justify="space-between">
+                <Flex align="center" gap={4}>
+                  <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                    <Receipt size={24} />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight="700" color="brand.900">Add Expense</Text>
+                    <Text fontSize="sm" color="gray.500">Log payment</Text>
+                  </Box>
+                </Flex>
+                <ChevronRight size={20} color="#CBD5E1" />
+              </Flex>
+            </CardBody>
+          </Card>
+          
+          <Card bg="white" cursor="pointer" onClick={() => setActiveTab('savings')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
+            <CardBody p={5}>
+              <Flex align="center" justify="space-between">
+                <Flex align="center" gap={4}>
+                  <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                    <Target size={24} />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight="700" color="brand.900">Log Saving</Text>
+                    <Text fontSize="sm" color="gray.500">Record deposit</Text>
+                  </Box>
+                </Flex>
+                <ChevronRight size={20} color="#CBD5E1" />
+              </Flex>
+            </CardBody>
+          </Card>
+
+          <Card bg="white" cursor="pointer" onClick={handleGenerateTelegramCode} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
+            <CardBody p={5}>
+              <Flex align="center" justify="space-between">
+                <Flex align="center" gap={4}>
+                  <Flex w="48px" h="48px" bg="#0088cc" color="white" borderRadius="12px" align="center" justify="center">
+                    <Smartphone size={24} />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight="700" color="brand.900">Connect Telegram</Text>
+                    {telegramCode ? (
+                       <Text fontSize="xs" fontWeight="bold" color="blue.500">Code: {telegramCode}</Text>
+                    ) : (
+                       <Text fontSize="sm" color="gray.500">{generatingCode ? 'Loading...' : 'Link your account'}</Text>
+                    )}
+                  </Box>
+                </Flex>
+                <ChevronRight size={20} color="#CBD5E1" />
+              </Flex>
+            </CardBody>
+          </Card>
+        </SimpleGrid>`;
+
+code = code.replace(actionCardsOld, actionCardsNew);
 
 fs.writeFileSync('client/src/components/Dashboard.jsx', code);
-console.log("Dashboard.jsx updated with Quick Actions.");
+console.log('Dashboard patched for telegram!');
