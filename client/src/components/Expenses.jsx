@@ -13,7 +13,7 @@ import {
   Receipt, Plus, Search, Pencil, Trash2, IndianRupee,
   Calendar, Tag, AlignLeft, FilterX, LayoutList, Camera, Check, Image as ImageIcon, Paperclip
 } from 'lucide-react'
-import { api, fmt, formatDate, CATEGORIES } from '../utils/api'
+import { api, fmt, fmtK, formatDate, CATEGORIES } from '../utils/api'
 
 const EMPTY_FORM = { category: '', description: '', amount: '', date: '' }
 
@@ -376,10 +376,10 @@ export default function Expenses() {
       {/* ── Summary Strip ── */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>
         {[
-          { label: 'Total Entries',   value: expenses.length,    color: '#091540', icon: LayoutList },
-          { label: 'Total Spent',     value: fmt(totalAll),      color: '#1B2CC1', icon: Receipt },
-          { label: 'Filtered Items',  value: filtered.length,    color: '#7692FF', icon: FilterX },
-          { label: 'Filtered Total',  value: fmt(filteredTotal), color: '#ABD2FA', icon: Tag },
+          { label: 'Total Spent',     value: fmtK(totalAll),      color: '#10B981', icon: Receipt },
+          { label: 'Total Entries',   value: expenses.length,    color: '#1B2CC1', icon: LayoutList },
+          { label: 'Filtered Total',  value: fmtK(filteredTotal), color: '#E09913', icon: Tag },
+          { label: 'Filtered Items',  value: filtered.length,    color: '#0EA5E9', icon: FilterX },
         ].map(({ label, value, color, icon: Icon }) => (
           <Card key={label} shadow="sm" borderRadius="xl" border="1px solid" borderColor="gray.100">
             <CardBody py={4} px={5}>

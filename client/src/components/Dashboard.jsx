@@ -312,39 +312,39 @@ export default function Dashboard({ setActiveTab }) {
       <SimpleGrid columns={{ base: 2, md: 3, xl: 5 }} spacing={4} mb={6}>
         <StatCard
           label="Budget Goal"
-          value={fmt(summary?.budget)}
+          value={fmtK(summary?.budget)}
           Icon={Target}
-          gradient="linear(135deg, gold.400, gold.600)"
+          baseColor="#0EA5E9"
           helpText="Total target"
           onClick={onOpen}
         />
         <StatCard
           label="Total Savings"
-          value={fmt(summary?.totalSavings)}
+          value={fmtK(summary?.totalSavings)}
           Icon={TrendingUp}
-          gradient="linear(135deg, #10B981, #059669)"
+          baseColor="#10B981"
           helpText={`${sp}% of goal`}
           arrowType="increase"
         />
         <StatCard
           label="Total Expenses"
-          value={fmt(summary?.totalExpenses)}
+          value={fmtK(summary?.totalExpenses)}
           Icon={IndianRupee}
-          gradient="linear(135deg, brand.500, brand.700)"
+          baseColor="#1B2CC1"
           helpText={`${ep}% of goal`}
         />
         <StatCard
           label="Still Required"
-          value={fmt(summary?.amountStillRequired)}
+          value={fmtK(summary?.amountStillRequired)}
           Icon={Clock}
-          gradient="linear(135deg, #F59E0B, #D97706)"
+          baseColor="#E09913"
           helpText="More savings needed"
         />
         <StatCard
           label="Available Balance"
-          value={fmt(Math.abs(summary?.availableBalance || 0))}
+          value={fmtK(Math.abs(summary?.availableBalance || 0))}
           Icon={Wallet}
-          gradient={`linear(135deg, ${(summary?.availableBalance || 0) >= 0 ? '#7F55B0, #643994' : '#EF4444, #DC2626'})`}
+          baseColor="#7F55B0"
           helpText={(summary?.availableBalance || 0) >= 0 ? 'Surplus' : 'Deficit'}
           arrowType={(summary?.availableBalance || 0) >= 0 ? 'increase' : 'decrease'}
         />

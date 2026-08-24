@@ -260,10 +260,10 @@ export default function Savings() {
       {/* ── Summary Cards ── */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>
         {[
-          { label: 'Total Saved',      value: fmt(totalSaved),                     color: '#10B981', icon: PiggyBank },
-          { label: 'Entries',          value: savings.length,                       color: '#1b2cc1', icon: BarChart2 },
-          { label: 'Still Required',   value: fmt(summary?.amountStillRequired),    color: '#E09913', icon: Clock     },
-          { label: 'Budget Goal',      value: fmt(summary?.budget),                 color: '#0EA5E9', icon: Target    },
+          { label: 'Total Saved',      value: fmtK(totalSaved),                     color: '#10B981', icon: PiggyBank },
+          { label: 'Entries',          value: savings.length,                       color: '#1B2CC1', icon: BarChart2 },
+          { label: 'Still Required',   value: fmtK(summary?.amountStillRequired),    color: '#E09913', icon: Clock     },
+          { label: 'Budget Goal',      value: fmtK(summary?.budget),                 color: '#0EA5E9', icon: Target    },
         ].map(({ label, value, color, icon: Icon }) => (
           <Card key={label} shadow="sm" borderRadius="xl" border="1px solid" borderColor="gray.100">
             <CardBody py={4} px={5}>
