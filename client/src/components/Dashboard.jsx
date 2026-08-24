@@ -154,6 +154,7 @@ export default function Dashboard({ setActiveTab }) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
   const [telegramCode, setTelegramCode] = useState(null)
+  const [isTelegramLinked, setIsTelegramLinked] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
 
   const handleGenerateTelegramCode = async () => {
@@ -172,10 +173,12 @@ export default function Dashboard({ setActiveTab }) {
   const loadAll = useCallback(async () => {
     try {
       setLoading(true)
-      const [sum, exp, sav, cats] = await Promise.all([
-        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(),
+      const [sum, exp, sav, cats, tgStatus] = await Promise.all([
+        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(), api.getTelegramStatus().catch(() => ({isLinked: false, activeCode: null}))
       ])
       setSummary(sum); setExpenses(exp); setSavings(sav); setCategories(cats)
+      if (tgStatus.activeCode) setTelegramCode(tgStatus.activeCode);
+      if (tgStatus.isLinked) setIsTelegramLinked(true);
       setBudget(sum.budget || '')
     } catch {
       toast({ title: 'Error loading data', status: 'error', duration: 3000 })
@@ -369,11 +372,13 @@ export default function Dashboard({ setActiveTab }) {
                   <Smartphone size={24} />
                 </Flex>
                 <Box>
-                  <Text fontWeight="700" color="blue.700">Connect Telegram</Text>
-                  {telegramCode ? (
+                                    <Text fontWeight="700" color="blue.700">Telegram</Text>
+                  {isTelegramLinked ? (
+                     <Text fontSize="xs" fontWeight="bold" color="green.500">Connected ✓</Text>
+                  ) : telegramCode ? (
                      <Text fontSize="xs" fontWeight="bold" color="blue.500">Code: {telegramCode}</Text>
                   ) : (
-                     <Text fontSize="sm" color="gray.500">{generatingCode ? 'Loading...' : 'Link your account'}</Text>
+                     <Text fontSize="sm" color="gray.500">{generatingCode ? 'Loading...' : 'Link account'}</Text>
                   )}
                 </Box>
               </Flex>

@@ -331,6 +331,32 @@ Saved to your portal as a DRAFT. Please review and approve it on the dashboard.<
 // ═══════════════════════════════════════════════════════════════════════════
 // TELEGRAM ACCOUNT LINKING
 // ═══════════════════════════════════════════════════════════════════════════
+
+app.get('/api/telegram/status', requireAuth, async (req, res) => {
+  try {
+    let isLinked = false;
+    let activeCode = null;
+
+    if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+      const link = await dbGet('SELECT chat_id FROM telegram_links WHERE user_id = ?', [req.user.uid]);
+      if (link) isLinked = true;
+      const codeRow = await dbGet('SELECT code FROM telegram_codes WHERE user_id = ?', [req.user.uid]);
+      if (codeRow) activeCode = codeRow.code;
+    } else {
+      const d = readJSON();
+      if (d.telegram_links && Object.values(d.telegram_links).includes(req.user.uid)) {
+        isLinked = true;
+      }
+      if (d.telegram_codes) {
+        for (const [k, v] of Object.entries(d.telegram_codes)) {
+          if (v === req.user.uid) activeCode = k;
+        }
+      }
+    }
+    res.json({ isLinked, activeCode });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/telegram/link-code', requireAuth, async (req, res) => {
   const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit code
   try {
