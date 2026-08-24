@@ -16,7 +16,95 @@ import {
 } from 'lucide-react'
 import { api, fmt, fmtK, formatDate, CATEGORIES } from '../utils/api'
 
-const EMPTY_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' }
+// ── Full-Screen Document Viewer ──────────────────────────────────────────────
+function FullScreenViewer({ url, isPdf, onClose }) {
+  const [zoom, setZoom] = useState(1)
+  const zoomIn  = () => setZoom(z => Math.min(z + 0.25, 4))
+  const zoomOut = () => setZoom(z => Math.max(z - 0.25, 0.25))
+  const zoomReset = () => setZoom(1)
+
+  // Close on Escape key
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <Box
+      position="fixed" top={0} left={0} right={0} bottom={0}
+      zIndex={9999}
+      bg="rgba(0,0,0,0.92)"
+      display="flex" flexDirection="column"
+    >
+      {/* ── Toolbar ── */}
+      <Flex
+        align="center" justify="space-between"
+        px={6} py={3}
+        bg="rgba(0,0,0,0.7)"
+        backdropFilter="blur(10px)"
+        borderBottom="1px solid rgba(255,255,255,0.08)"
+      >
+        <Text color="white" fontWeight="700" fontSize="sm">📄 Document Viewer</Text>
+        <HStack spacing={2}>
+          <Button size="sm" variant="outline" colorScheme="whiteAlpha" color="white"
+            onClick={zoomOut} isDisabled={zoom <= 0.25} borderRadius="8px" px={3}>
+            − Zoom Out
+          </Button>
+          <Button size="sm" variant="solid" bg="whiteAlpha.200" color="white"
+            onClick={zoomReset} borderRadius="8px" px={3} _hover={{ bg: 'whiteAlpha.300' }}>
+            {Math.round(zoom * 100)}%
+          </Button>
+          <Button size="sm" variant="outline" colorScheme="whiteAlpha" color="white"
+            onClick={zoomIn} isDisabled={zoom >= 4} borderRadius="8px" px={3}>
+            + Zoom In
+          </Button>
+          <Button size="sm" as="a" href={url} download target="_blank"
+            colorScheme="blue" borderRadius="8px" px={3}>
+            ⬇ Download
+          </Button>
+          <Button size="sm" colorScheme="red" variant="outline" borderRadius="8px" px={3}
+            onClick={onClose}>
+            ✕ Close
+          </Button>
+        </HStack>
+      </Flex>
+
+      {/* ── Content Area ── */}
+      <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems={isPdf ? 'flex-start' : 'center'} p={4}>
+        {isPdf ? (
+          <iframe
+            src={url}
+            title="Document Viewer"
+            style={{
+              border: 'none',
+              width: `${Math.min(zoom * 100, 100)}vw`,
+              height: '90vh',
+              transform: zoom > 1 ? `scale(${zoom})` : 'none',
+              transformOrigin: 'top center',
+              borderRadius: '8px',
+              background: 'white',
+            }}
+          />
+        ) : (
+          <img
+            src={url}
+            alt="Receipt"
+            style={{
+              maxWidth: '100%',
+              transform: `scale(${zoom})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.2s ease',
+              borderRadius: '8px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            }}
+          />
+        )}
+      </Box>
+    </Box>
+  )
+}
+
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
@@ -613,25 +701,13 @@ export default function Expenses() {
         </AlertDialogOverlay>
       </AlertDialog>
 
-      {/* ── Document Viewer Modal ── */}
-      <Modal isOpen={!!viewerUrl} onClose={() => setViewerUrl(null)} isCentered size="4xl">
-        <ModalOverlay backdropFilter="blur(6px)" />
-        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)" bg="gray.50">
-          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={4} pb={3} bg="white" borderBottom="1px solid" borderColor="gray.100">
-            Document Viewer
-          </ModalHeader>
-          <ModalCloseButton mt={1} />
-          <ModalBody p={0} display="flex" justifyContent="center" alignItems="center" minH="50vh">
-            {viewerUrl && (
-              viewerUrl.toLowerCase().endsWith('.pdf') ? (
-                <iframe src={viewerUrl} width="100%" height="70vh" style={{ border: 'none', minHeight: '600px' }} title="Document Viewer" />
-              ) : (
-                <img src={viewerUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
-              )
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      {/* ── Full-Screen Document Viewer ── */}
+      {viewerUrl && (() => {
+        const isPdf = viewerUrl.toLowerCase().includes('.pdf');
+        return (
+          <FullScreenViewer url={viewerUrl} isPdf={isPdf} onClose={() => setViewerUrl(null)} />
+        );
+      })()}
 
     </Container>
   )
