@@ -198,5 +198,9 @@
     }
   ],
   "_nextExpenseId": 17,
-  "_nextSavingsId": 7
+  "_nextSavingsId": 7,
+  "telegram_codes": {},
+  "telegram_links": {
+    "1256918427": "jzSCJChQ1OTinp3PESQzSNeCGlp1"
+  }
 }

@@ -363,11 +363,15 @@ app.post('/api/telegram/webhook', async (req, res) => {
   
   async function sendReply(text) {
     if (!botToken) return;
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ chat_id: chatId, text })
-    });
+    try {
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ chat_id: chatId, text })
+      });
+    } catch (e) {
+      console.error("Failed to send Telegram reply:", e.message);
+    }
   }
 
   try {
