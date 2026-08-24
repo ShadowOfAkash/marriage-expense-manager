@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box, Container, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText, StatArrow,
   Card, CardBody, CardHeader, Heading, Text, Progress, Badge, Flex, VStack, HStack,
@@ -144,7 +145,8 @@ function EmptyState({ icon: Icon, message, actionLabel, onAction }) {
 }
 
 // ── Main Dashboard ───────────────────────────────────────────────────────────
-export default function Dashboard({ setActiveTab }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const [summary,    setSummary]    = useState(null)
   const [expenses,   setExpenses]   = useState([])
   const [savings,    setSavings]    = useState([])
@@ -330,7 +332,7 @@ export default function Dashboard({ setActiveTab }) {
       
       {/* ── Quick Action Cards ── */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
-        <Card bg="white" cursor="pointer" onClick={() => setActiveTab('expenses')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={() => navigate('/expenses')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
@@ -347,7 +349,7 @@ export default function Dashboard({ setActiveTab }) {
           </CardBody>
         </Card>
         
-        <Card bg="white" cursor="pointer" onClick={() => setActiveTab('savings')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={() => navigate('/savings')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
@@ -512,7 +514,7 @@ export default function Dashboard({ setActiveTab }) {
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => setActiveTab('savings')} />
+              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => navigate('/savings')} />
             )}
           </CardBody>
         </Card>
@@ -547,7 +549,7 @@ export default function Dashboard({ setActiveTab }) {
                 </Box>
               </>
             ) : (
-              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => setActiveTab('expenses')} />
+              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => navigate('/expenses')} />
             )}
           </CardBody>
         </Card>
@@ -624,7 +626,7 @@ export default function Dashboard({ setActiveTab }) {
                 variant="ghost"
                 colorScheme="brand"
                 rightIcon={<ChevronRight size={12} />}
-                onClick={() => setActiveTab('expenses')}
+                onClick={() => navigate('/expenses')}
                 fontWeight="600"
               >
                 View All
@@ -665,7 +667,7 @@ export default function Dashboard({ setActiveTab }) {
               </Tbody>
             </Table>
           ) : (
-            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => setActiveTab('expenses')} />
+            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => navigate('/expenses')} />
           )}
         </CardBody>
       </Card>

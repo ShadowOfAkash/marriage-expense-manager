@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { Box, Flex, VStack, Icon, Text, Button, Divider, Tooltip } from '@chakra-ui/react';
 import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeTab = location.pathname.split('/')[1] || 'dashboard';
   const { logout, currentUser } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -61,7 +65,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                 bg={isActive ? 'brand.600' : 'transparent'}
                 color={isActive ? 'white' : 'whiteAlpha.700'}
                 _hover={{ bg: isActive ? 'brand.600' : 'whiteAlpha.200', color: 'white' }}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => navigate('/' + item.id)}
                 transition="all 0.2s"
                 justify={isExpanded ? "flex-start" : "center"}
               >
