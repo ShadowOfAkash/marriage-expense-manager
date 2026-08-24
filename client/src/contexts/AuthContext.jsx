@@ -7,7 +7,8 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut 
+  signOut,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 
 // Will be provided by user
@@ -56,12 +57,17 @@ export const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
+  const resetPassword = (email) => {
+    return sendPasswordResetEmail(auth, email);
+  };
+
   const value = {
     currentUser,
     loginWithGoogle,
     loginWithEmail,
     signupWithEmail,
-    logout
+    logout,
+    resetPassword
   };
 
   return (
