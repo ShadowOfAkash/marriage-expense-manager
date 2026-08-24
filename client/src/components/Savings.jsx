@@ -20,18 +20,18 @@ import { api, fmt, fmtK, MONTH_NAMES } from '../utils/api'
 
 const MONTHS = MONTH_NAMES
 
-function SectionHeader({ icon: Icon, title, subtitle, color = '#10B981' }) {
+function SectionHeader({ icon: Icon, title, subtitle, color = '#1B2CC1' }) {
   return (
     <Flex align="center" gap={3} mb={5}>
-      <Flex w={9} h={9} borderRadius="10px"
-        bg="green.50" border="1px solid" borderColor="green.100"
+      <Flex w={10} h={10} borderRadius="10px"
+        bg={color + '1A'} border="1px solid" borderColor={color + '33'}
         align="center" justify="center" flexShrink={0}
       >
-        <Icon size={16} color={color} />
+        <Icon size={18} color={color} />
       </Flex>
       <Box>
         <Text fontWeight="700" fontSize="md" color="gray.800">{title}</Text>
-        {subtitle && <Text fontSize="11px" color="gray.400">{subtitle}</Text>}
+        {subtitle && <Text fontSize="12px" color="gray.500" fontWeight="500">{subtitle}</Text>}
       </Box>
     </Flex>
   )

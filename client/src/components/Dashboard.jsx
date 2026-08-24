@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react'
 import {
   Target, TrendingUp, Wallet, Clock, AlertCircle,
-  PieChart as PieIcon, BarChart2, Activity, CalendarDays,
+  PieChart as PieIcon, BarChart2, Activity, CalendarDays, Receipt, PiggyBank,
   ChevronRight, IndianRupee,
 } from 'lucide-react'
 import {
@@ -101,21 +101,21 @@ function StatCard({ label, value, Icon, gradient, helpText, arrowType, onClick, 
 }
 
 // ── Section Header ───────────────────────────────────────────────────────────
-function SectionHeader({ icon: Icon, title, subtitle, action }) {
+function SectionHeader({ icon: Icon, title, subtitle, action, color = '#1B2CC1' }) {
   return (
     <Flex justify="space-between" align="center" mb={4} flexWrap="wrap" gap={2}>
       <HStack spacing={3}>
         <Flex
-          w={9} h={9} borderRadius="10px"
-          bgGradient="linear(135deg, brand.50, plum.50)"
-          border="1px solid" borderColor="brand.100"
+          w={10} h={10} borderRadius="10px"
+          bg={color + '1A'}
+          border="1px solid" borderColor={color + '33'}
           align="center" justify="center"
         >
-          <Icon size={16} color="#BE185D" />
+          <Icon size={18} color={color} />
         </Flex>
         <Box>
           <Text fontWeight="700" fontSize="md" color="gray.800">{title}</Text>
-          {subtitle && <Text fontSize="11px" color="gray.400">{subtitle}</Text>}
+          {subtitle && <Text fontSize="12px" color="gray.500" fontWeight="500">{subtitle}</Text>}
         </Box>
       </HStack>
       {action}
@@ -535,7 +535,7 @@ export default function Dashboard({ setActiveTab }) {
       <Card border="1px solid" borderColor="gray.100" shadow="0 2px 12px rgba(0,0,0,0.05)">
         <CardBody p={6}>
           <SectionHeader
-            icon={CalendarDays}
+            icon={Receipt}
             title="Recent Expenses"
             subtitle={`Last ${Math.min(expenses.length, 6)} entries`}
             action={
