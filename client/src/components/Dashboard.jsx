@@ -10,6 +10,7 @@ import {
   Target, TrendingUp, Wallet, Clock, AlertCircle,
   PieChart as PieIcon, BarChart2, Activity, CalendarDays, Receipt, PiggyBank,
   ChevronRight, IndianRupee,
+  Smartphone
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
