@@ -91,6 +91,7 @@ export default function Savings() {
       await api.addSavings({ ...form, amount: Number(form.amount), year: Number(form.year) })
       toast({ title: 'Savings logged!', status: 'success', duration: 2000 })
       setForm({ month: currentMonth(), year: currentYear(), amount: '', note: '' })
+      onAddClose()
       load()
     } catch {
       toast({ title: 'Error saving entry', status: 'error', duration: 3000 })
@@ -129,12 +130,22 @@ export default function Savings() {
           <Heading size="lg" color="gray.800" fontWeight="800" letterSpacing="-0.5px">Savings</Heading>
           <Text color="gray.400" fontSize="sm" mt={0.5}>Track your monthly salary and savings</Text>
         </Box>
+        <Button size="md" colorScheme="brand" leftIcon={<Plus size={16} />} onClick={onAddOpen} shadow="md">
+          Add Saving
+        </Button>
       </Flex>
 
-      {/* ── Add Form ── */}
-      <Card mb={5} border="1px solid" borderColor="gray.100" shadow="0 2px 12px rgba(0,0,0,0.05)">
-        <CardBody p={6}>
-          <SectionHeader icon={Plus} title="Log Monthly Salary / Savings" subtitle="Record savings for this month" />
+      {/* ── Add Saving Modal ── */}
+      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
+        <ModalOverlay backdropFilter="blur(6px)" />
+        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
+          <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
+          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
+            <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Log Saving</Text></HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+          
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
@@ -241,8 +252,9 @@ export default function Savings() {
               Clear
             </Button>
           </HStack>
-        </CardBody>
-      </Card>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       {/* ── Summary Cards ── */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>

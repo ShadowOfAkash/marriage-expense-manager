@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Box } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 import Login     from './components/Login'
-import Navbar    from './components/Navbar'
+import Sidebar   from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Expenses  from './components/Expenses'
 import Savings   from './components/Savings'
@@ -36,18 +36,17 @@ export default function App() {
   if (!user) return <Login onLogin={handleLogin} />
 
   return (
-    <Box minH="100vh" bg="pink.50">
-      <Navbar
-        user={user}
+    <Flex minH="100vh" bg="surface.bg">
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
       />
-      <Box pb={10}>
+      <Box flex={1} overflowY="auto" pb={10}>
         {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
         {activeTab === 'expenses'  && <Expenses />}
         {activeTab === 'savings'   && <Savings />}
       </Box>
-    </Box>
+    </Flex>
   )
 }

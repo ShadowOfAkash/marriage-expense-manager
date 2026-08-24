@@ -48,6 +48,7 @@ export default function Expenses() {
 
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
   const { isOpen: isDelOpen,  onOpen: onDelOpen,  onClose: onDelClose  } = useDisclosure()
+  const { isOpen: isAddOpen,  onOpen: onAddOpen,  onClose: onAddClose  } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
 
@@ -155,6 +156,7 @@ export default function Expenses() {
       await api.addExpense({ ...form, amount: Number(form.amount) })
       toast({ title: 'Expense saved!', status: 'success', duration: 2000 })
       setForm({ ...EMPTY_FORM, date: today() })
+      onAddClose()
       load()
     } catch {
       toast({ title: 'Error saving expense', status: 'error', duration: 3000 })
@@ -201,13 +203,23 @@ export default function Expenses() {
           <Heading size="lg" color="gray.800" fontWeight="800" letterSpacing="-0.5px">Expenses</Heading>
           <Text color="gray.400" fontSize="sm" mt={0.5}>Track and manage all wedding expenses</Text>
         </Box>
+        <Button size="md" colorScheme="brand" leftIcon={<Plus size={16} />} onClick={onAddOpen} shadow="md">
+          Add New Expense
+        </Button>
       </Flex>
 
-      {/* ── Add Form ── */}
-      <Card mb={5} border="1px solid" borderColor="gray.100" shadow="0 2px 12px rgba(0,0,0,0.05)">
-        <CardBody p={6}>
+      {/* ── Add Expense Modal ── */}
+      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
+        <ModalOverlay backdropFilter="blur(6px)" />
+        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
+          <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
+          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
+            <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Add New Expense</Text></HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
           <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
-            <SectionHeader icon={Plus} title="Add New Expense" subtitle="Log a wedding expense entry" />
+            
             <Button
               size="sm"
               colorScheme="purple"
@@ -357,8 +369,9 @@ export default function Expenses() {
               </Button>
             )}
           </HStack>
-        </CardBody>
-      </Card>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       {/* ── Summary Strip ── */}
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>

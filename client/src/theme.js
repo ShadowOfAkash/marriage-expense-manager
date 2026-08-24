@@ -6,48 +6,24 @@ const theme = extendTheme({
     body:    "'Inter', 'Segoe UI', system-ui, sans-serif",
   },
 
-  // ── Elegant Wedding Palette ─────────────────────────────────────────────
+  // ── Professional Fintech Palette ─────────────────────────────────────────────
   colors: {
     brand: {
-      50:  '#FDF4F9',
-      100: '#FAE3F2',
-      200: '#F5C0E3',
-      300: '#EF90CC',
-      400: '#E55EAF',
-      500: '#D63A92',
-      600: '#BE185D',   // primary action
-      700: '#9B1249',
-      800: '#7A0E38',
-      900: '#5C0A2A',
-    },
-    gold: {
-      50:  '#FFFBF0',
-      100: '#FEF3D0',
-      200: '#FCE49E',
-      300: '#F9CE6A',
-      400: '#F5B533',
-      500: '#E09913',   // champagne gold
-      600: '#C07D0A',
-      700: '#9B6208',
-      800: '#7A4C07',
-      900: '#5C3805',
-    },
-    plum: {
-      50:  '#F7F3FA',
-      100: '#EDE5F5',
-      200: '#D8C8EB',
-      300: '#BFA4DC',
-      400: '#A07CC8',
-      500: '#7F55B0',
-      600: '#643994',   // deep plum accent
-      700: '#4E2A76',
-      800: '#3A1E58',
-      900: '#27143B',
+      50:  '#f0f5ff',
+      100: '#abd2fa', // Light Blue
+      200: '#8ebaff',
+      300: '#7692ff', // Soft Blue
+      400: '#4a6cf8',
+      500: '#1b2cc1', // Vibrant Blue (Primary)
+      600: '#1524a8',
+      700: '#101a85',
+      800: '#0c1566',
+      900: '#091540', // Dark Navy
     },
     surface: {
-      bg:     '#FDFAF7',   // warm cream background
+      bg:     '#F8FAFC',   // clean light gray/blue background
       card:   '#FFFFFF',
-      border: '#F0E8F0',
+      border: '#E2E8F0',
     },
   },
 
@@ -59,31 +35,34 @@ const theme = extendTheme({
   styles: {
     global: {
       body: {
-        bg:    '#FDFAF7',
-        color: '#1C1125',
+        bg:    '#F8FAFC',
+        color: '#0F172A',
       },
       '*': { boxSizing: 'border-box' },
     },
   },
 
   shadows: {
-    card:  '0 2px 12px rgba(190,24,93,0.07)',
-    hover: '0 8px 30px rgba(190,24,93,0.13)',
+    card:  '0 2px 12px rgba(9, 21, 64, 0.05)',
+    hover: '0 8px 30px rgba(27, 44, 193, 0.12)',
   },
 
   components: {
     Card: {
       baseStyle: {
         container: {
-          borderRadius: '18px',
+          borderRadius: '16px',
           overflow: 'hidden',
           bg: 'white',
+          border: '1px solid',
+          borderColor: 'gray.100',
+          shadow: '0 2px 12px rgba(9, 21, 64, 0.05)',
         },
       },
     },
     Button: {
       defaultProps: { colorScheme: 'brand' },
-      baseStyle: { fontWeight: 600, borderRadius: '10px' },
+      baseStyle: { fontWeight: 600, borderRadius: '8px' },
     },
     Badge: {
       baseStyle: { borderRadius: '6px', fontWeight: 600 },
