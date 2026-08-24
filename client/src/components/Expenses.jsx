@@ -364,7 +364,7 @@ export default function Expenses() {
               />
             </Button>
             {form.receipt_url && (
-              <Button size="sm" variant="ghost" colorScheme="purple" p={1} onClick={() => window.open(form.receipt_url, '_blank')} title="View Attached Document">
+              <Button size="sm" variant="ghost" colorScheme="purple" p={1} onClick={() => setViewerUrl(form.receipt_url)} title="View Attached Document">
                 <ImageIcon size={14} />
               </Button>
             )}
@@ -491,7 +491,7 @@ export default function Expenses() {
                       </Td>
                       <Td borderColor={isDraft ? 'orange.100' : 'gray.50'} textAlign="center">
                         {e.receipt_url ? (
-                          <Button size="xs" variant="ghost" colorScheme="purple" p={1} h="auto" onClick={() => window.open(e.receipt_url, '_blank')} title="View Document">
+                          <Button size="xs" variant="ghost" colorScheme="purple" p={1} h="auto" onClick={() => setViewerUrl(e.receipt_url)} title="View Document">
                             <ImageIcon size={14} />
                           </Button>
                         ) : <Text color="gray.300" fontSize="10px">—</Text>}
@@ -577,7 +577,7 @@ export default function Expenses() {
               />
             </Button>
             {editItem?.receipt_url && (
-              <Button size="sm" variant="ghost" colorScheme="purple" mr={2} onClick={() => window.open(editItem.receipt_url, '_blank')}>
+              <Button size="sm" variant="ghost" colorScheme="purple" mr={2} onClick={() => setViewerUrl(editItem.receipt_url)}>
                 <ImageIcon size={14} /> View
               </Button>
             )}
@@ -602,6 +602,27 @@ export default function Expenses() {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+
+      {/* ── Document Viewer Modal ── */}
+      <Modal isOpen={!!viewerUrl} onClose={() => setViewerUrl(null)} isCentered size="4xl">
+        <ModalOverlay backdropFilter="blur(6px)" />
+        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)" bg="gray.50">
+          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={4} pb={3} bg="white" borderBottom="1px solid" borderColor="gray.100">
+            Document Viewer
+          </ModalHeader>
+          <ModalCloseButton mt={1} />
+          <ModalBody p={0} display="flex" justifyContent="center" alignItems="center" minH="50vh">
+            {viewerUrl && (
+              viewerUrl.toLowerCase().endsWith('.pdf') ? (
+                <iframe src={viewerUrl} width="100%" height="70vh" style={{ border: 'none', minHeight: '600px' }} title="Document Viewer" />
+              ) : (
+                <img src={viewerUrl} alt="Receipt" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
+              )
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
     </Container>
   )
 }
