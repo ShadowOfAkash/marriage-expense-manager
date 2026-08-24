@@ -20,6 +20,7 @@ import {
   RadialBarChart, RadialBar,
 } from 'recharts'
 import { api, fmt, fmtK, formatDate, MONTH_NAMES } from '../utils/api'
+import { AddExpenseModal, AddSavingModal } from './SharedModals'
 
 const CAT_COLORS = [
   '#BE185D','#7F55B0','#E09913','#0EA5E9','#10B981',
@@ -673,6 +674,9 @@ export default function Dashboard() {
           )}
         </CardBody>
       </Card>
+
+      <AddExpenseModal isOpen={isAddExpOpen} onClose={onAddExpClose} />
+      <AddSavingModal isOpen={isAddSavOpen} onClose={onAddSavClose} />
 
     </Container>
   )
