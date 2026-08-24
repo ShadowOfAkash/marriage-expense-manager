@@ -462,7 +462,7 @@ export default function Expenses() {
             <Table size="sm" variant="simple">
               <Thead bg="gray.50">
                 <Tr>
-                  {['#','Date','Category','Description','Amount','Receipt','Actions'].map(h => (
+                  {['#','Date','Category','Description','Receipt','Amount','Actions'].map(h => (
                     <Th key={h} color="gray.500" fontSize="10px" fontWeight="700" textTransform="uppercase" letterSpacing="wider" borderColor="gray.100" isNumeric={h === 'Amount'}>{h}</Th>
                   ))}
                 </Tr>

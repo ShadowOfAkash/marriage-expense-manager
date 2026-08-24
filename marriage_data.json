@@ -135,6 +135,16 @@
       "status": "approved",
       "created_at": "2026-08-24T19:32:05.628Z",
       "receipt_url": ""
+    },
+    {
+      "id": 16,
+      "category": "Miscellaneous",
+      "description": "General clothing snacks household items",
+      "amount": 30180,
+      "date": "2025-07-30",
+      "status": "approved",
+      "receipt_url": "/uploads/tg_1787602730185_24qius.jpg",
+      "created_at": "2026-08-24T20:18:50.187Z"
     }
   ],
   "savings": [
@@ -187,6 +197,6 @@
       "created_at": "2026-08-24T05:44:20.469Z"
     }
   ],
-  "_nextExpenseId": 16,
+  "_nextExpenseId": 17,
   "_nextSavingsId": 7
 }
