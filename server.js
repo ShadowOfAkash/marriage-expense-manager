@@ -12,6 +12,22 @@ const USERS = [
   { email: 'akashtiwari.mnnit@gmail.com', password: 'Akashcse@25274', name: 'Akash Tiwari' }
 ];
 
+const admin = require('firebase-admin');
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+    });
+    console.log('✅ Firebase Admin initialized');
+  } else {
+    console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT not found in environment');
+  }
+} catch (e) {
+  console.error('❌ Failed to initialize Firebase Admin:', e.message);
+}
+
+// Keep a fallback for development if they haven't configured it yet
+
 const validTokens = new Set();
 
 // ── Middleware ───────────────────────────────────────────────────────────────
@@ -45,15 +61,15 @@ async function initDB() {
   if (useLibSQL) {
     // Create tables in Turso
     await db.executeMultiple(`
-      CREATE TABLE IF NOT EXISTS budget (
-        id         INTEGER PRIMARY KEY DEFAULT 1,
+      CREATE TABLE IF NOT EXISTS user_budget (
+        user_id    TEXT PRIMARY KEY,
         amount     REAL    NOT NULL DEFAULT 0,
         updated_at TEXT    DEFAULT (datetime('now'))
       );
-      INSERT OR IGNORE INTO budget (id, amount) VALUES (1, 0);
 
       CREATE TABLE IF NOT EXISTS expenses (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     TEXT    NOT NULL DEFAULT 'legacy_user',
         category    TEXT    NOT NULL,
         description TEXT    DEFAULT '',
         amount      REAL    NOT NULL,
@@ -63,6 +79,7 @@ async function initDB() {
 
       CREATE TABLE IF NOT EXISTS savings (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id    TEXT    NOT NULL DEFAULT 'legacy_user',
         month      TEXT    NOT NULL,
         year       INTEGER NOT NULL,
         amount     REAL    NOT NULL,
@@ -72,6 +89,8 @@ async function initDB() {
     `);
     try { await db.execute("ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'approved'"); } catch(e){}
     try { await db.execute("ALTER TABLE expenses ADD COLUMN receipt_url TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE expenses ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
+    try { await db.execute("ALTER TABLE savings ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
     console.log('📁 Using local JSON file database');
@@ -117,11 +136,31 @@ async function dbRun(sql, args = []) {
 }
 
 // ── Auth Middleware ──────────────────────────────────────────────────────────
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Authentication required' });
-  if (!validTokens.has(auth.slice(7))) return res.status(401).json({ error: 'Invalid or expired session' });
-  next();
+  
+  const token = auth.slice(7);
+  
+  try {
+    // Check if Firebase is initialized and verify the token
+    if (admin.apps.length > 0) {
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      req.user = decodedToken; // contains .uid
+      return next();
+    }
+  } catch (error) {
+    console.error("Firebase auth error:", error.message);
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+
+  // Fallback to legacy mock auth ONLY if Firebase isn't configured yet
+  if (!admin.apps.length && validTokens.has(token)) {
+    req.user = { uid: 'legacy_user' };
+    return next();
+  }
+  
+  return res.status(401).json({ error: 'Invalid or expired session' });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -452,8 +491,8 @@ app.post('/api/upload', requireAuth, (req, res) => {
 
 app.get('/api/expenses', requireAuth, async (req, res) => {
   try {
-    if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses ORDER BY date DESC, id DESC'));
-    res.json([...readJSON().expenses].sort((a, b) => b.date.localeCompare(a.date)));
+    if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC', [req.user.uid]));
+    res.json([...readJSON().expenses].filter(e => e.user_id === req.user.uid).sort((a, b) => b.date.localeCompare(a.date)));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -41,7 +41,23 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
         >
           {isExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </Button>
-      </Flex>
+  
+      <Box mt="auto">
+        <Text fontSize="11px" color="brand.400" mb={2} px={2} isTruncated>{currentUser?.email}</Text>
+        <Button
+          w="100%"
+          variant="ghost"
+          color="gray.400"
+          justifyContent="flex-start"
+          leftIcon={<LogOut size={18} />}
+          _hover={{ bg: 'whiteAlpha.100', color: 'white' }}
+          onClick={logout}
+        >
+          Sign Out
+        </Button>
+      </Box>
+    </Flex>
+
 
       <Divider borderColor="whiteAlpha.300" mb={4} />
 
