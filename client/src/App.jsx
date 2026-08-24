@@ -9,7 +9,11 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 function MainApp() {
   const { currentUser } = useAuth()
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'dashboard')
+  
+  React.useEffect(() => {
+    localStorage.setItem('activeTab', activeTab)
+  }, [activeTab])
 
   if (!currentUser) return <Login />
 
