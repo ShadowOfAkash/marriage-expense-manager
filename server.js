@@ -494,7 +494,7 @@ app.post('/api/telegram/webhook', async (req, res) => {
     // 4. Process with Gemini
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
     const todayDate = new Date().toISOString().split('T')[0];
     const prompt = `You are a financial AI assistant processing an expense input. The user has provided either a receipt image, an audio voice note (which might be in Hindi or English), or a text message.
