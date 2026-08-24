@@ -61,6 +61,7 @@ export default function Savings() {
   const [form,    setForm]    = useState({ month: currentMonth(), year: currentYear(), amount: '', note: '' })
 
   const { isOpen: isDelOpen, onOpen: onDelOpen, onClose: onDelClose } = useDisclosure()
+  const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
 
