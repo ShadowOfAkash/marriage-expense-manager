@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { api, fmt, fmtK, formatDate, CATEGORIES } from '../utils/api'
 
-const EMPTY_FORM = { category: '', description: '', amount: '', date: '' }
+const EMPTY_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' }
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
@@ -104,12 +104,14 @@ export default function Expenses() {
         const base64String = reader.result.split(',')[1]
         try {
           const aiData = await api.scanReceipt(base64String, file.type)
-          setForm({
+          setForm(prev => ({
+            ...prev,
             category: aiData.category || '',
             description: aiData.description || '',
             amount: aiData.amount ? String(aiData.amount) : '',
-            date: aiData.date || today()
-          })
+            date: aiData.date || today(),
+            receipt_url: aiData.receipt_url || ''
+          }))
           toast({ title: 'Receipt Scanned!', description: 'Please review the fields before saving.', status: 'success', duration: 3000 })
         } catch (err) {
           toast({ title: 'Scan Failed', description: err.message, status: 'error', duration: 3000 })
@@ -210,7 +212,7 @@ export default function Expenses() {
       </Flex>
 
       {/* ── Add Expense Modal ── */}
-      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="3xl">
+      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
           <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
@@ -239,10 +241,22 @@ export default function Expenses() {
             mb={6}
           >
             <Flex direction="column" align="center" gap={3}>
-              <Camera size={32} color="#1B2CC1" />
-              <Text fontWeight="700" color="brand.900" fontSize="md">Drag & Drop Receipt (Image/PDF)</Text>
-              <Text fontSize="sm" color="gray.500">or click to browse your files</Text>
-              {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
+              {form.receipt_url ? (
+                <>
+                  <ImageIcon size={32} color="#10B981" />
+                  <Text fontWeight="700" color="green.600" fontSize="md">Document Uploaded Successfully!</Text>
+                  <Text fontSize="sm" color="gray.500">Click or drag another to replace</Text>
+                  <Button size="xs" colorScheme="blue" variant="outline" mt={2} onClick={(e) => { e.stopPropagation(); setViewerUrl(form.receipt_url); }}>View Document</Button>
+                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
+                </>
+              ) : (
+                <>
+                  <Camera size={32} color="#1B2CC1" />
+                  <Text fontWeight="700" color="brand.900" fontSize="md">Drag & Drop Receipt (Image/PDF)</Text>
+                  <Text fontSize="sm" color="gray.500">or click to browse your files</Text>
+                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
+                </>
+              )}
             </Flex>
             <input type="file" accept="image/*,application/pdf" ref={fileInputRef} onChange={handleScan} style={{ display: 'none' }} />
           </Box>
@@ -353,32 +367,7 @@ export default function Expenses() {
               Clear
             </Button>
             
-            <Button
-              as="label"
-              htmlFor="doc-upload"
-              size="sm"
-              variant="outline"
-              colorScheme="gray"
-              borderRadius="10px"
-              leftIcon={<Paperclip size={14} />}
-              isLoading={isUploading}
-              cursor="pointer"
-              ml={2}
-            >
-              {form.receipt_url ? 'Change Doc' : 'Attach Doc'}
-              <input
-                id="doc-upload"
-                type="file"
-                accept="image/*,application/pdf"
-                style={{ display: 'none' }}
-                onChange={(e) => handleDocUpload(e, false)}
-              />
-            </Button>
-            {form.receipt_url && (
-              <Button size="sm" variant="ghost" colorScheme="purple" p={1} onClick={() => setViewerUrl(form.receipt_url)} title="View Attached Document">
-                <ImageIcon size={14} />
-              </Button>
-            )}
+            
           </HStack>
           </ModalBody>
         </ModalContent>
@@ -530,7 +519,7 @@ export default function Expenses() {
       </Card>
 
       {/* ── Edit Modal ── */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="2xl">
+      <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="md">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
           <Box h="3px" bgGradient="linear(to-r, blue.400, plum.500)" />

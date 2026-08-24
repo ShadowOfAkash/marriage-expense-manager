@@ -147,7 +147,7 @@ export default function Savings() {
           <ModalCloseButton />
           <ModalBody pb={6}>
           
-          <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={5}>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
                 <HStack spacing={1.5} mb={1}><CalendarDays size={12} /><Text>Month</Text></HStack>
