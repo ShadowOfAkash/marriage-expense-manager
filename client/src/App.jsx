@@ -1,52 +1,40 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Box, Flex } from '@chakra-ui/react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login     from './components/Login'
 import Sidebar   from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Expenses  from './components/Expenses'
 import Savings   from './components/Savings'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 
-export default function App() {
-  const [user,      setUser]      = useState(null)
-  const [activeTab, setActiveTab] = useState('dashboard')
+function MainApp() {
+  const { currentUser } = useAuth()
 
-  // Restore session from localStorage
-  useEffect(() => {
-    const token    = localStorage.getItem('auth_token')
-    const userData = localStorage.getItem('user_data')
-    if (token && userData) {
-      try { setUser(JSON.parse(userData)) } catch (_) {}
-    }
-  }, [])
-
-  const handleLogin = (userData, token) => {
-    localStorage.setItem('auth_token', token)
-    localStorage.setItem('user_data', JSON.stringify(userData))
-    setUser(userData)
-    setActiveTab('dashboard')
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
-    setUser(null)
-    setActiveTab('dashboard')
-  }
-
-  if (!user) return <Login onLogin={handleLogin} />
+  if (!currentUser) return <Login />
 
   return (
     <Flex minH="100vh" bg="surface.bg">
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onLogout={handleLogout}
-      />
+      <Sidebar />
       <Box flex={1} overflowY="auto" pb={10}>
-        {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
-        {activeTab === 'expenses'  && <Expenses />}
-        {activeTab === 'savings'   && <Savings />}
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/savings" element={<Savings />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
       </Box>
     </Flex>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

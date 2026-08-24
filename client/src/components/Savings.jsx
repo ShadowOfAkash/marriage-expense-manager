@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Box, Container, Card, CardBody, Heading, Text,
   SimpleGrid, FormControl, FormLabel, Input, Select, Button,
@@ -64,6 +65,14 @@ export default function Savings() {
   const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      onAddOpen()
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, onAddOpen])
 
   function currentMonth() { return MONTHS[new Date().getMonth()] }
   function currentYear()  { return new Date().getFullYear() }
@@ -140,14 +149,14 @@ export default function Savings() {
       <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
         <ModalOverlay backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-          <Box h="3px" bgGradient="linear(to-r, brand.400, brand.600)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Log Saving</Text></HStack>
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
           
-          <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={5}>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
                 <HStack spacing={1.5} mb={1}><CalendarDays size={12} /><Text>Month</Text></HStack>

@@ -12,6 +12,24 @@ const USERS = [
   { email: 'akashtiwari.mnnit@gmail.com', password: 'Akashcse@25274', name: 'Akash Tiwari' }
 ];
 
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT && getApps().length === 0) {
+    initializeApp({
+      credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+    });
+    console.log('✅ Firebase Admin initialized');
+  } else if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+    console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT not found in environment');
+  }
+} catch (e) {
+  console.error('❌ Failed to initialize Firebase Admin:', e.message);
+}
+
+// Keep a fallback for development if they haven't configured it yet
+
 const validTokens = new Set();
 
 // ── Middleware ───────────────────────────────────────────────────────────────
@@ -45,15 +63,25 @@ async function initDB() {
   if (useLibSQL) {
     // Create tables in Turso
     await db.executeMultiple(`
-      CREATE TABLE IF NOT EXISTS budget (
-        id         INTEGER PRIMARY KEY DEFAULT 1,
+      
+      CREATE TABLE IF NOT EXISTS telegram_links (
+        chat_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS telegram_codes (
+        code TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE TABLE IF NOT EXISTS user_budget (
+        user_id    TEXT PRIMARY KEY,
         amount     REAL    NOT NULL DEFAULT 0,
         updated_at TEXT    DEFAULT (datetime('now'))
       );
-      INSERT OR IGNORE INTO budget (id, amount) VALUES (1, 0);
 
       CREATE TABLE IF NOT EXISTS expenses (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     TEXT    NOT NULL DEFAULT 'legacy_user',
         category    TEXT    NOT NULL,
         description TEXT    DEFAULT '',
         amount      REAL    NOT NULL,
@@ -63,6 +91,7 @@ async function initDB() {
 
       CREATE TABLE IF NOT EXISTS savings (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id    TEXT    NOT NULL DEFAULT 'legacy_user',
         month      TEXT    NOT NULL,
         year       INTEGER NOT NULL,
         amount     REAL    NOT NULL,
@@ -72,6 +101,8 @@ async function initDB() {
     `);
     try { await db.execute("ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'approved'"); } catch(e){}
     try { await db.execute("ALTER TABLE expenses ADD COLUMN receipt_url TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE expenses ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
+    try { await db.execute("ALTER TABLE savings ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
     console.log('📁 Using local JSON file database');
@@ -117,11 +148,31 @@ async function dbRun(sql, args = []) {
 }
 
 // ── Auth Middleware ──────────────────────────────────────────────────────────
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Authentication required' });
-  if (!validTokens.has(auth.slice(7))) return res.status(401).json({ error: 'Invalid or expired session' });
-  next();
+  
+  const token = auth.slice(7);
+  
+  try {
+    // Check if Firebase is initialized and verify the token
+    if (getApps().length > 0) {
+      const decodedToken = await getAuth().verifyIdToken(token);
+      req.user = decodedToken; // contains .uid
+      return next();
+    }
+  } catch (error) {
+    console.error("Firebase auth error:", error.message);
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+
+  // Fallback to legacy mock auth ONLY if Firebase isn't configured yet
+  if (getApps().length === 0 && validTokens.has(token)) {
+    req.user = { uid: 'legacy_user' };
+    return next();
+  }
+  
+  return res.status(401).json({ error: 'Invalid or expired session' });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -175,17 +226,21 @@ app.get('/api/summary', requireAuth, async (req, res) => {
   try {
     let budgetAmount, totalExpenses, totalSavings;
     if (useLibSQL) {
-      const bRow = await dbGet('SELECT amount FROM budget WHERE id = 1');
-      const eRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM expenses');
-      const sRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM savings');
+      const bRow = await dbGet('SELECT amount FROM user_budget WHERE user_id = ?', [req.user.uid]);
+      const eRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM expenses WHERE user_id = ?', [req.user.uid]);
+      const sRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM savings WHERE user_id = ?', [req.user.uid]);
       budgetAmount  = bRow?.amount || 0;
       totalExpenses = Number(eRow?.total || 0);
       totalSavings  = Number(sRow?.total || 0);
     } else {
       const d = readJSON();
-      budgetAmount  = d.budget.amount || 0;
-      totalExpenses = d.expenses.reduce((s, e) => s + e.amount, 0);
-      totalSavings  = d.savings.reduce((s, e) => s + e.amount, 0);
+      budgetAmount  = d.user_budgets?.[req.user.uid]?.amount || 0;
+      
+      const userExpenses = d.expenses.filter(e => e.user_id === req.user.uid);
+      const userSavings = d.savings.filter(s => s.user_id === req.user.uid);
+      
+      totalExpenses = userExpenses.reduce((s, e) => s + e.amount, 0);
+      totalSavings  = userSavings.reduce((s, e) => s + e.amount, 0);
     }
     res.json({
       budget: budgetAmount, totalExpenses, totalSavings,
@@ -194,7 +249,10 @@ app.get('/api/summary', requireAuth, async (req, res) => {
       savingsProgress:     budgetAmount > 0 ? Math.min(100, (totalSavings  / budgetAmount) * 100) : 0,
       expenseProgress:     budgetAmount > 0 ? Math.min(100, (totalExpenses / budgetAmount) * 100) : 0,
     });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) { 
+    console.error("Summary Route Error:", e);
+    res.status(500).json({ error: e.message }); 
+  }
 });
 
 
@@ -269,104 +327,216 @@ Saved to your portal as a DRAFT. Please review and approve it on the dashboard.<
 });
 
 
-app.post('/api/telegram/webhook', async (req, res) => {
-  res.sendStatus(200); // Acknowledge immediately to stop Telegram retries
 
-  console.log('Received webhook body:', JSON.stringify(req.body));
+// ═══════════════════════════════════════════════════════════════════════════
+// TELEGRAM ACCOUNT LINKING
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.get('/api/telegram/status', requireAuth, async (req, res) => {
+  try {
+    let isLinked = false;
+    let activeCode = null;
+
+    if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+      const link = await dbGet('SELECT chat_id FROM telegram_links WHERE user_id = ?', [req.user.uid]);
+      if (link) isLinked = true;
+      const codeRow = await dbGet('SELECT code FROM telegram_codes WHERE user_id = ?', [req.user.uid]);
+      if (codeRow) activeCode = codeRow.code;
+    } else {
+      const d = readJSON();
+      if (d.telegram_links && Object.values(d.telegram_links).includes(req.user.uid)) {
+        isLinked = true;
+      }
+      if (d.telegram_codes) {
+        for (const [k, v] of Object.entries(d.telegram_codes)) {
+          if (v === req.user.uid) activeCode = k;
+        }
+      }
+    }
+    res.json({ isLinked, activeCode });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/telegram/link-code', requireAuth, async (req, res) => {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit code
+  try {
+    if (useLibSQL) {
+      await dbRun('DELETE FROM telegram_codes WHERE user_id = ?', [req.user.uid]); // clear old
+      await dbRun('INSERT INTO telegram_codes (code, user_id) VALUES (?, ?)', [code, req.user.uid]);
+    } else {
+      const d = readJSON();
+      if (!d.telegram_codes) d.telegram_codes = {};
+      // clear old codes for this user
+      for (const [k, v] of Object.entries(d.telegram_codes)) {
+        if (v === req.user.uid) delete d.telegram_codes[k];
+      }
+      d.telegram_codes[code] = req.user.uid;
+      writeJSON(d);
+    }
+    res.json({ code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/telegram/webhook', async (req, res) => {
+  res.sendStatus(200);
+
   const msg = req.body.message;
   if (!msg) return;
 
-  const chatId = msg.chat.id;
+  const chatId = msg.chat.id.toString();
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   
   async function sendReply(text) {
     if (!botToken) return;
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ chat_id: chatId, text })
-    });
-  }
-
-  if (!msg.photo || msg.photo.length === 0) {
-    return sendReply("Please send a photo of a receipt/bill.");
+    try {
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ chat_id: chatId, text })
+      });
+    } catch (e) { console.error("Failed to send Telegram reply:", e.message); }
   }
 
   try {
+    // 1. Check Link Code
+    if (msg.text && (msg.text.startsWith('/link') || msg.text.startsWith('/start'))) {
+      const parts = msg.text.split(' ');
+      const code = parts[1] ? parts[1].trim() : msg.text.trim();
+      let foundUser = null;
+      if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+        const row = await dbGet('SELECT user_id FROM telegram_codes WHERE code = ?', [code]);
+        if (row) {
+          foundUser = row.user_id;
+          await dbRun('INSERT INTO telegram_links (chat_id, user_id) VALUES (?, ?) ON CONFLICT(chat_id) DO UPDATE SET user_id=excluded.user_id', [chatId, foundUser]);
+          await dbRun('DELETE FROM telegram_codes WHERE code = ?', [code]);
+        }
+      } else {
+        const d = readJSON();
+        if (d.telegram_codes && d.telegram_codes[code]) {
+          foundUser = d.telegram_codes[code];
+          if (!d.telegram_links) d.telegram_links = {};
+          d.telegram_links[chatId] = foundUser;
+          delete d.telegram_codes[code];
+          writeJSON(d);
+        }
+      }
+      
+      if (foundUser) {
+        return sendReply("✅ Account successfully linked! You can now send photos, voice notes, or text messages here.");
+      } else {
+        return sendReply("❌ Invalid or expired code. Please generate a new code from the FinanceOS dashboard and reply with it.");
+      }
+    }
+
+    // 2. Resolve User ID
+    let linkedUserId = null;
+    if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+      const row = await dbGet('SELECT user_id FROM telegram_links WHERE chat_id = ?', [chatId]);
+      if (row) linkedUserId = row.user_id;
+    } else {
+      const d = readJSON();
+      if (d.telegram_links) linkedUserId = d.telegram_links[chatId];
+    }
+
+    if (!linkedUserId) {
+      return sendReply("⚠️ Your Telegram account is not linked to FinanceOS.\n\nPlease go to your Dashboard, click 'Connect Telegram' to generate a 6-digit code, and send it here!");
+    }
+
+    // 3. Collect Input (Photo, Voice, Text)
+    let base64Data = null;
+    let mimeType = null;
+    let inputText = null;
+    let receipt_url = '';
+    let fileIdToDownload = null;
+
+    if (msg.photo && msg.photo.length > 0) {
+      fileIdToDownload = msg.photo[msg.photo.length - 1].file_id;
+      mimeType = 'image/jpeg';
+      await sendReply("📸 Image received! Processing with AI...");
+    } else if (msg.voice) {
+      fileIdToDownload = msg.voice.file_id;
+      mimeType = msg.voice.mime_type || 'audio/ogg';
+      await sendReply("🎙️ Voice note received! Listening with AI...");
+    } else if (msg.text) {
+      inputText = msg.text;
+      await sendReply("✍️ Text received! Processing with AI...");
+    } else {
+      return sendReply("Please send a photo of a receipt, a voice note, or a text message describing your expense.");
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return sendReply("API Key missing on server.");
 
-    await sendReply("📸 Receipt received! Analyzing with AI...");
+    // Download file if photo or voice
+    if (fileIdToDownload) {
+      const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileIdToDownload}`);
+      const fileData = await fileRes.json();
+      const filePath = fileData.result.file_path;
 
-    // Get largest photo
-    const fileId = msg.photo[msg.photo.length - 1].file_id;
-    
-    // Fetch file path
-    const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
-    const fileData = await fileRes.json();
-    const filePath = fileData.result.file_path;
+      const fileDataRes = await fetch(`https://api.telegram.org/file/bot${botToken}/${filePath}`);
+      const arrayBuffer = await fileDataRes.arrayBuffer();
+      base64Data = Buffer.from(arrayBuffer).toString('base64');
 
-    // Download image
-    const imgRes = await fetch(`https://api.telegram.org/file/bot${botToken}/${filePath}`);
-    const arrayBuffer = await imgRes.arrayBuffer();
-    const base64Image = Buffer.from(arrayBuffer).toString('base64');
-    const mimeType = 'image/jpeg';
+      // Only save images to disk for receipts
+      if (mimeType.startsWith('image/')) {
+        const fsPath = require('path');
+        const uploadsDir = fsPath.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        
+        const ext = fsPath.extname(filePath) || '.jpg';
+        const finalName = 'tg_' + Date.now() + '_' + Math.random().toString(36).substring(7) + ext;
+        const savePath = fsPath.join(uploadsDir, finalName);
+        fs.writeFileSync(savePath, Buffer.from(arrayBuffer));
+        receipt_url = '/uploads/' + finalName;
+      }
+    }
 
-    // Process with Gemini
+    // 4. Process with Gemini
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
-    const prompt = `You are a receipt data extractor. Extract the following from this receipt/bill image:
-    1. amount (number, the total final amount paid)
-    2. date (string, YYYY-MM-DD format, guess the year if missing based on recent times)
-    3. description (string, short summary of the vendor/items, max 5 words)
-    4. category (string, MUST be exactly one of these: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
+    const todayDate = new Date().toISOString().split('T')[0];
+    const prompt = `You are a financial AI assistant processing an expense input. The user has provided either a receipt image, an audio voice note (which might be in Hindi or English), or a text message.
+    Extract the expense details, translating any Hindi/regional language into clear English:
+    1. amount (number, the total final amount spent)
+    2. date (string, YYYY-MM-DD format. If they don't mention a date, use today: ${todayDate})
+    3. description (string, short English summary of the expense, max 5 words)
+    4. category (string, MUST be exactly one of: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
 
-    Return ONLY a raw JSON object with these keys (amount, date, description, category).`;
+    Return ONLY a raw JSON object with these keys: amount, date, description, category.`;
 
-    const imageParts = [{ inlineData: { data: base64Image, mimeType } }];
-    const result = await model.generateContent([prompt, ...imageParts]);
+    const parts = [prompt];
+    if (inputText) parts.push(inputText);
+    if (base64Data) parts.push({ inlineData: { data: base64Data, mimeType } });
+
+    const result = await model.generateContent(parts);
     const response = await result.response;
     const text = response.text().trim().replace(/^\s*```json/i, '').replace(/^\s*```/i, '').replace(/```\s*$/i, '').trim();
     
     let aiData = JSON.parse(text);
 
-    // Save image to uploads folder
-    const fsPath = require('path');
-    const uploadsDir = fsPath.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-    
-    // Create a filename from the telegram file path (e.g. photos/file_2.jpg)
-    const ext = fsPath.extname(filePath) || '.jpg';
-    const finalName = 'tg_' + Date.now() + '_' + Math.random().toString(36).substring(7) + ext;
-    const savePath = fsPath.join(uploadsDir, finalName);
-    
-    // Write buffer to disk
-    fs.writeFileSync(savePath, Buffer.from(arrayBuffer));
-    const receipt_url = '/uploads/' + finalName;
-
-    // 3. Save to database as DRAFT
+    // 5. Save to database using the LINKED user_id!
     const finalAmount = Number(aiData.amount) || 0;
-    const finalDate = aiData.date || new Date().toISOString().split('T')[0];
+    const finalDate = aiData.date || todayDate;
     const finalCat = aiData.category || 'Miscellaneous';
     const finalDesc = aiData.description || 'Telegram Upload';
     
     if (useLibSQL) {
       await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
-        [finalCat, finalDesc, finalAmount, finalDate, 'draft', receipt_url]
+        'INSERT INTO expenses (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [finalCat, finalDesc, finalAmount, finalDate, 'draft', receipt_url, linkedUserId]
       );
     } else {
       const d = readJSON();
-      d.expenses.push({ id: d._nextExpenseId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() });
+      d.expenses.push({ id: d._nextExpenseId++, user_id: linkedUserId, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() });
       writeJSON(d);
     }
 
-    sendReply(`✅ Receipt scanned successfully!\nTotal: ₹${finalAmount}\nCategory: ${finalCat}\n\nSaved to your portal as a DRAFT. Review it on the dashboard.`);
+    sendReply(`✅ Expense logged successfully!\nAmount: ₹${finalAmount}\nCategory: ${finalCat}\nNotes: ${finalDesc}\n\nSaved to your portal as a DRAFT.`);
   } catch (e) {
     console.error("Telegram Webhook error:", e);
-    sendReply(`❌ Error processing receipt: ${e.message}`);
+    sendReply(`❌ Error processing expense: ${e.message}`);
   }
 });
 
@@ -383,14 +553,15 @@ app.post('/api/expenses/scan', requireAuth, async (req, res) => {
     }
 
     const { image, mimeType } = req.body;
-    const imgBuffer = Buffer.from(image, 'base64');
-    const filename = `scan_${Date.now()}.jpg`;
-    const fs = require('fs');
-    const dir = require('path').join(__dirname, 'uploads'); if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true}); fs.writeFileSync(require('path').join(dir, filename), imgBuffer);
-    const receipt_url = `/uploads/${filename}`;
     if (!image || !mimeType) {
       return res.status(400).json({ error: 'Image data and mimeType are required.' });
     }
+    const imgBuffer = Buffer.from(image, 'base64');
+    const ext = mimeType === 'application/pdf' ? '.pdf' : '.jpg';
+    const filename = `scan_${Date.now()}${ext}`;
+    const fs = require('fs');
+    const dir = require('path').join(__dirname, 'uploads'); if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true}); fs.writeFileSync(require('path').join(dir, filename), imgBuffer);
+    const receipt_url = `/uploads/${filename}`;
 
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -452,8 +623,8 @@ app.post('/api/upload', requireAuth, (req, res) => {
 
 app.get('/api/expenses', requireAuth, async (req, res) => {
   try {
-    if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses ORDER BY date DESC, id DESC'));
-    res.json([...readJSON().expenses].sort((a, b) => b.date.localeCompare(a.date)));
+    if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC', [req.user.uid]));
+    res.json([...readJSON().expenses].filter(e => e.user_id === req.user.uid).sort((a, b) => b.date.localeCompare(a.date)));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -464,14 +635,14 @@ app.post('/api/expenses', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       const r = await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
-        [category, description || '', Number(amount), date, finalStatus, receipt_url || '']
+        'INSERT INTO expenses (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [category, description || '', Number(amount), date, finalStatus, receipt_url || '', req.user.uid]
       );
       const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
+    const expense = { id: d._nextExpenseId++, user_id: req.user.uid, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
     d.expenses.push(expense); writeJSON(d);
     res.status(201).json(expense);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -509,11 +680,12 @@ app.get('/api/expenses/categories', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       return res.json(await dbAll(
-        'SELECT category, SUM(amount) as total, COUNT(*) as count FROM expenses GROUP BY category ORDER BY total DESC'
+        'SELECT category, SUM(amount) as total, COUNT(*) as count FROM expenses WHERE user_id = ? GROUP BY category ORDER BY total DESC',
+        [req.user.uid]
       ));
     }
     const d = readJSON(); const map = {};
-    for (const e of d.expenses) {
+    for (const e of d.expenses.filter(e => e.user_id === req.user.uid)) {
       if (!map[e.category]) map[e.category] = { category: e.category, total: 0, count: 0 };
       map[e.category].total += e.amount; map[e.category].count++;
     }
@@ -530,11 +702,11 @@ const MONTH_ORDER = ['January','February','March','April','May','June',
 app.get('/api/savings', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
-      const rows = await dbAll('SELECT * FROM savings ORDER BY year DESC, id DESC');
+      const rows = await dbAll('SELECT * FROM savings WHERE user_id = ? ORDER BY year DESC, id DESC', [req.user.uid]);
       return res.json(rows);
     }
     const d = readJSON();
-    res.json([...d.savings].sort((a, b) => {
+    res.json([...d.savings].filter(s => s.user_id === req.user.uid).sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       return MONTH_ORDER.indexOf(b.month) - MONTH_ORDER.indexOf(a.month);
     }));
@@ -547,14 +719,14 @@ app.post('/api/savings', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       const r = await dbRun(
-        'INSERT INTO savings (month, year, amount, note) VALUES (?, ?, ?, ?)',
-        [month, parseInt(year), Number(amount), note || '']
+        'INSERT INTO savings (month, year, amount, note, user_id) VALUES (?, ?, ?, ?, ?)',
+        [month, parseInt(year), Number(amount), note || '', req.user.uid]
       );
       const row = await dbGet('SELECT * FROM savings WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const saving = { id: d._nextSavingsId++, month, year: parseInt(year), amount: Number(amount), note: note || '', created_at: new Date().toISOString() };
+    const saving = { id: d._nextSavingsId++, user_id: req.user.uid, month, year: parseInt(year), amount: Number(amount), note: note || '', created_at: new Date().toISOString() };
     d.savings.push(saving); writeJSON(d); res.status(201).json(saving);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

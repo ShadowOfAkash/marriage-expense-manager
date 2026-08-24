@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box, Container, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText, StatArrow,
   Card, CardBody, CardHeader, Heading, Text, Progress, Badge, Flex, VStack, HStack,
@@ -10,6 +11,7 @@ import {
   Target, TrendingUp, Wallet, Clock, AlertCircle,
   PieChart as PieIcon, BarChart2, Activity, CalendarDays, Receipt, PiggyBank,
   ChevronRight, IndianRupee,
+  Smartphone
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -143,23 +145,44 @@ function EmptyState({ icon: Icon, message, actionLabel, onAction }) {
 }
 
 // ── Main Dashboard ───────────────────────────────────────────────────────────
-export default function Dashboard({ setActiveTab }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const [summary,    setSummary]    = useState(null)
   const [expenses,   setExpenses]   = useState([])
   const [savings,    setSavings]    = useState([])
   const [categories, setCategories] = useState([])
+  const { isOpen: isAddExpOpen, onOpen: onAddExpOpen, onClose: onAddExpClose } = useDisclosure()
+  const { isOpen: isAddSavOpen, onOpen: onAddSavOpen, onClose: onAddSavClose } = useDisclosure()
   const [loading,    setLoading]    = useState(true)
   const [budget,     setBudget]     = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
+  const [telegramCode, setTelegramCode] = useState(null)
+  const [isTelegramLinked, setIsTelegramLinked] = useState(false)
+  const [generatingCode, setGeneratingCode] = useState(false)
+
+  const handleGenerateTelegramCode = async () => {
+    try {
+      setGeneratingCode(true);
+      const res = await api.generateTelegramCode();
+      setTelegramCode(res.code);
+      toast({ title: 'Code Generated', description: 'Send this code to the Telegram bot!', status: 'success' });
+    } catch (e) {
+      toast({ title: 'Failed to generate code', description: e.message, status: 'error' });
+    } finally {
+      setGeneratingCode(false);
+    }
+  }
 
   const loadAll = useCallback(async () => {
     try {
       setLoading(true)
-      const [sum, exp, sav, cats] = await Promise.all([
-        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(),
+      const [sum, exp, sav, cats, tgStatus] = await Promise.all([
+        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(), api.getTelegramStatus().catch(() => ({isLinked: false, activeCode: null}))
       ])
       setSummary(sum); setExpenses(exp); setSavings(sav); setCategories(cats)
+      if (tgStatus.activeCode) setTelegramCode(tgStatus.activeCode);
+      if (tgStatus.isLinked) setIsTelegramLinked(true);
       setBudget(sum.budget || '')
     } catch {
       toast({ title: 'Error loading data', status: 'error', duration: 3000 })
@@ -268,7 +291,7 @@ export default function Dashboard({ setActiveTab }) {
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="sm">
         <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(6px)" />
         <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.3)">
-          <Box h="3px" bgGradient="linear(to-r, brand.500, plum.500, gold.500)" />
+
           <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
             <HStack spacing={2}>
               <Target size={18} color="#BE185D" />
@@ -307,6 +330,67 @@ export default function Dashboard({ setActiveTab }) {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      
+      {/* ── Quick Action Cards ── */}
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
+        <Card bg="white" cursor="pointer" onClick={onAddExpOpen} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+          <CardBody p={5}>
+            <Flex align="center" justify="space-between">
+              <Flex align="center" gap={4}>
+                <Flex w="48px" h="48px" bg="brand.50" color="brand.600" borderRadius="12px" align="center" justify="center">
+                  <Receipt size={24} />
+                </Flex>
+                <Box>
+                  <Text fontWeight="700" color="brand.900">Add Expense</Text>
+                  <Text fontSize="sm" color="gray.500">Log payment</Text>
+                </Box>
+              </Flex>
+              <ChevronRight size={20} color="#CBD5E1" />
+            </Flex>
+          </CardBody>
+        </Card>
+        
+        <Card bg="white" cursor="pointer" onClick={onAddSavOpen} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+          <CardBody p={5}>
+            <Flex align="center" justify="space-between">
+              <Flex align="center" gap={4}>
+                <Flex w="48px" h="48px" bg="brand.50" color="brand.600" borderRadius="12px" align="center" justify="center">
+                  <Target size={24} />
+                </Flex>
+                <Box>
+                  <Text fontWeight="700" color="brand.900">Log Saving</Text>
+                  <Text fontSize="sm" color="gray.500">Record deposit</Text>
+                </Box>
+              </Flex>
+              <ChevronRight size={20} color="#CBD5E1" />
+            </Flex>
+          </CardBody>
+        </Card>
+
+        <Card bg="white" cursor="pointer" onClick={handleGenerateTelegramCode} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="blue.100">
+          <CardBody p={5}>
+            <Flex align="center" justify="space-between">
+              <Flex align="center" gap={4}>
+                <Flex w="48px" h="48px" bg="#0088cc" color="white" borderRadius="12px" align="center" justify="center">
+                  <Smartphone size={24} />
+                </Flex>
+                <Box>
+                                    <Text fontWeight="700" color="blue.700">Telegram</Text>
+                  {isTelegramLinked ? (
+                     <Text fontSize="xs" fontWeight="bold" color="green.500">Connected ✓</Text>
+                  ) : telegramCode ? (
+                     <Text fontSize="xs" fontWeight="bold" color="blue.500">Code: {telegramCode}</Text>
+                  ) : (
+                     <Text fontSize="sm" color="gray.500">{generatingCode ? 'Loading...' : 'Link account'}</Text>
+                  )}
+                </Box>
+              </Flex>
+              <ChevronRight size={20} color="#CBD5E1" />
+            </Flex>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
 
       {/* ── Stat Cards ── */}
       <SimpleGrid columns={{ base: 2, md: 3, xl: 5 }} spacing={4} mb={6}>
@@ -432,7 +516,7 @@ export default function Dashboard({ setActiveTab }) {
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => setActiveTab('savings')} />
+              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => onAddSavOpen()} />
             )}
           </CardBody>
         </Card>
@@ -467,7 +551,7 @@ export default function Dashboard({ setActiveTab }) {
                 </Box>
               </>
             ) : (
-              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => setActiveTab('expenses')} />
+              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => onAddExpOpen()} />
             )}
           </CardBody>
         </Card>
@@ -544,7 +628,7 @@ export default function Dashboard({ setActiveTab }) {
                 variant="ghost"
                 colorScheme="brand"
                 rightIcon={<ChevronRight size={12} />}
-                onClick={() => setActiveTab('expenses')}
+                onClick={() => onAddExpOpen()}
                 fontWeight="600"
               >
                 View All
@@ -585,7 +669,7 @@ export default function Dashboard({ setActiveTab }) {
               </Tbody>
             </Table>
           ) : (
-            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => setActiveTab('expenses')} />
+            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => onAddExpOpen()} />
           )}
         </CardBody>
       </Card>
