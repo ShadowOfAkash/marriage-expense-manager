@@ -557,11 +557,12 @@ app.get('/api/expenses/categories', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
       return res.json(await dbAll(
-        'SELECT category, SUM(amount) as total, COUNT(*) as count FROM expenses GROUP BY category ORDER BY total DESC'
+        'SELECT category, SUM(amount) as total, COUNT(*) as count FROM expenses WHERE user_id = ? GROUP BY category ORDER BY total DESC',
+        [req.user.uid]
       ));
     }
     const d = readJSON(); const map = {};
-    for (const e of d.expenses) {
+    for (const e of d.expenses.filter(e => e.user_id === req.user.uid)) {
       if (!map[e.category]) map[e.category] = { category: e.category, total: 0, count: 0 };
       map[e.category].total += e.amount; map[e.category].count++;
     }
