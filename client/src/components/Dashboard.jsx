@@ -151,6 +151,8 @@ export default function Dashboard() {
   const [expenses,   setExpenses]   = useState([])
   const [savings,    setSavings]    = useState([])
   const [categories, setCategories] = useState([])
+  const { isOpen: isAddExpOpen, onOpen: onAddExpOpen, onClose: onAddExpClose } = useDisclosure()
+  const { isOpen: isAddSavOpen, onOpen: onAddSavOpen, onClose: onAddSavClose } = useDisclosure()
   const [loading,    setLoading]    = useState(true)
   const [budget,     setBudget]     = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -332,7 +334,7 @@ export default function Dashboard() {
       
       {/* ── Quick Action Cards ── */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
-        <Card bg="white" cursor="pointer" onClick={() => navigate('/expenses', { state: { openAddModal: true } })} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={onAddExpOpen} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
@@ -349,7 +351,7 @@ export default function Dashboard() {
           </CardBody>
         </Card>
         
-        <Card bg="white" cursor="pointer" onClick={() => navigate('/savings', { state: { openAddModal: true } })} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={onAddSavOpen} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
@@ -514,7 +516,7 @@ export default function Dashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => navigate('/savings')} />
+              <EmptyState icon={TrendingUp} message="No savings data yet" actionLabel="Log Savings →" onAction={() => onAddSavOpen()} />
             )}
           </CardBody>
         </Card>
@@ -549,7 +551,7 @@ export default function Dashboard() {
                 </Box>
               </>
             ) : (
-              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => navigate('/expenses')} />
+              <EmptyState icon={PieIcon} message="No expenses yet" actionLabel="Add Expense →" onAction={() => onAddExpOpen()} />
             )}
           </CardBody>
         </Card>
@@ -626,7 +628,7 @@ export default function Dashboard() {
                 variant="ghost"
                 colorScheme="brand"
                 rightIcon={<ChevronRight size={12} />}
-                onClick={() => navigate('/expenses')}
+                onClick={() => onAddExpOpen()}
                 fontWeight="600"
               >
                 View All
@@ -667,7 +669,7 @@ export default function Dashboard() {
               </Tbody>
             </Table>
           ) : (
-            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => navigate('/expenses')} />
+            <EmptyState icon={IndianRupee} message="No expenses logged yet" actionLabel="Add First Expense →" onAction={() => onAddExpOpen()} />
           )}
         </CardBody>
       </Card>
