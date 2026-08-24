@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Box, Container, Card, CardBody, Heading, Text,
   SimpleGrid, FormControl, FormLabel, Input, Select, Button,
@@ -64,6 +65,14 @@ export default function Savings() {
   const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      onAddOpen()
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, onAddOpen])
 
   function currentMonth() { return MONTHS[new Date().getMonth()] }
   function currentYear()  { return new Date().getFullYear() }

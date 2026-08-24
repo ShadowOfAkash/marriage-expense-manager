@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Box, Container, Card, CardBody, Heading, Text,
   SimpleGrid, FormControl, FormLabel, Input, Select, Button,
@@ -52,6 +53,15 @@ export default function Expenses() {
   const { isOpen: isAddOpen,  onOpen: onAddOpen,  onClose: onAddClose  } = useDisclosure()
   const cancelRef = React.useRef()
   const toast = useToast()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.openAddModal) {
+      onAddOpen()
+      // Clear the state so it doesn't reopen on refresh
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, onAddOpen])
 
   function today() { return new Date().toISOString().split('T')[0] }
 

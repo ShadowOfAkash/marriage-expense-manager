@@ -332,11 +332,11 @@ export default function Dashboard() {
       
       {/* ── Quick Action Cards ── */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={6}>
-        <Card bg="white" cursor="pointer" onClick={() => navigate('/expenses')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={() => navigate('/expenses', { state: { openAddModal: true } })} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
-                <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                <Flex w="48px" h="48px" bg="brand.50" color="brand.600" borderRadius="12px" align="center" justify="center">
                   <Receipt size={24} />
                 </Flex>
                 <Box>
@@ -349,11 +349,11 @@ export default function Dashboard() {
           </CardBody>
         </Card>
         
-        <Card bg="white" cursor="pointer" onClick={() => navigate('/savings')} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
+        <Card bg="white" cursor="pointer" onClick={() => navigate('/savings', { state: { openAddModal: true } })} _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s" border="1px solid" borderColor="gray.100">
           <CardBody p={5}>
             <Flex align="center" justify="space-between">
               <Flex align="center" gap={4}>
-                <Flex w="48px" h="48px" bg="brand.900" color="white" borderRadius="12px" align="center" justify="center">
+                <Flex w="48px" h="48px" bg="brand.50" color="brand.600" borderRadius="12px" align="center" justify="center">
                   <Target size={24} />
                 </Flex>
                 <Box>
