@@ -49,6 +49,11 @@ export const api = {
       method: 'POST', headers: getHeaders(), body: JSON.stringify({ image, mimeType })
     }).then(handleResponse),
 
+  uploadDocument: (fileBase64, filename) =>
+    fetch('/api/upload', {
+      method: 'POST', headers: getHeaders(), body: JSON.stringify({ file: fileBase64, filename })
+    }).then(handleResponse),
+
   // Savings
   getSavings:    ()     => fetch('/api/savings', { headers: getHeaders() }).then(handleResponse),
   addSavings:    (data) =>

@@ -115,6 +115,26 @@
       "status": "approved",
       "created_at": "2026-08-24T11:57:32.820Z",
       "receipt_url": ""
+    },
+    {
+      "id": 14,
+      "category": "Catering",
+      "description": "fvfjdv fjbd",
+      "amount": 4332,
+      "date": "2026-08-24",
+      "status": "approved",
+      "receipt_url": "/uploads/doc_1787599853497_Screenshot_2026-08-03_at_12.15.12_PM.png",
+      "created_at": "2026-08-24T19:30:55.906Z"
+    },
+    {
+      "id": 15,
+      "category": "Miscellaneous",
+      "description": "Website Development Service",
+      "amount": 29500,
+      "date": "2026-03-30",
+      "status": "approved",
+      "created_at": "2026-08-24T19:32:05.628Z",
+      "receipt_url": ""
     }
   ],
   "savings": [
@@ -167,6 +187,6 @@
       "created_at": "2026-08-24T05:44:20.469Z"
     }
   ],
-  "_nextExpenseId": 14,
+  "_nextExpenseId": 16,
   "_nextSavingsId": 7
 }

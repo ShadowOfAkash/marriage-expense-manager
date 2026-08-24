@@ -19,6 +19,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(require('path').join(__dirname, 'uploads')));
 
 // ── Database Setup ───────────────────────────────────────────────────────────
 let db;
@@ -215,7 +216,7 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
     const base64Image = imgBuffer.toString('base64');
     const filename = `tg_${Date.now()}.jpg`;
     const fs = require('fs');
-    fs.writeFileSync(require('path').join(__dirname, 'public/uploads', filename), imgBuffer);
+    const dir = require('path').join(__dirname, 'uploads'); if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true}); fs.writeFileSync(require('path').join(dir, filename), imgBuffer);
     const receipt_url = `/uploads/${filename}`;
     const mimeType = MediaContentType0 || 'image/jpeg';
 
@@ -371,7 +372,7 @@ app.post('/api/expenses/scan', requireAuth, async (req, res) => {
     const imgBuffer = Buffer.from(image, 'base64');
     const filename = `scan_${Date.now()}.jpg`;
     const fs = require('fs');
-    fs.writeFileSync(require('path').join(__dirname, 'public/uploads', filename), imgBuffer);
+    const dir = require('path').join(__dirname, 'uploads'); if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true}); fs.writeFileSync(require('path').join(dir, filename), imgBuffer);
     const receipt_url = `/uploads/${filename}`;
     if (!image || !mimeType) {
       return res.status(400).json({ error: 'Image data and mimeType are required.' });
@@ -427,7 +428,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
     const finalName = `doc_${Date.now()}_${safeName}`;
     const fs = require('fs');
     const path = require('path');
-    fs.writeFileSync(path.join(__dirname, 'public/uploads', finalName), buffer);
+    const dir = path.join(__dirname, 'uploads'); if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true}); fs.writeFileSync(path.join(dir, finalName), buffer);
     res.json({ url: `/uploads/${finalName}` });
   } catch(e) {
     console.error("Upload error:", e);
@@ -554,6 +555,8 @@ app.delete('/api/savings/:id', requireAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get('/api/health', (req, res) => res.status(200).send('OK'));
+
 // ─── Catch-all ──────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -561,7 +564,7 @@ app.get('*', (req, res) => {
 
 // ─── Start ──────────────────────────────────────────────────────────────────
 initDB().then(() => {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n💒 Marriage Expense Manager running at:\n   ➜  http://localhost:${PORT}\n`);
   });
 }).catch(err => {
