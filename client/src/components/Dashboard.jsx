@@ -49,51 +49,50 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 // ── Stat Card ───────────────────────────────────────────────────────────────
-function StatCard({ label, value, Icon, gradient, helpText, arrowType, onClick, subtext }) {
+function StatCard({ label, value, Icon, gradient, helpText, arrowType, onClick, subtext, baseColor = '#1b2cc1' }) {
   return (
     <Card
       cursor={onClick ? 'pointer' : 'default'}
-      transition="all 0.22s ease"
-      _hover={{ transform: 'translateY(-4px)', shadow: '0 12px 36px rgba(0,0,0,0.12)' }}
+      transition="all 0.2s ease"
+      _hover={{ transform: 'translateY(-2px)', shadow: '0 8px 30px rgba(9,21,64,0.08)' }}
       onClick={onClick}
       border="1px solid" borderColor="gray.100"
-      shadow="0 2px 12px rgba(0,0,0,0.05)"
-      overflow="hidden"
+      shadow="sm"
+      borderRadius="xl"
     >
-      {/* Gradient top strip */}
-      <Box h="3px" bgGradient={gradient} />
       <CardBody p={5}>
         <Flex justify="space-between" align="flex-start">
           <Stat flex={1}>
             <StatLabel
-              fontSize="10px" fontWeight="700" color="gray.500"
-              textTransform="uppercase" letterSpacing="wider" mb={1}
+              fontSize="11px" fontWeight="600" color="gray.500"
+              mb={1}
             >
               {label}
             </StatLabel>
             <StatNumber
-              fontSize={{ base: 'lg', md: 'xl' }}
+              fontSize={{ base: 'xl', md: '2xl' }}
               fontWeight="800"
-              color="gray.800"
+              color="brand.900"
               letterSpacing="-0.5px"
             >
               {value}
             </StatNumber>
             {helpText && (
-              <StatHelpText mb={0} mt={1} fontSize="11px" color="gray.400">
+              <StatHelpText mb={0} mt={1} fontSize="12px" color="gray.400" fontWeight="500">
                 {arrowType && <StatArrow type={arrowType} />}
                 {helpText}
               </StatHelpText>
             )}
             {subtext && (
-              <Text fontSize="10px" color="gray.400" mt={0.5}>{subtext}</Text>
+              <Text fontSize="11px" color="gray.400" mt={0.5} fontWeight="500">{subtext}</Text>
             )}
           </Stat>
           <Flex
-            w={10} h={10} borderRadius="12px" bgGradient={gradient}
-            align="center" justify="center" opacity={0.15} flexShrink={0}
+            w={12} h={12} borderRadius="12px" bg={baseColor + '1A'}
+            align="center" justify="center" flexShrink={0}
+            color={baseColor}
           >
-            <Icon size={20} color="black" />
+            <Icon size={22} />
           </Flex>
         </Flex>
       </CardBody>

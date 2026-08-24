@@ -261,20 +261,19 @@ export default function Savings() {
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>
         {[
           { label: 'Total Saved',      value: fmt(totalSaved),                     color: '#10B981', icon: PiggyBank },
-          { label: 'Entries',          value: savings.length,                       color: '#7F55B0', icon: BarChart2 },
+          { label: 'Entries',          value: savings.length,                       color: '#1b2cc1', icon: BarChart2 },
           { label: 'Still Required',   value: fmt(summary?.amountStillRequired),    color: '#E09913', icon: Clock     },
           { label: 'Budget Goal',      value: fmt(summary?.budget),                 color: '#0EA5E9', icon: Target    },
         ].map(({ label, value, color, icon: Icon }) => (
-          <Card key={label} border="1px solid" borderColor="gray.100" shadow="0 2px 10px rgba(0,0,0,0.05)" overflow="hidden">
-            <Box h="3px" bg={color} />
-            <CardBody py={3} px={4}>
-              <Flex justify="space-between" align="flex-start">
+          <Card key={label} shadow="sm" borderRadius="xl" border="1px solid" borderColor="gray.100">
+            <CardBody py={4} px={5}>
+              <Flex justify="space-between" align="center">
                 <Stat>
-                  <StatLabel fontSize="10px" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="wider">{label}</StatLabel>
-                  <StatNumber fontSize="lg" color="gray.800" fontWeight="800">{value}</StatNumber>
+                  <StatLabel fontSize="11px" color="gray.500" fontWeight="600" mb={1}>{label}</StatLabel>
+                  <StatNumber fontSize="2xl" color="brand.900" fontWeight="800">{value}</StatNumber>
                 </Stat>
-                <Flex w={8} h={8} borderRadius="9px" align="center" justify="center" bg="gray.50" mt={1}>
-                  <Icon size={15} color={color} />
+                <Flex w={10} h={10} borderRadius="10px" bg={color + '1A'} color={color} align="center" justify="center">
+                  <Icon size={20} />
                 </Flex>
               </Flex>
             </CardBody>
