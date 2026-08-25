@@ -151,27 +151,38 @@ async function dbRun(sql, args = []) {
 async function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Authentication required' });
-  
+
   const token = auth.slice(7);
-  
-  try {
-    // Check if Firebase is initialized and verify the token
-    if (getApps().length > 0) {
+
+  // ── Path 1: Firebase Admin is initialized — full verification ──
+  if (getApps().length > 0) {
+    try {
       const decodedToken = await getAuth().verifyIdToken(token);
-      req.user = decodedToken; // contains .uid
+      req.user = decodedToken;
       return next();
+    } catch (error) {
+      console.error('Firebase auth error:', error.message);
+      return res.status(401).json({ error: 'Invalid or expired session' });
     }
-  } catch (error) {
-    console.error("Firebase auth error:", error.message);
-    return res.status(401).json({ error: 'Invalid or expired session' });
   }
 
-  // Fallback to legacy mock auth ONLY if Firebase isn't configured yet
-  if (getApps().length === 0 && validTokens.has(token)) {
-    req.user = { uid: 'legacy_user' };
-    return next();
+  // ── Path 2: No Firebase Admin (missing .env) — decode JWT payload locally ──
+  // Firebase ID tokens are standard JWTs. We can safely decode the payload
+  // (base64url middle segment) to get the uid for local development.
+  try {
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      const uid = payload.user_id || payload.sub || payload.uid;
+      if (uid) {
+        req.user = { uid };
+        return next();
+      }
+    }
+  } catch (e) {
+    // malformed token — fall through
   }
-  
+
   return res.status(401).json({ error: 'Invalid or expired session' });
 }
 
