@@ -1,0 +1,17 @@
+{
+  "name": "figma-design-system-generator",
+  "version": "1.0.0",
+  "description": "Figma plugin that generates a complete design system with color palette, typography, and UI components",
+  "scripts": {
+    "build": "npm run build:code && npm run build:ui",
+    "build:code": "tsc",
+    "build:ui": "cp src/ui.html dist/ui.html",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.100.0",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}

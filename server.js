@@ -213,7 +213,8 @@ app.get('/api/budget', requireAuth, async (req, res) => {
       const row = await dbGet('SELECT amount FROM budget WHERE id = 1');
       return res.json({ amount: row?.amount || 0 });
     }
-    res.json({ amount: readJSON().budget.amount });
+    const d = readJSON();
+    res.json({ amount: d.user_budgets?.[req.user.uid]?.amount || d.budget?.amount || 0 });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -225,7 +226,12 @@ app.post('/api/budget', requireAuth, async (req, res) => {
       await dbRun('UPDATE budget SET amount = ?, updated_at = datetime(\'now\') WHERE id = 1', [Number(amount)]);
       return res.json({ success: true, amount: Number(amount) });
     }
-    const d = readJSON(); d.budget.amount = Number(amount); writeJSON(d);
+    const d = readJSON();
+    if (!d.user_budgets) d.user_budgets = {};
+    if (!d.user_budgets[req.user.uid]) d.user_budgets[req.user.uid] = {};
+    d.user_budgets[req.user.uid].amount = Number(amount);
+    d.budget.amount = Number(amount);
+    writeJSON(d);
     res.json({ success: true, amount: Number(amount) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -245,10 +251,10 @@ app.get('/api/summary', requireAuth, async (req, res) => {
       totalSavings  = Number(sRow?.total || 0);
     } else {
       const d = readJSON();
-      budgetAmount  = d.user_budgets?.[req.user.uid]?.amount || 0;
+      budgetAmount  = d.user_budgets?.[req.user.uid]?.amount || d.budget?.amount || 0;
       
-      const userExpenses = d.expenses.filter(e => e.user_id === req.user.uid);
-      const userSavings = d.savings.filter(s => s.user_id === req.user.uid);
+      const userExpenses = d.expenses.filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user');
+      const userSavings = d.savings.filter(s => s.user_id === req.user.uid || !s.user_id || s.user_id === 'legacy_user');
       
       totalExpenses = userExpenses.reduce((s, e) => s + e.amount, 0);
       totalSavings  = userSavings.reduce((s, e) => s + e.amount, 0);
@@ -635,7 +641,7 @@ app.post('/api/upload', requireAuth, (req, res) => {
 app.get('/api/expenses', requireAuth, async (req, res) => {
   try {
     if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC', [req.user.uid]));
-    res.json([...readJSON().expenses].filter(e => e.user_id === req.user.uid).sort((a, b) => b.date.localeCompare(a.date)));
+    res.json([...readJSON().expenses].filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user').sort((a, b) => b.date.localeCompare(a.date)));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -696,7 +702,7 @@ app.get('/api/expenses/categories', requireAuth, async (req, res) => {
       ));
     }
     const d = readJSON(); const map = {};
-    for (const e of d.expenses.filter(e => e.user_id === req.user.uid)) {
+    for (const e of d.expenses.filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user')) {
       if (!map[e.category]) map[e.category] = { category: e.category, total: 0, count: 0 };
       map[e.category].total += e.amount; map[e.category].count++;
     }
@@ -717,7 +723,7 @@ app.get('/api/savings', requireAuth, async (req, res) => {
       return res.json(rows);
     }
     const d = readJSON();
-    res.json([...d.savings].filter(s => s.user_id === req.user.uid).sort((a, b) => {
+    res.json([...d.savings].filter(s => s.user_id === req.user.uid || !s.user_id || s.user_id === 'legacy_user').sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       return MONTH_ORDER.indexOf(b.month) - MONTH_ORDER.indexOf(a.month);
     }));
