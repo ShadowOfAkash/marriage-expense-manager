@@ -1,237 +1,129 @@
-import React from 'react'
-import {
-  Box, Flex, Text, Button, HStack, Container,
-  Avatar, Menu, MenuButton, MenuList, MenuItem,
-  MenuDivider, useToast, VStack,
-} from '@chakra-ui/react'
-import {
-  LayoutDashboard, Receipt, PiggyBank,
-  ChevronDown, LogOut, User, Gem,
-} from 'lucide-react'
-import { api } from '../utils/api'
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@heroui/react';
+import { LayoutDashboard, Receipt, PiggyBank, ChevronDown, LogOut, User, Gem } from 'lucide-react';
+import { api } from '../utils/api';
+import { useToast } from '../contexts/ToastContext';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-  { id: 'expenses',  label: 'Expenses',  Icon: Receipt          },
+  { id: 'expenses',  label: 'Payments',  Icon: Receipt          },
   { id: 'savings',   label: 'Savings',   Icon: PiggyBank        },
-]
+];
 
 export default function Navbar({ user, activeTab, setActiveTab, onLogout }) {
-  const toast = useToast()
+  const toast = useToast();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
-    try { await api.logout() } catch (_) {}
-    toast({ title: 'Logged out successfully', status: 'info', duration: 2000, isClosable: true })
-    onLogout()
-  }
+    try { await api.logout(); } catch (_) {}
+    toast({ title: 'Logged out successfully', status: 'info' });
+    onLogout();
+  };
 
   return (
-    <Box
-      bg="linear-gradient(135deg, #1C1125 0%, #2D1242 45%, #3D1654 100%)"
-      borderBottom="1px solid rgba(190,24,93,0.25)"
-      position="sticky"
-      top={0}
-      zIndex={100}
-      boxShadow="0 4px 24px rgba(0,0,0,0.35)"
-    >
-      <Container maxW="7xl">
-        <Flex h="68px" align="center" justify="space-between" gap={4}>
+    <div className="bg-gradient-to-br from-[#1C1125] via-[#2D1242] to-[#3D1654] border-b border-[#BE185D40] sticky top-0 z-40 shadow-xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="h-[68px] flex items-center justify-between gap-4">
 
-          {/* ── Brand Logo ──────────────────────────────── */}
-          <HStack spacing={3} flexShrink={0}>
-            <Flex
-              w={10} h={10}
-              borderRadius="12px"
-              bgGradient="linear(135deg, brand.600, plum.600)"
-              align="center" justify="center"
-              boxShadow="0 2px 10px rgba(190,24,93,0.45)"
-            >
-              <Gem size={18} color="white" />
-            </Flex>
-            <Box display={{ base: 'none', sm: 'block' }}>
-              <Text
-                color="white"
-                fontWeight="800"
-                fontSize="md"
-                letterSpacing="-0.3px"
-                lineHeight="tight"
-              >
-                Shaadi Tracker
-              </Text>
-              <Text
-                color="whiteAlpha.500"
-                fontSize="9px"
-                letterSpacing="widest"
-                textTransform="uppercase"
-                lineHeight="tight"
-              >
-                Wedding Budget Manager
-              </Text>
-            </Box>
-          </HStack>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+              <Gem size={18} className="text-white" />
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-white font-extrabold text-base tracking-tight leading-tight">Shaadi Tracker</div>
+              <div className="text-white/50 text-[9px] tracking-widest uppercase leading-tight">Wedding Budget Manager</div>
+            </div>
+          </div>
 
-          {/* ── Pill Tab Nav (Desktop) ───────────────────── */}
-          <Flex
-            display={{ base: 'none', md: 'flex' }}
-            bg="whiteAlpha.100"
-            border="1px solid rgba(255,255,255,0.08)"
-            borderRadius="14px"
-            p="5px"
-            gap="4px"
-            align="center"
-          >
+          <div className="hidden md:flex bg-white/10 border border-white/10 rounded-2xl p-1 gap-1 items-center">
             {TABS.map(({ id, label, Icon }) => {
-              const isActive = activeTab === id
+              const isActive = activeTab === id;
               return (
-                <Button
+                <button
                   key={id}
-                  size="sm"
-                  leftIcon={<Icon size={15} />}
-                  bg={isActive ? 'white' : 'transparent'}
-                  color={isActive ? 'brand.700' : 'whiteAlpha.700'}
-                  boxShadow={isActive ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'}
-                  borderRadius="10px"
-                  px={4}
-                  h="34px"
-                  fontWeight={isActive ? '700' : '500'}
-                  fontSize="sm"
-                  _hover={{
-                    bg: isActive ? 'white' : 'whiteAlpha.150',
-                    color: isActive ? 'brand.700' : 'white',
-                  }}
-                  _active={{ transform: 'scale(0.97)' }}
-                  transition="all 0.18s ease"
+                  className={`flex items-center gap-2 px-4 h-[34px] text-sm rounded-xl transition-all ${
+                    isActive ? 'bg-white text-blue-700 font-bold shadow-md' : 'text-white/70 font-medium hover:bg-white/20 hover:text-white'
+                  }`}
                   onClick={() => setActiveTab(id)}
-                  gap={2}
                 >
+                  <Icon size={15} />
                   {label}
-                </Button>
-              )
+                </button>
+              );
             })}
-          </Flex>
+          </div>
 
-          {/* ── User Menu ───────────────────────────────── */}
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant="unstyled"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              flexShrink={0}
-              _hover={{ opacity: 0.85 }}
-              _active={{ opacity: 0.7 }}
+          <div className="relative" ref={menuRef}>
+            <button
+              className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-3 py-1.5 hover:opacity-85 active:opacity-70 transition-opacity"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <HStack
-                spacing={2}
-                bg="whiteAlpha.100"
-                border="1px solid rgba(255,255,255,0.12)"
-                borderRadius="40px"
-                px={3}
-                py={1.5}
-              >
-                <Avatar
-                  size="xs"
-                  name={user.name}
-                  bg="linear-gradient(135deg, #BE185D, #643994)"
-                  color="white"
-                  fontWeight="bold"
-                  fontSize="xs"
-                />
-                <Text
-                  color="white"
-                  fontSize="sm"
-                  fontWeight="600"
-                  display={{ base: 'none', sm: 'block' }}
-                  maxW="120px"
-                  noOfLines={1}
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-600 to-purple-700 text-white font-bold text-xs flex items-center justify-center">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden sm:block text-white text-sm font-semibold max-w-[120px] truncate">
+                {user.name.split(' ')[0]}
+              </span>
+              <ChevronDown size={13} className="text-white/50" />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl py-2 overflow-hidden z-50">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="font-bold text-sm text-gray-800 truncate">{user.name}</div>
+                    <div className="text-[11px] text-gray-500 truncate">{user.email}</div>
+                  </div>
+                </div>
+
+                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                  <User size={14} /> Profile
+                </button>
+                <div className="h-px bg-gray-100 my-1" />
+                <button 
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                  onClick={handleLogout}
                 >
-                  {user.name.split(' ')[0]}
-                </Text>
-                <ChevronDown size={13} color="rgba(255,255,255,0.5)" />
-              </HStack>
-            </MenuButton>
+                  <LogOut size={14} /> Sign Out
+                </button>
+              </div>
+            )}
+          </div>
 
-            <MenuList
-              bg="white"
-              border="1px solid"
-              borderColor="gray.100"
-              shadow="0 8px 40px rgba(0,0,0,0.15)"
-              borderRadius="14px"
-              py={2}
-              minW="220px"
-              overflow="hidden"
-            >
-              {/* User info header */}
-              <Box px={4} py={3} bg="gray.50" borderBottom="1px solid" borderColor="gray.100">
-                <HStack spacing={2}>
-                  <Avatar size="sm" name={user.name} bg="brand.600" color="white" />
-                  <Box>
-                    <Text fontWeight="700" fontSize="sm" color="gray.800">{user.name}</Text>
-                    <Text fontSize="11px" color="gray.500">{user.email}</Text>
-                  </Box>
-                </HStack>
-              </Box>
+        </div>
 
-              <MenuItem
-                icon={<User size={14} />}
-                fontSize="sm"
-                color="gray.700"
-                _hover={{ bg: 'brand.50', color: 'brand.700' }}
-                px={4}
-                py={2.5}
-              >
-                Profile
-              </MenuItem>
-              <MenuDivider my={1} />
-              <MenuItem
-                icon={<LogOut size={14} />}
-                fontSize="sm"
-                color="red.500"
-                _hover={{ bg: 'red.50' }}
-                onClick={handleLogout}
-                px={4}
-                py={2.5}
-              >
-                Sign Out
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
-
-        {/* ── Mobile Bottom Tabs ──────────────────────────── */}
-        <Flex
-          display={{ base: 'flex', md: 'none' }}
-          pb={2}
-          gap={1}
-          bg="whiteAlpha.100"
-          borderRadius="12px"
-          p={1}
-          mb={1}
-        >
+        <div className="flex md:hidden pb-2 gap-1 bg-white/10 rounded-xl p-1 mb-1">
           {TABS.map(({ id, label, Icon }) => {
-            const isActive = activeTab === id
+            const isActive = activeTab === id;
             return (
-              <Button
+              <button
                 key={id}
-                flex={1}
-                size="xs"
-                leftIcon={<Icon size={13} />}
-                bg={isActive ? 'white' : 'transparent'}
-                color={isActive ? 'brand.700' : 'whiteAlpha.700'}
-                borderRadius="9px"
-                fontWeight={isActive ? '700' : '500'}
-                _hover={{ bg: isActive ? 'white' : 'whiteAlpha.200', color: isActive ? 'brand.700' : 'white' }}
+                className={`flex-1 flex items-center justify-center gap-2 h-8 text-xs rounded-lg transition-all ${
+                  isActive ? 'bg-white text-blue-700 font-bold' : 'text-white/70 font-medium hover:bg-white/20 hover:text-white'
+                }`}
                 onClick={() => setActiveTab(id)}
-                transition="all 0.15s"
-                h="32px"
               >
+                <Icon size={13} />
                 {label}
-              </Button>
-            )
+              </button>
+            );
           })}
-        </Flex>
-      </Container>
-    </Box>
-  )
+        </div>
+      </div>
+    </div>
+  );
 }

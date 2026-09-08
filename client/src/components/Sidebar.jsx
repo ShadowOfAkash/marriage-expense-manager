@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Flex, VStack, Icon, Text, Button, Divider, Tooltip } from '@chakra-ui/react';
+import { Tooltip, Button } from '@heroui/react';
 import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -13,97 +13,76 @@ export default function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'expenses',  label: 'Expenses',  icon: Receipt },
+    { id: 'expenses',  label: 'Payments',  icon: Receipt },
     { id: 'savings',   label: 'Savings',   icon: PiggyBank },
   ];
 
   return (
-    <Box
-      w={isExpanded ? '240px' : '72px'}
-      bg="brand.900"
-      color="white"
-      h="100vh"
-      position="sticky"
-      top={0}
-      transition="width 0.2s"
-      display="flex"
-      flexDirection="column"
-      shadow="xl"
-      zIndex={100}
+    <div
+      className={`bg-zinc-950 text-white h-screen sticky top-0 flex flex-col border-r border-zinc-900 z-50 transition-all duration-200 ${
+        isExpanded ? 'w-[240px]' : 'w-[72px]'
+      }`}
     >
-      <Flex align="center" justify={isExpanded ? "space-between" : "center"} p={4} h="72px">
+      <div className={`flex items-center p-4 h-[72px] ${isExpanded ? 'justify-between' : 'justify-center'}`}>
         {isExpanded && (
-          <Text fontWeight="800" fontSize="lg" letterSpacing="tight">
-            Finance<Text as="span" color="brand.200">OS</Text>
-          </Text>
+          <span className="font-extrabold text-lg tracking-tight">
+            Finance<span className="text-zinc-400">OS</span>
+          </span>
         )}
         <Button
-          size="sm"
-          variant="ghost"
-          color="white"
-          _hover={{ bg: 'whiteAlpha.200' }}
+          isIconOnly
+          variant="light"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-950"
           onClick={() => setIsExpanded(!isExpanded)}
-          px={0}
         >
           {isExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </Button>
-      </Flex>
+      </div>
 
-      <Divider borderColor="whiteAlpha.300" mb={4} />
+      <div className="h-px bg-zinc-950 mb-4 mx-4" />
 
-      <VStack spacing={2} align="stretch" px={3} flex={1}>
+      <div className="flex-1 flex flex-col gap-2 px-3">
         {navItems.map(item => {
           const isActive = activeTab === item.id;
+          const Icon = item.icon;
           return (
-            <Tooltip label={!isExpanded ? item.label : ''} placement="right" key={item.id}>
-              <Flex
-                align="center"
-                p={3}
-                mx={isExpanded ? 0 : 'auto'}
-                borderRadius="8px"
-                cursor="pointer"
-                bg={isActive ? 'brand.600' : 'transparent'}
-                color={isActive ? 'white' : 'whiteAlpha.700'}
-                _hover={{ bg: isActive ? 'brand.600' : 'whiteAlpha.200', color: 'white' }}
+            <Tooltip content={!isExpanded ? item.label : ''} placement="right" key={item.id} isDisabled={isExpanded}>
+              <div
                 onClick={() => navigate('/' + item.id)}
-                transition="all 0.2s"
-                justify={isExpanded ? "flex-start" : "center"}
+                className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                  isActive ? 'bg-zinc-950 text-white' : 'text-zinc-400 hover:bg-zinc-950 hover:text-white'
+                } ${isExpanded ? 'justify-start' : 'justify-center mx-auto'}`}
               >
-                <Icon as={item.icon} boxSize={5} />
-                {isExpanded && <Text ml={3} fontSize="sm" fontWeight="600">{item.label}</Text>}
-              </Flex>
+                <Icon size={20} />
+                {isExpanded && <span className="ml-3 text-sm font-semibold">{item.label}</span>}
+              </div>
             </Tooltip>
           );
         })}
-      </VStack>
+      </div>
 
-      <Divider borderColor="whiteAlpha.300" mt={4} />
+      <div className="h-px bg-zinc-950 mt-4 mx-4" />
       
       {isExpanded && currentUser && (
-        <Flex px={4} py={2} align="center" mt={2}>
-          <Icon as={User} boxSize={4} color="brand.200" mr={2} />
-          <Text fontSize="xs" color="brand.200" isTruncated>{currentUser.email}</Text>
-        </Flex>
+        <div className="flex px-4 py-2 items-center mt-2">
+          <User size={16} className="text-zinc-500 mr-2" />
+          <span className="text-xs text-zinc-500 truncate">{currentUser.email}</span>
+        </div>
       )}
 
-      <Box p={3}>
-        <Tooltip label={!isExpanded ? "Logout" : ''} placement="right">
-          <Flex
-            align="center"
-            p={3}
-            mx={isExpanded ? 0 : 'auto'}
-            borderRadius="8px"
-            cursor="pointer"
-            color="red.300"
-            _hover={{ bg: 'whiteAlpha.100', color: 'red.400' }}
+      <div className="p-3">
+        <Tooltip content={!isExpanded ? "Logout" : ''} placement="right" isDisabled={isExpanded}>
+          <div
             onClick={logout}
-            justify={isExpanded ? "flex-start" : "center"}
+            className={`flex items-center p-3 rounded-lg cursor-pointer text-zinc-400 hover:bg-zinc-950 hover:text-white transition-colors ${
+              isExpanded ? 'justify-start' : 'justify-center mx-auto'
+            }`}
           >
-            <Icon as={LogOut} boxSize={5} />
-            {isExpanded && <Text ml={3} fontSize="sm" fontWeight="600">Logout</Text>}
-          </Flex>
+            <LogOut size={20} />
+            {isExpanded && <span className="ml-3 text-sm font-semibold">Logout</span>}
+          </div>
         </Tooltip>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

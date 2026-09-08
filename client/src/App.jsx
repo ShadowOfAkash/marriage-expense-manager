@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box, Flex } from '@chakra-ui/react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login     from './components/Login'
 import Sidebar   from './components/Sidebar'
@@ -14,9 +13,9 @@ function MainApp() {
   if (!currentUser) return <Login />
 
   return (
-    <Flex minH="100vh" bg="surface.bg">
+    <div className="flex min-h-screen bg-zinc-50">
       <Sidebar />
-      <Box flex={1} overflowY="auto" pb={10}>
+      <div className="flex-1 overflow-y-auto pb-10">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -24,8 +23,8 @@ function MainApp() {
           <Route path="/savings" element={<Savings />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </Box>
-    </Flex>
+      </div>
+    </div>
   )
 }
 

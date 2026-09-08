@@ -1,716 +1,269 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useLocation } from 'react-router-dom'
-import {
-  Box, Container, Card, CardBody, Heading, Text,
-  SimpleGrid, FormControl, FormLabel, Input, Select, Button,
-  Table, Thead, Tbody, Tr, Th, Td, Badge, Flex, HStack, VStack,
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody,
-  ModalFooter, ModalCloseButton, useDisclosure, useToast,
-  InputGroup, InputLeftAddon, AlertDialog, AlertDialogOverlay,
-  AlertDialogContent, AlertDialogHeader, AlertDialogBody,
-  AlertDialogFooter, Spinner, Center, Stat, StatLabel, StatNumber,
-} from '@chakra-ui/react'
-import {
-  Receipt, Plus, Search, Pencil, Trash2, IndianRupee,
-  Calendar, Tag, AlignLeft, FilterX, LayoutList, Camera, Check, Image as ImageIcon, Paperclip
-} from 'lucide-react'
-import { api, fmt, fmtK, formatDate, CATEGORIES } from '../utils/api'
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Button, Card, Chip, Input, TextField, Label } from '@heroui/react';
+import { Search, Plus, Filter, Tag, ChevronDown, Receipt, Calendar, Pencil, Trash2, Image as ImageIcon, Paperclip, X, IndianRupee, AlignLeft } from 'lucide-react';
+import { api, fmt, formatDate, CATEGORIES } from '../utils/api';
+import { AddExpenseModal } from './SharedModals';
+import { TailwindModal } from './TailwindModal';
 
-// ── Full-Screen Document Viewer ──────────────────────────────────────────────
+// Full Screen Viewer (Tailwind converted from old Chakra)
 function FullScreenViewer({ url, isPdf, onClose }) {
-  const [zoom, setZoom] = useState(1)
-  const zoomIn  = () => setZoom(z => Math.min(z + 0.25, 4))
-  const zoomOut = () => setZoom(z => Math.max(z - 0.25, 0.25))
-  const zoomReset = () => setZoom(1)
-
-  // Close on Escape key
-  React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
   return (
-    <Box
-      position="fixed" top={0} left={0} right={0} bottom={0}
-      zIndex={9999}
-      bg="rgba(0,0,0,0.92)"
-      display="flex" flexDirection="column"
-    >
-      {/* ── Toolbar ── */}
-      <Flex
-        align="center" justify="space-between"
-        px={6} py={3}
-        bg="rgba(0,0,0,0.7)"
-        backdropFilter="blur(10px)"
-        borderBottom="1px solid rgba(255,255,255,0.08)"
-      >
-        <Text color="white" fontWeight="700" fontSize="sm">📄 Document Viewer</Text>
-        <HStack spacing={2}>
-          <Button size="sm" variant="outline" colorScheme="whiteAlpha" color="white"
-            onClick={zoomOut} isDisabled={zoom <= 0.25} borderRadius="8px" px={3}>
-            − Zoom Out
-          </Button>
-          <Button size="sm" variant="solid" bg="whiteAlpha.200" color="white"
-            onClick={zoomReset} borderRadius="8px" px={3} _hover={{ bg: 'whiteAlpha.300' }}>
-            {Math.round(zoom * 100)}%
-          </Button>
-          <Button size="sm" variant="outline" colorScheme="whiteAlpha" color="white"
-            onClick={zoomIn} isDisabled={zoom >= 4} borderRadius="8px" px={3}>
-            + Zoom In
-          </Button>
-          <Button size="sm" as="a" href={url} download target="_blank"
-            colorScheme="blue" borderRadius="8px" px={3}>
-            ⬇ Download
-          </Button>
-          <Button size="sm" colorScheme="red" variant="outline" borderRadius="8px" px={3}
-            onClick={onClose}>
-            ✕ Close
-          </Button>
-        </HStack>
-      </Flex>
-
-      {/* ── Content Area ── */}
-      <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems={isPdf ? 'flex-start' : 'center'} p={4}>
-        {isPdf ? (
-          <iframe
-            src={url}
-            title="Document Viewer"
-            style={{
-              border: 'none',
-              width: `${Math.min(zoom * 100, 100)}vw`,
-              height: '90vh',
-              transform: zoom > 1 ? `scale(${zoom})` : 'none',
-              transformOrigin: 'top center',
-              borderRadius: '8px',
-              background: 'white',
-            }}
-          />
-        ) : (
-          <img
-            src={url}
-            alt="Receipt"
-            style={{
-              maxWidth: '100%',
-              transform: `scale(${zoom})`,
-              transformOrigin: 'center center',
-              transition: 'transform 0.2s ease',
-              borderRadius: '8px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            }}
-          />
-        )}
-      </Box>
-    </Box>
-  )
-}
-
-const EMPTY_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' }
-
-function SectionHeader({ icon: Icon, title, subtitle }) {
-  return (
-    <Flex align="center" gap={3} mb={5}>
-      <Flex w={9} h={9} borderRadius="10px"
-        bg="brand.50" border="1px solid" borderColor="brand.100"
-        align="center" justify="center" flexShrink={0}
-      >
-        <Icon size={16} color="#BE185D" />
-      </Flex>
-      <Box>
-        <Text fontWeight="700" fontSize="md" color="gray.800">{title}</Text>
-        {subtitle && <Text fontSize="11px" color="gray.400">{subtitle}</Text>}
-      </Box>
-    </Flex>
-  )
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
+      <Button isIconOnly variant="light" className="absolute top-4 right-4 text-white hover:bg-white/20 z-10" onClick={onClose}>
+        <X size={24} />
+      </Button>
+      {isPdf ? (
+        <iframe src={url} className="w-full h-full max-w-5xl bg-white rounded-lg" />
+      ) : (
+        <img src={url} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" alt="Document" />
+      )}
+    </div>
+  );
 }
 
 export default function Expenses() {
-  function today() { return new Date().toISOString().split('T')[0] }
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const [expenses,  setExpenses]  = useState([])
-  const [form,      setForm]      = useState({ ...EMPTY_FORM, date: today() })
-  const [editItem,  setEditItem]  = useState(null)
-  const [search,    setSearch]    = useState('')
-  const [catFilter, setCatFilter] = useState('')
-  const [loading,   setLoading]   = useState(true)
-  const [delId,     setDelId]     = useState(null)
-  const [viewerUrl, setViewerUrl] = useState(null)
-  const [saving,    setSaving]    = useState(false)
-  const [scanning,  setScanning]  = useState(false)
-  const fileInputRef = React.useRef(null)
+  // Search & Filter
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
-  const { isOpen: isDelOpen,  onOpen: onDelOpen,  onClose: onDelClose  } = useDisclosure()
-  const { isOpen: isAddOpen,  onOpen: onAddOpen,  onClose: onAddClose  } = useDisclosure()
-  const cancelRef = React.useRef()
-  const toast = useToast()
-  const location = useLocation()
-
-  useEffect(() => {
-    if (location.state?.openAddModal) {
-      onAddOpen()
-      // Clear the state so it doesn't reopen on refresh
-      window.history.replaceState({}, '')
-    }
-  }, [location.state, onAddOpen])
-
-
-  const load = useCallback(async () => {
-    try {
-      setLoading(true)
-      setExpenses(await api.getExpenses())
-    } catch {
-      toast({ title: 'Error loading expenses', status: 'error', duration: 3000 })
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { load() }, [load])
-
-  
+  // Modals
+  const [editItem, setEditItem] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDelOpen, setIsDelOpen] = useState(false);
+  const [delId, setDelId] = useState(null);
+  const [viewerUrl, setViewerUrl] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const handleDocUpload = async (e, isEdit) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        setIsUploading(true);
-        const base64 = reader.result.split(',')[1];
-        const res = await api.uploadDocument(base64, file.name);
-        if (isEdit) {
-          setEditItem({ ...editItem, receipt_url: res.url });
-        } else {
-          setForm({ ...form, receipt_url: res.url });
-        }
-        toast({ title: 'Document attached', status: 'success', duration: 2000 });
-      } catch (err) {
-        toast({ title: 'Upload failed', description: err.message, status: 'error', duration: 3000 });
-      } finally {
-        setIsUploading(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
 
-  const handleScan = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    setScanning(true)
+  const loadData = async () => {
     try {
-      const reader = new FileReader()
-      reader.onloadend = async () => {
-        const base64String = reader.result.split(',')[1]
-        try {
-          const aiData = await api.scanReceipt(base64String, file.type)
-          setForm(prev => ({
-            ...prev,
-            category: aiData.category || '',
-            description: aiData.description || '',
-            amount: aiData.amount ? String(aiData.amount) : '',
-            date: aiData.date || today(),
-            receipt_url: aiData.receipt_url || ''
-          }))
-          toast({ title: 'Receipt Scanned!', description: 'Please review the fields before saving.', status: 'success', duration: 3000 })
-        } catch (err) {
-          toast({ title: 'Scan Failed', description: err.message, status: 'error', duration: 3000 })
-        } finally {
-          setScanning(false)
-        }
-      }
-      reader.readAsDataURL(file)
-    } catch (e) {
-      setScanning(false)
-      toast({ title: 'Error reading image', status: 'error', duration: 3000 })
-    }
-    // reset input so same file can be selected again
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
-  const filtered = expenses.filter(e => {
-    const matchCat = !catFilter || e.category === catFilter
-    const q = search.toLowerCase()
-    return matchCat && (!q || e.description.toLowerCase().includes(q) || e.category.toLowerCase().includes(q))
-  })
-  filtered.sort((a, b) => {
-    if (a.status === 'draft' && b.status !== 'draft') return -1;
-    if (a.status !== 'draft' && b.status === 'draft') return 1;
-    return 0;
-  });
-  const filteredTotal = filtered.reduce((s, e) => s + e.amount, 0)
-
-  const handleApprove = async (exp) => {
-    try {
-      await api.updateExpense(exp.id, { ...exp, status: 'approved' });
-      toast({ title: 'Expense Approved', status: 'success', duration: 2000 });
-      load();
-    } catch {
-      toast({ title: 'Error approving', status: 'error', duration: 3000 });
+      const data = await api.getExpenses();
+      setExpenses(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAdd = async () => {
-    if (!form.category) return toast({ title: 'Select a category', status: 'warning', duration: 2000 })
-    if (!form.amount || Number(form.amount) <= 0) return toast({ title: 'Enter a valid amount', status: 'warning', duration: 2000 })
-    if (!form.date) return toast({ title: 'Select a date', status: 'warning', duration: 2000 })
-    setSaving(true)
-    try {
-      await api.addExpense({ ...form, amount: Number(form.amount) })
-      toast({ title: 'Expense saved!', status: 'success', duration: 2000 })
-      setForm({ ...EMPTY_FORM, date: today() })
-      onAddClose()
-      load()
-    } catch {
-      toast({ title: 'Error saving expense', status: 'error', duration: 3000 })
-    } finally {
-      setSaving(false)
-    }
-  }
+  useEffect(() => { loadData(); }, []);
 
-  const openEdit = (exp) => { setEditItem({ ...exp }); onEditOpen() }
+  const filtered = useMemo(() => expenses.filter(e => {
+    const matchCat = categoryFilter ? e.category === categoryFilter : true;
+    const matchSearch = e.description?.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  }), [expenses, search, categoryFilter]);
 
-  const handleUpdate = async () => {
-    if (!editItem.category || !editItem.amount || !editItem.date)
-      return toast({ title: 'All fields required', status: 'warning', duration: 2000 })
-    setSaving(true)
-    try {
-      await api.updateExpense(editItem.id, { ...editItem, amount: Number(editItem.amount) })
-      toast({ title: 'Expense updated!', status: 'success', duration: 2000 })
-      onEditClose(); load()
-    } catch {
-      toast({ title: 'Error updating', status: 'error', duration: 3000 })
-    } finally {
-      setSaving(false)
-    }
-  }
+  const openEdit = (e) => {
+    setEditItem({ ...e });
+    setIsEditOpen(true);
+  };
 
-  const confirmDelete = (id) => { setDelId(id); onDelOpen() }
+  const confirmDelete = (id) => {
+    setDelId(id);
+    setIsDelOpen(true);
+  };
+
   const handleDelete = async () => {
     try {
-      await api.deleteExpense(delId)
-      toast({ title: 'Expense deleted', status: 'info', duration: 2000 })
-      onDelClose(); load()
-    } catch {
-      toast({ title: 'Error deleting', status: 'error', duration: 3000 })
+      await api.deleteExpense(delId);
+      setIsDelOpen(false);
+      loadData();
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
 
-  const setF = (k, v) => setForm(p => ({ ...p, [k]: v }))
-  const totalAll = expenses.reduce((s, e) => s + e.amount, 0)
+  const handleUpdate = async () => {
+    setSaving(true);
+    try {
+      await api.updateExpense(editItem.id, editItem);
+      setIsEditOpen(false);
+      loadData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDocUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const url = await api.uploadReceipt(file);
+      setEditItem(p => ({ ...p, receipt_url: url }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
-    <Container maxW="7xl" py={7} px={{ base: 4, md: 6 }}>
-      <Flex align="flex-start" justify="space-between" mb={7} flexWrap="wrap" gap={3}>
-        <Box>
-          <Heading size="lg" color="gray.800" fontWeight="800" letterSpacing="-0.5px">Expenses</Heading>
-          <Text color="gray.400" fontSize="sm" mt={0.5}>Track and manage all wedding expenses</Text>
-        </Box>
-        <Button size="md" colorScheme="brand" leftIcon={<Plus size={16} />} onClick={onAddOpen} shadow="md">
-          Add New Expense
+    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-zinc-900 tracking-tight flex items-center gap-2">
+            <Receipt size={24} className="text-zinc-900" /> Payments
+          </h1>
+          <p className="text-zinc-500 text-sm mt-1">Manage and track your wedding payments</p>
+        </div>
+        <Button className="bg-zinc-900 text-white hover:bg-zinc-950 shadow-md font-bold" onClick={() => setIsAddOpen(true)}>
+          <Plus size={18} /> Add Payment
         </Button>
-      </Flex>
+      </div>
 
-      {/* ── Add Expense Modal ── */}
-      <Modal isOpen={isAddOpen} onClose={onAddClose} isCentered size="xl">
-        <ModalOverlay backdropFilter="blur(6px)" />
-        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
-
-          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
-            <HStack spacing={2}><Plus size={16} color="#1B2CC1" /><Text>Add New Expense</Text></HStack>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-          <Box
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleScan({ target: { files: [e.dataTransfer.files[0]] } });
-              }
-            }}
-            onClick={() => fileInputRef.current?.click()}
-            border="2px dashed"
-            borderColor="brand.300"
-            borderRadius="16px"
-            p={8}
-            textAlign="center"
-            bg="brand.50"
-            _hover={{ bg: 'brand.100', cursor: 'pointer' }}
-            transition="all 0.2s"
-            mb={6}
-          >
-            <Flex direction="column" align="center" gap={3}>
-              {form.receipt_url ? (
-                <>
-                  <ImageIcon size={32} color="#10B981" />
-                  <Text fontWeight="700" color="green.600" fontSize="md">Document Uploaded Successfully!</Text>
-                  <Text fontSize="sm" color="gray.500">Click or drag another to replace</Text>
-                  <Button size="xs" colorScheme="blue" variant="outline" mt={2} onClick={(e) => { e.stopPropagation(); setViewerUrl(form.receipt_url); }}>View Document</Button>
-                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
-                </>
-              ) : (
-                <>
-                  <Camera size={32} color="#1B2CC1" />
-                  <Text fontWeight="700" color="brand.900" fontSize="md">Drag & Drop Receipt (Image/PDF)</Text>
-                  <Text fontSize="sm" color="gray.500">or click to browse your files</Text>
-                  {scanning && <Text fontSize="sm" color="purple.500" fontWeight="bold" mt={2}>Analyzing with AI...</Text>}
-                </>
-              )}
-            </Flex>
-            <input type="file" accept="image/*,application/pdf" ref={fileInputRef} onChange={handleScan} style={{ display: 'none' }} />
-          </Box>
-          
-          <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={5}>
-            <FormControl>
-              <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
-                <HStack spacing={1.5} mb={1}><Tag size={12} /><Text>Category</Text></HStack>
-              </FormLabel>
-              <Select
-                value={form.category}
-                onChange={e => setF('category', e.target.value)}
-                placeholder="— Select —"
-                focusBorderColor="brand.500"
-                borderColor="gray.200"
-                borderRadius="10px"
-                bg="gray.50"
-                _hover={{ borderColor: 'brand.300', bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                fontSize="sm"
-              >
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </Select>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
-                <HStack spacing={1.5} mb={1}><IndianRupee size={12} /><Text>Amount</Text></HStack>
-              </FormLabel>
-              <InputGroup>
-                <InputLeftAddon bg="brand.50" color="brand.700" fontWeight="700" borderRadius="10px 0 0 10px" fontSize="sm">₹</InputLeftAddon>
-                <Input
-                  type="number"
-                  value={form.amount}
-                  onChange={e => setF('amount', e.target.value)}
-                  placeholder="0"
-                  focusBorderColor="brand.500"
-                  borderColor="gray.200"
-                  borderRadius="0 10px 10px 0"
-                  bg="gray.50"
-                  _hover={{ borderColor: 'brand.300', bg: 'white' }}
-                  _focus={{ bg: 'white' }}
-                  min={0}
-                  fontSize="sm"
-                />
-              </InputGroup>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
-                <HStack spacing={1.5} mb={1}><Calendar size={12} /><Text>Date</Text></HStack>
-              </FormLabel>
-              <Input
-                type="date"
-                value={form.date}
-                onChange={e => setF('date', e.target.value)}
-                focusBorderColor="brand.500"
-                borderColor="gray.200"
-                borderRadius="10px"
-                bg="gray.50"
-                _hover={{ borderColor: 'brand.300', bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                fontSize="sm"
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">
-                <HStack spacing={1.5} mb={1}><AlignLeft size={12} /><Text>Description</Text></HStack>
-              </FormLabel>
-              <Input
-                value={form.description}
-                onChange={e => setF('description', e.target.value)}
-                placeholder="e.g. Banquet Hall deposit"
-                focusBorderColor="brand.500"
-                borderColor="gray.200"
-                borderRadius="10px"
-                bg="gray.50"
-                _hover={{ borderColor: 'brand.300', bg: 'white' }}
-                _focus={{ bg: 'white' }}
-                fontSize="sm"
-                onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              />
-            </FormControl>
-          </SimpleGrid>
-
-          <HStack mt={5}>
-            <Button
-              bgGradient="linear(135deg, brand.600, plum.600)"
-              color="white" fontWeight="700"
-              _hover={{ bgGradient: 'linear(135deg, brand.700, plum.700)', transform: 'translateY(-1px)', shadow: 'md' }}
-              _active={{ transform: 'translateY(0)' }}
-              leftIcon={<Plus size={15} />}
-              onClick={handleAdd}
-              isLoading={saving}
-              loadingText="Saving…"
-              borderRadius="10px"
-              transition="all 0.2s"
-              shadow="0 4px 12px rgba(190,24,93,0.2)"
-            >
-              Save Expense
-            </Button>
-            <Button
-              variant="ghost" colorScheme="gray" borderRadius="10px"
-              onClick={() => setForm({ ...EMPTY_FORM, date: today() })}
-              fontSize="sm"
-            >
-              Clear
-            </Button>
-            
-            
-          </HStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-
-      {/* ── Summary Strip ── */}
-      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={5}>
-        {[
-          { label: 'Total Spent',     value: fmtK(totalAll),      color: '#10B981', icon: Receipt },
-          { label: 'Total Entries',   value: expenses.length,    color: '#1B2CC1', icon: LayoutList },
-          { label: 'Filtered Total',  value: fmtK(filteredTotal), color: '#E09913', icon: Tag },
-          { label: 'Filtered Items',  value: filtered.length,    color: '#0EA5E9', icon: FilterX },
-        ].map(({ label, value, color, icon: Icon }) => (
-          <Card key={label} shadow="sm" borderRadius="xl" border="1px solid" borderColor="gray.100">
-            <CardBody py={4} px={5}>
-              <Flex justify="space-between" align="center">
-                <Stat>
-                  <StatLabel fontSize="11px" color="gray.500" fontWeight="600" mb={1}>{label}</StatLabel>
-                  <StatNumber fontSize="2xl" color="brand.900" fontWeight="800">{value}</StatNumber>
-                </Stat>
-                <Flex w={10} h={10} borderRadius="10px" bg={color + '1A'} color={color} align="center" justify="center">
-                  <Icon size={20} />
-                </Flex>
-              </Flex>
-            </CardBody>
-          </Card>
-        ))}
-      </SimpleGrid>
-
-      {/* ── Filter Bar ── */}
-      <Flex gap={3} mb={4} flexWrap="wrap" align="center">
-        <InputGroup flex={1} minW="200px" maxW="380px">
-          <Box position="absolute" left={3} top="50%" transform="translateY(-50%)" zIndex={1} pointerEvents="none">
-            <Search size={15} color="#9CA3AF" />
-          </Box>
+      <Card className="mb-6 shadow-sm border border-zinc-200">
+        <Card.Content className="p-4 flex flex-col md:flex-row gap-4 items-center bg-zinc-50 rounded-xl">
           <Input
+            placeholder="Search payments..."
+            startContent={<Search size={16} className="text-zinc-400" />}
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search description or category…"
-            focusBorderColor="brand.500"
-            borderColor="gray.200"
-            borderRadius="10px"
-            bg="white"
-            pl={9}
-            fontSize="sm"
-            _hover={{ borderColor: 'brand.300' }}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1"
           />
-        </InputGroup>
-        <Select
-          value={catFilter}
-          onChange={e => setCatFilter(e.target.value)}
-          maxW="210px"
-          focusBorderColor="brand.500"
-          borderColor="gray.200"
-          borderRadius="10px"
-          bg="white"
-          fontSize="sm"
-          _hover={{ borderColor: 'brand.300' }}
-        >
-          <option value="">All Categories</option>
-          {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-        </Select>
-        {(search || catFilter) && (
-          <Button
-            variant="ghost" colorScheme="gray" size="sm" borderRadius="9px"
-            leftIcon={<FilterX size={14} />}
-            onClick={() => { setSearch(''); setCatFilter('') }}
-            fontSize="sm"
-          >
-            Clear filters
-          </Button>
-        )}
-      </Flex>
+          <div className="w-full md:w-64 relative">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full h-10 px-4 bg-white hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-900 border border-zinc-200 outline-none focus:ring-2 focus:ring-zinc-400 appearance-none cursor-pointer"
+            >
+              <option value="">All Categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          </div>
+        </Card.Content>
+      </Card>
 
-      {/* ── Table ── */}
-      <Card border="1px solid" borderColor="gray.100" shadow="0 2px 12px rgba(0,0,0,0.05)" overflow="hidden">
-        {loading ? (
-          <Center py={16}><Spinner color="brand.500" size="lg" /></Center>
-        ) : filtered.length === 0 ? (
-          <Center py={16}>
-            <VStack spacing={3}>
-              <Flex w={14} h={14} borderRadius="16px" bg="gray.50" align="center" justify="center">
-                <LayoutList size={24} color="#CBD5E0" />
-              </Flex>
-              <Text color="gray.400" fontSize="sm">
-                {expenses.length === 0 ? 'No expenses yet. Add your first!' : 'No results match your filters.'}
-              </Text>
-            </VStack>
-          </Center>
+      <Card className="shadow-sm border border-zinc-200">
+        {filtered.length > 0 ? (
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-zinc-200 text-zinc-500 font-medium bg-zinc-50">
+                  <th className="py-3 px-4 font-medium whitespace-nowrap">DATE</th>
+                  <th className="py-3 px-4 font-medium whitespace-nowrap">CATEGORY</th>
+                  <th className="py-3 px-4 font-medium min-w-[200px]">DESCRIPTION</th>
+                  <th className="py-3 px-4 font-medium text-center whitespace-nowrap">DOCUMENT</th>
+                  <th className="py-3 px-4 font-medium text-right whitespace-nowrap">AMOUNT</th>
+                  <th className="py-3 px-4 font-medium text-right whitespace-nowrap">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {filtered.map((e) => (
+                  <tr key={e.id} className="hover:bg-zinc-50 transition-colors">
+                    <td className="py-3 px-4 whitespace-nowrap"><span className="text-sm text-zinc-600 font-medium"><Calendar size={12} className="inline mr-1 text-zinc-400" />{formatDate(e.date)}</span></td>
+                    <td className="py-3 px-4 whitespace-nowrap"><Chip size="sm" variant="flat" color="default" className="bg-zinc-100 text-zinc-900 border border-zinc-300">{e.category}</Chip></td>
+                    <td className="py-3 px-4"><span className="text-sm text-zinc-800">{e.description || "—"}</span></td>
+                    <td className="py-3 px-4 text-center">
+                      {e.receipt_url ? (
+                        <Button isIconOnly size="sm" variant="light" className="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200" onClick={() => setViewerUrl(e.receipt_url)}>
+                          <ImageIcon size={16} />
+                        </Button>
+                      ) : (
+                        <span className="text-zinc-300">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap"><span className="font-bold text-zinc-900">{fmt(e.amount)}</span></td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <div className="flex justify-end gap-1">
+                        <Button isIconOnly size="sm" variant="light" className="text-blue-600 hover:bg-blue-50" onClick={() => openEdit(e)}><Pencil size={14} /></Button>
+                        <Button isIconOnly size="sm" variant="light" className="text-red-600 hover:bg-red-50" onClick={() => confirmDelete(e.id)}><Trash2 size={14} /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <Box overflowX="auto">
-            <Table size="sm" variant="simple">
-              <Thead bg="gray.50">
-                <Tr>
-                  {['#','Date','Category','Description','Receipt','Amount','Actions'].map(h => (
-                    <Th key={h} color="gray.500" fontSize="10px" fontWeight="700" textTransform="uppercase" letterSpacing="wider" borderColor="gray.100" isNumeric={h === 'Amount'}>{h}</Th>
-                  ))}
-                </Tr>
-              </Thead>
-              <Tbody>
-                {filtered.map((e, i) => {
-                  const isDraft = e.status === 'draft';
-                  return (
-                    <Tr key={e.id} bg={isDraft ? 'orange.50' : 'transparent'} _hover={{ bg: isDraft ? 'orange.100' : 'gray.50' }} transition="background 0.12s">
-                      <Td fontSize="11px" color="gray.400" borderColor={isDraft ? 'orange.100' : 'gray.50'} w={8}>{i + 1}</Td>
-                      <Td fontSize="xs" color="gray.500" borderColor={isDraft ? 'orange.100' : 'gray.50'} whiteSpace="nowrap">{formatDate(e.date)}</Td>
-                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'}>
-                        <Badge
-                          bg={isDraft ? 'orange.100' : 'brand.50'} color={isDraft ? 'orange.800' : 'brand.700'} fontSize="10px"
-                          border="1px solid" borderColor={isDraft ? 'orange.200' : 'brand.100'}
-                          borderRadius="6px" px={2} py={0.5} fontWeight="600"
-                        >
-                          {e.category}
-                        </Badge>
-                      </Td>
-                      <Td fontSize="sm" color="gray.700" maxW="220px" borderColor={isDraft ? 'orange.100' : 'gray.50'}>
-                        <HStack>
-                          {isDraft && <Badge colorScheme="orange" fontSize="9px" borderRadius="4px">DRAFT</Badge>}
-                          <Text noOfLines={1}>{e.description || <Text as="span" color="gray.300">—</Text>}</Text>
-                        </HStack>
-                      </Td>
-                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'} textAlign="center">
-                        {e.receipt_url ? (
-                          <Button size="xs" variant="ghost" colorScheme="purple" p={1} h="auto" onClick={() => setViewerUrl(e.receipt_url)} title="View Document">
-                            <ImageIcon size={14} />
-                          </Button>
-                        ) : <Text color="gray.300" fontSize="10px">—</Text>}
-                      </Td>
-                      <Td isNumeric fontWeight="700" color="gray.800" borderColor={isDraft ? 'orange.100' : 'gray.50'}>{fmt(e.amount)}</Td>
-                      <Td borderColor={isDraft ? 'orange.100' : 'gray.50'}>
-                        <HStack spacing={1}>
-                          {isDraft && (
-                            <Button size="xs" colorScheme="orange" leftIcon={<Check size={11} />}
-                              onClick={() => handleApprove(e)} borderRadius="7px" fontSize="10px">Approve</Button>
-                          )}
-                          <Button size="xs" variant="ghost" colorScheme="blue" leftIcon={<Pencil size={11} />}
-                            onClick={() => openEdit(e)} borderRadius="7px" fontSize="10px">Edit</Button>
-                          <Button size="xs" variant="ghost" colorScheme="red"  leftIcon={<Trash2 size={11} />}
-                            onClick={() => confirmDelete(e.id)} borderRadius="7px" fontSize="10px">Del</Button>
-                        </HStack>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </Box>
+          <div className="py-20 flex flex-col items-center">
+            <Receipt size={40} className="text-zinc-300 mb-4" />
+            <h3 className="text-zinc-500 font-medium">No payments found</h3>
+          </div>
         )}
       </Card>
 
-      {/* ── Edit Modal ── */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} isCentered size="md">
-        <ModalOverlay backdropFilter="blur(6px)" />
-        <ModalContent borderRadius="20px" overflow="hidden" shadow="0 24px 64px rgba(0,0,0,0.25)">
+      <AddExpenseModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onSuccess={loadData} />
 
-          <ModalHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
-            <HStack spacing={2}><Pencil size={16} color="#3B82F6" /><Text>Edit Expense</Text></HStack>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {editItem && (
-              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-                <FormControl>
-                  <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Category</FormLabel>
-                  <Select value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))} focusBorderColor="blue.500" borderRadius="10px">
-                    {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                  </Select>
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Amount (₹)</FormLabel>
-                  <InputGroup>
-                    <InputLeftAddon borderRadius="10px 0 0 10px">₹</InputLeftAddon>
-                    <Input type="number" value={editItem.amount} onChange={e => setEditItem(p => ({ ...p, amount: e.target.value }))} focusBorderColor="blue.500" borderRadius="0 10px 10px 0" />
-                  </InputGroup>
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Date</FormLabel>
-                  <Input type="date" value={editItem.date} onChange={e => setEditItem(p => ({ ...p, date: e.target.value }))} focusBorderColor="blue.500" borderRadius="10px" />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="wider">Description</FormLabel>
-                  <Input value={editItem.description} onChange={e => setEditItem(p => ({ ...p, description: e.target.value }))} focusBorderColor="blue.500" borderRadius="10px" />
-                </FormControl>
-              </SimpleGrid>
-            )}
-          </ModalBody>
-          <ModalFooter gap={2}>
-            <Button
-              as="label"
-              htmlFor="doc-upload-edit"
-              size="sm"
-              variant="outline"
-              colorScheme="gray"
-              borderRadius="10px"
-              leftIcon={<Paperclip size={14} />}
-              isLoading={isUploading}
-              cursor="pointer"
-              mr="auto"
-            >
-              {editItem?.receipt_url ? 'Change Doc' : 'Attach Doc'}
-              <input
-                id="doc-upload-edit"
-                type="file"
-                accept="image/*,application/pdf"
-                style={{ display: 'none' }}
-                onChange={(e) => handleDocUpload(e, true)}
-              />
-            </Button>
-            {editItem?.receipt_url && (
-              <Button size="sm" variant="ghost" colorScheme="purple" mr={2} onClick={() => setViewerUrl(editItem.receipt_url)}>
-                <ImageIcon size={14} /> View
+      {/* Edit Modal */}
+      <TailwindModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Payment">
+        {editItem && (
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><Tag size={12} /> Category</Label>
+                <div className="relative">
+                  <select
+                    value={editItem.category || ''}
+                    onChange={(e) => setEditItem({ ...editItem, category: e.target.value })}
+                    className="w-full h-10 px-3 bg-zinc-100 hover:bg-zinc-200 transition-colors rounded-lg text-sm font-medium text-zinc-900 border-none outline-none focus:ring-2 focus:ring-zinc-400 appearance-none cursor-pointer"
+                  >
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                </div>
+              </div>
+
+              <TextField>
+                <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><IndianRupee size={12} /> Amount</Label>
+                <Input type="number" value={editItem.amount} onChange={e => setEditItem({ ...editItem, amount: e.target.value })} startContent={<span className="text-zinc-500 font-bold">₹</span>} />
+              </TextField>
+
+              <TextField>
+                <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><Calendar size={12} /> Date</Label>
+                <Input type="date" value={editItem.date} onChange={e => setEditItem({ ...editItem, date: e.target.value })} />
+              </TextField>
+
+              <TextField>
+                <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><AlignLeft size={12} /> Description</Label>
+                <Input value={editItem.description} onChange={e => setEditItem({ ...editItem, description: e.target.value })} />
+              </TextField>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button as="label" variant="outline" className="border-zinc-300 hover:bg-zinc-100 cursor-pointer text-zinc-700" isLoading={isUploading}>
+                <Paperclip size={16} className="mr-2" /> {editItem.receipt_url ? 'Change Document' : 'Attach Document'}
+                <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleDocUpload} />
               </Button>
-            )}
-            <Button variant="ghost" onClick={onEditClose} borderRadius="10px">Cancel</Button>
-            <Button colorScheme="blue" onClick={handleUpdate} isLoading={saving} borderRadius="10px" leftIcon={<Pencil size={13} />}>Update</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              {editItem.receipt_url && (
+                <Button variant="light" className="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100" onClick={() => setViewerUrl(editItem.receipt_url)}>
+                  <ImageIcon size={16} className="mr-2" /> View
+                </Button>
+              )}
+            </div>
 
-      {/* ── Delete Confirm ── */}
-      <AlertDialog isOpen={isDelOpen} leastDestructiveRef={cancelRef} onClose={onDelClose} isCentered>
-        <AlertDialogOverlay backdropFilter="blur(6px)">
-          <AlertDialogContent borderRadius="18px" shadow="0 24px 64px rgba(0,0,0,0.25)">
-            <AlertDialogHeader color="gray.800" fontWeight="800" fontSize="md" pt={5}>
-              <HStack spacing={2}><Trash2 size={16} color="#EF4444" /><Text>Delete Expense?</Text></HStack>
-            </AlertDialogHeader>
-            <AlertDialogBody color="gray.600" fontSize="sm">This action cannot be undone.</AlertDialogBody>
-            <AlertDialogFooter gap={2}>
-              <Button ref={cancelRef} onClick={onDelClose} variant="ghost" borderRadius="10px">Cancel</Button>
-              <Button colorScheme="red" onClick={handleDelete} borderRadius="10px" leftIcon={<Trash2 size={13} />}>Delete</Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+            <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-zinc-100">
+              <Button variant="light" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+              <Button className="bg-zinc-900 text-white hover:bg-zinc-800" onClick={handleUpdate} isLoading={saving}>Update Payment</Button>
+            </div>
+          </div>
+        )}
+      </TailwindModal>
 
-      {/* ── Full-Screen Document Viewer ── */}
+      {/* Delete Confirm Modal */}
+      <TailwindModal isOpen={isDelOpen} onClose={() => setIsDelOpen(false)} title="Delete Payment?">
+        <div className="p-2">
+          <p className="text-zinc-600 mb-6">This action cannot be undone. Are you sure you want to permanently delete this payment?</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="light" onClick={() => setIsDelOpen(false)}>Cancel</Button>
+            <Button className="bg-red-600 text-white hover:bg-red-700 font-bold" onClick={handleDelete}>Delete Payment</Button>
+          </div>
+        </div>
+      </TailwindModal>
+
+      {/* Full-Screen Document Viewer */}
       {viewerUrl && (() => {
         const isPdf = viewerUrl.toLowerCase().includes('.pdf');
-        return (
-          <FullScreenViewer url={viewerUrl} isPdf={isPdf} onClose={() => setViewerUrl(null)} />
-        );
+        return <FullScreenViewer url={viewerUrl} isPdf={isPdf} onClose={() => setViewerUrl(null)} />;
       })()}
-
-    </Container>
-  )
+    </div>
+  );
 }

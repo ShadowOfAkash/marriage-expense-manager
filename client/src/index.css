@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+@source "../node_modules/@heroui/react";
+@source "../node_modules/@heroui/theme";
+@source "../node_modules/@heroui/styles";
+
+@theme {
+  --color-brand-50: #f0f5ff;
+  --color-brand-100: #abd2fa;
+  --color-brand-200: #8ebaff;
+  --color-brand-300: #7692ff;
+  --color-brand-400: #4a6cf8;
+  --color-brand-500: #1b2cc1;
+  --color-brand-600: #1524a8;
+  --color-brand-700: #101a85;
+  --color-brand-800: #0c1566;
+  --color-brand-900: #091540;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 font-sans;
+}

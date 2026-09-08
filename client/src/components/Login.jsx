@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Box, Container, VStack, Heading, Text, Input, Button, Divider,
-  HStack, useToast, Flex, Image
-} from '@chakra-ui/react';
+import { Button, TextField, Label, Input, FieldError } from '@heroui/react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,7 +11,6 @@ export default function Login() {
   const { loginWithGoogle, loginWithEmail, signupWithEmail, resetPassword } = useAuth();
   const toast = useToast();
 
-  
   async function handleResetPassword() {
     if (!email) {
       return toast({ title: 'Enter your email', description: 'Please enter your email address in the field above to reset your password.', status: 'warning' });
@@ -37,7 +34,7 @@ export default function Login() {
       }
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
-        toast({ title: 'Email Already Exists', description: 'This email is already registered. If you created it with Google, please click "Continue with Google", or use "Forgot Password" to set a password!', status: 'warning', duration: 8000 });
+        toast({ title: 'Email Already Exists', description: 'This email is already registered.', status: 'warning', duration: 8000 });
       } else {
         toast({ title: 'Authentication Failed', description: err.message, status: 'error' });
       }
@@ -54,75 +51,73 @@ export default function Login() {
   }
 
   return (
-    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
-      <Container maxW="md">
-        <Box bg="white" p={8} borderRadius="2xl" shadow="xl">
-          <VStack spacing={6} align="stretch">
-            <Box textAlign="center">
-              <Flex w={12} h={12} bg="brand.900" color="white" borderRadius="xl" align="center" justify="center" mx="auto" mb={4} fontSize="xl" fontWeight="bold">
-                M
-              </Flex>
-              <Heading size="lg" color="brand.900">Marriage Expense Manager</Heading>
-              <Text color="gray.500" mt={2}>Welcome back! Please sign in to continue.</Text>
-            </Box>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 p-4">
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col gap-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-zinc-900 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+              M
+            </div>
+            <h1 className="text-2xl font-bold text-zinc-900">Marriage Payment Manager</h1>
+            <p className="text-zinc-500 mt-2">Welcome back! Please sign in to continue.</p>
+          </div>
 
-            <Button
-              w="100%"
-              variant="outline"
-              size="lg"
-              onClick={handleGoogleLogin}
-              leftIcon={<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" width="20px" />}
-            >
+          <Button
+            className="w-full h-12 font-bold bg-white border-1 border-zinc-300 text-zinc-700 shadow-sm hover:bg-zinc-50"
+            variant="solid"
+            onClick={handleGoogleLogin}
+          >
+            <div className="flex items-center gap-2">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" width="20" />
               Continue with Google
+            </div>
+          </Button>
+
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-zinc-200" />
+            <span className="text-sm text-zinc-400 whitespace-nowrap">or email</span>
+            <div className="flex-1 h-px bg-zinc-200" />
+          </div>
+
+          <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
+            <TextField isRequired>
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </TextField>
+            <TextField isRequired>
+              <Label>Password</Label>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </TextField>
+
+            <Button type="submit" className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-12 font-bold mt-2" isLoading={loading}>
+              {isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
+          </form>
 
-            <HStack>
-              <Divider />
-              <Text fontSize="sm" whiteSpace="nowrap" color="gray.400">or email</Text>
-              <Divider />
-            </HStack>
+          {isLogin && (
+            <div className="text-center text-sm text-zinc-900 cursor-pointer font-medium hover:underline" onClick={handleResetPassword}>
+              Forgot Password?
+            </div>
+          )}
 
-            <form onSubmit={handleEmailSubmit}>
-              <VStack spacing={4}>
-                <Input
-                  placeholder="Email Address"
-                  type="email"
-                  size="lg"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                />
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  size="lg"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-
-                <Button type="submit" bg="brand.900" color="white" w="100%" size="lg" isLoading={loading} _hover={{ bg: 'brand.800' }}>
-                  {isLogin ? 'Sign In' : 'Sign Up'}
-                </Button>
-              </VStack>
-            </form>
-
-            {isLogin && (
-              <Text textAlign="center" fontSize="sm" color="brand.500" cursor="pointer" onClick={handleResetPassword}>
-                Forgot Password?
-              </Text>
-            )}
-
-
-            <Text textAlign="center" fontSize="sm" color="gray.500">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <Text as="span" color="brand.500" fontWeight="bold" cursor="pointer" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? 'Sign Up' : 'Sign In'}
-              </Text>
-            </Text>
-          </VStack>
-        </Box>
-      </Container>
-    </Box>
+          <div className="text-center text-sm text-zinc-500 mt-2">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            <span className="text-zinc-900 font-bold cursor-pointer hover:underline" onClick={() => setIsLogin(!isLogin)}>
+              {isLogin ? 'Sign Up' : 'Sign In'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

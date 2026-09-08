@@ -158,7 +158,13 @@ async function requireAuth(req, res, next) {
   if (getApps().length > 0) {
     try {
       const decodedToken = await getAuth().verifyIdToken(token);
+      // Map known email to the legacy data UID
+      if (decodedToken.email === 'akashtiwari.mnnit@gmail.com') {
+        console.log(`[Auth] Mapping Google UID ${decodedToken.uid} → jzSCJChQ1OTinp3PESQzSNeCGlp1 for ${decodedToken.email}`);
+        decodedToken.uid = 'jzSCJChQ1OTinp3PESQzSNeCGlp1';
+      }
       req.user = decodedToken;
+      console.log(`[Auth] Verified Firebase token. uid=${req.user.uid} email=${decodedToken.email}`);
       return next();
     } catch (error) {
       console.error('Firebase auth error:', error.message);
@@ -166,16 +172,19 @@ async function requireAuth(req, res, next) {
     }
   }
 
-  // ── Path 2: No Firebase Admin (missing .env) — decode JWT payload locally ──
-  // Firebase ID tokens are standard JWTs. We can safely decode the payload
-  // (base64url middle segment) to get the uid for local development.
+  // ── Path 2: No Firebase Admin — decode JWT payload locally (dev fallback) ──
   try {
     const parts = token.split('.');
     if (parts.length === 3) {
       const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-      const uid = payload.user_id || payload.sub || payload.uid;
+      let uid = payload.user_id || payload.sub || payload.uid;
+      const email = payload.email || '';
+      if (email === 'akashtiwari.mnnit@gmail.com') {
+        uid = 'jzSCJChQ1OTinp3PESQzSNeCGlp1';
+      }
       if (uid) {
-        req.user = { uid };
+        req.user = { uid, email };
+        console.log(`[Auth] Decoded JWT locally. uid=${uid} email=${email}`);
         return next();
       }
     }
@@ -762,6 +771,7 @@ app.get('/api/health', (req, res) => res.status(200).send('OK'));
 
 // ─── Catch-all ──────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
