@@ -5,6 +5,7 @@ import Sidebar   from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Expenses  from './components/Expenses'
 import Savings   from './components/Savings'
+import Bookings from './components/Bookings'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 function MainApp() {
@@ -20,6 +21,7 @@ function MainApp() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/expenses" element={<Expenses />} />
+                <Route path="/bookings" element={<Bookings />} />
           <Route path="/savings" element={<Savings />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

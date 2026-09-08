@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Card, Chip, Input, TextField, Label } from '@heroui/react';
-import { Search, Plus, Filter, Tag, ChevronDown, Receipt, Calendar, Pencil, Trash2, Image as ImageIcon, Paperclip, X, IndianRupee, AlignLeft } from 'lucide-react';
+import { Search, Plus, Filter, Tag, ChevronDown, Receipt, Calendar, Pencil, Trash2, Image as ImageIcon, Paperclip, X, IndianRupee, AlignLeft, CalendarCheck } from 'lucide-react';
 import { api, fmt, formatDate, CATEGORIES } from '../utils/api';
 import { AddExpenseModal } from './SharedModals';
 import { TailwindModal } from './TailwindModal';
+import { ActionMenu } from './ActionMenu';
 
 // Full Screen Viewer (Tailwind converted from old Chakra)
 function FullScreenViewer({ url, isPdf, onClose }) {
@@ -39,10 +40,12 @@ export default function Expenses() {
   const [saving, setSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  const [bookings, setBookings] = useState([]);
   const loadData = async () => {
     try {
-      const data = await api.getExpenses();
-      setExpenses(data);
+      const [expData, bkData] = await Promise.all([api.getExpenses(), api.getBookings()]);
+      setExpenses(expData || []);
+      setBookings(bkData || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -149,10 +152,10 @@ export default function Expenses() {
               <thead>
                 <tr className="border-b border-zinc-200 text-zinc-500 font-medium bg-zinc-50">
                   <th className="py-3 px-4 font-medium whitespace-nowrap">DATE</th>
+                  <th className="py-3 px-4 font-medium whitespace-nowrap">BOOKING</th>
                   <th className="py-3 px-4 font-medium whitespace-nowrap">CATEGORY</th>
                   <th className="py-3 px-4 font-medium min-w-[200px]">DESCRIPTION</th>
-                  <th className="py-3 px-4 font-medium text-center whitespace-nowrap">DOCUMENT</th>
-                  <th className="py-3 px-4 font-medium text-right whitespace-nowrap">AMOUNT</th>
+                                    <th className="py-3 px-4 font-medium text-right whitespace-nowrap">AMOUNT</th>
                   <th className="py-3 px-4 font-medium text-right whitespace-nowrap">ACTIONS</th>
                 </tr>
               </thead>
@@ -162,15 +165,7 @@ export default function Expenses() {
                     <td className="py-3 px-4 whitespace-nowrap"><span className="text-sm text-zinc-600 font-medium"><Calendar size={12} className="inline mr-1 text-zinc-400" />{formatDate(e.date)}</span></td>
                     <td className="py-3 px-4 whitespace-nowrap"><Chip size="sm" variant="flat" color="default" className="bg-zinc-100 text-zinc-900 border border-zinc-300">{e.category}</Chip></td>
                     <td className="py-3 px-4"><span className="text-sm text-zinc-800">{e.description || "—"}</span></td>
-                    <td className="py-3 px-4 text-center">
-                      {e.receipt_url ? (
-                        <Button isIconOnly size="sm" variant="light" className="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200" onClick={() => setViewerUrl(e.receipt_url)}>
-                          <ImageIcon size={16} />
-                        </Button>
-                      ) : (
-                        <span className="text-zinc-300">—</span>
-                      )}
-                    </td>
+                    
                     <td className="py-3 px-4 text-right whitespace-nowrap"><span className="font-bold text-zinc-900">{fmt(e.amount)}</span></td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex justify-end gap-1">

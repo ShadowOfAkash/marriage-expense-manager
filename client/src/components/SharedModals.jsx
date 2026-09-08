@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { TailwindModal } from './TailwindModal';
 import { Button, Select, ListBox, Label, Input, TextField } from "@heroui/react";
-import { Plus, Tag, IndianRupee, Calendar, AlignLeft, Camera, Image as ImageIcon, CalendarDays, StickyNote } from 'lucide-react';
+import { Plus, Tag, IndianRupee, Calendar, AlignLeft, Camera, Image as ImageIcon, CalendarDays, StickyNote, CalendarCheck } from 'lucide-react';
 import { ChevronDown } from 'lucide-react';
 import { api, CATEGORIES, MONTH_NAMES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 
-const EMPTY_EXP_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '' };
+const EMPTY_EXP_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '', booking_id: '' };
 
-export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
+export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }) {
   const toast = useToast();
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] });
@@ -16,6 +16,17 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
   const [saving, setSaving] = useState(false);
 
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const [bookings, setBookings] = useState([]);
+  useEffect(() => {
+    if (isOpen) {
+      api.getBookings().then(setBookings).catch(() => {});
+      if (initialBookingId) setF('booking_id', initialBookingId);
+    } else {
+      setForm({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] });
+    }
+  }, [isOpen, initialBookingId]);
+
 
   const handleScan = async (e) => {
     const file = e.target.files?.[0];

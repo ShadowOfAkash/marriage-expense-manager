@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tooltip, Button } from '@heroui/react';
-import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { LayoutDashboard, Receipt, PiggyBank, LogOut, ChevronLeft, ChevronRight, User, CalendarCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ export default function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'bookings',  label: 'Bookings',  icon: CalendarCheck },
     { id: 'expenses',  label: 'Payments',  icon: Receipt },
     { id: 'savings',   label: 'Savings',   icon: PiggyBank },
   ];

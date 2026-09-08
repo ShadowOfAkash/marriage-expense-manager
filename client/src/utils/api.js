@@ -23,6 +23,12 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 export const api = {
+  // BOOKINGS
+  getBookings:   ()       => fetchWithAuth('/api/bookings'),
+  addBooking:    (data)   => fetchWithAuth('/api/bookings', { method: 'POST', body: JSON.stringify(data) }),
+  updateBooking: (id, data) => fetchWithAuth(`/api/bookings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBooking: (id)     => fetchWithAuth(`/api/bookings/${id}`, { method: 'DELETE' }),
+
   // Telegram
   generateTelegramCode: () => fetchWithAuth('/api/telegram/link-code', { method: 'POST' }),
   getTelegramStatus: () => fetchWithAuth('/api/telegram/status'),

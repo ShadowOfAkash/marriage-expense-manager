@@ -1,117 +1,85 @@
 const fs = require('fs');
 let code = fs.readFileSync('server.js', 'utf8');
 
-// 1. Add urlencoded middleware
-code = code.replace(
-  "app.use(express.json({ limit: '10mb' }));",
-  "app.use(express.json({ limit: '10mb' }));\napp.use(express.urlencoded({ extended: true }));"
-);
+if (!code.includes('/api/bookings')) {
+  const bookingsApi = `
+// ═══════════════════════════════════════════════════════════════════════════
+// BOOKINGS
+// ═══════════════════════════════════════════════════════════════════════════
 
-// 2. Add ALTER TABLE for status column
-code = code.replace(
-  "console.log('✅ Turso tables ready');",
-  "try { await db.execute(\"ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'approved'\"); } catch(e){}\n    console.log('✅ Turso tables ready');"
-);
-
-// 3. Update POST /api/expenses
-code = code.replace(
-  "const { category, description, amount, date } = req.body;",
-  "const { category, description, amount, date, status } = req.body;\n  const finalStatus = status || 'approved';"
-).replace(
-  "'INSERT INTO expenses (category, description, amount, date) VALUES (?, ?, ?, ?)',\n        [category, description || '', Number(amount), date]",
-  "'INSERT INTO expenses (category, description, amount, date, status) VALUES (?, ?, ?, ?, ?)',\n        [category, description || '', Number(amount), date, finalStatus]"
-).replace(
-  "const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, created_at: new Date().toISOString() };",
-  "const expense = { id: d._nextExpenseId++, category, description: description || '', amount: Number(amount), date, status: finalStatus, created_at: new Date().toISOString() };"
-);
-
-// 4. Update PUT /api/expenses/:id
-code = code.replace(
-  "const { category, description, amount, date } = req.body;",
-  "const { category, description, amount, date, status } = req.body;\n  const finalStatus = status || 'approved';"
-).replace(
-  "'UPDATE expenses SET category=?,description=?,amount=?,date=? WHERE id=?',\n        [category, description || '', Number(amount), date, id]",
-  "'UPDATE expenses SET category=?,description=?,amount=?,date=?,status=? WHERE id=?',\n        [category, description || '', Number(amount), date, finalStatus, id]"
-).replace(
-  "d.expenses[idx] = { ...d.expenses[idx], category, description: description || '', amount: Number(amount), date };",
-  "d.expenses[idx] = { ...d.expenses[idx], category, description: description || '', amount: Number(amount), date, status: finalStatus };"
-);
-
-// 5. Add WhatsApp Webhook
-const webhookCode = `
-app.post('/api/whatsapp/webhook', async (req, res) => {
-  const { MediaUrl0, MediaContentType0, Body, From } = req.body;
-  
-  if (!MediaUrl0) {
-     return res.send('<Response><Message>Please send a photo of a receipt/bill.</Message></Response>');
-  }
-
+app.get('/api/bookings', requireAuth, async (req, res) => {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.send('<Response><Message>API Key missing on server.</Message></Response>');
+    if (useLibSQL) {
+      const rows = await dbAll('SELECT * FROM bookings WHERE user_id = ? ORDER BY id DESC', [req.user.uid]);
+      return res.json(rows);
+    }
+    const d = readJSON();
+    if (!d.bookings) d.bookings = [];
+    res.json([...d.bookings].filter(b => b.user_id === req.user.uid || !b.user_id || b.user_id === 'legacy_user').reverse());
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    // 1. Fetch image from Twilio
-    const imgRes = await fetch(MediaUrl0);
-    const arrayBuffer = await imgRes.arrayBuffer();
-    const base64Image = Buffer.from(arrayBuffer).toString('base64');
-    const mimeType = MediaContentType0 || 'image/jpeg';
+app.post('/api/bookings', requireAuth, async (req, res) => {
+  const { vendor, service, booking_date, event_date, amount, advance, status, notes } = req.body;
+  if (!vendor || !service) return res.status(400).json({ error: 'Vendor and service required' });
+  try {
+    if (useLibSQL) {
+      const result = await dbRun(
+        'INSERT INTO bookings (user_id, vendor, service, booking_date, event_date, amount, advance, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [req.user.uid, vendor, service, booking_date || '', event_date || '', Number(amount)||0, Number(advance)||0, status || 'Pending', notes || '']
+      );
+      return res.json({ id: result.lastInsertRowid, success: true });
+    }
+    const d = readJSON();
+    if (!d.bookings) d.bookings = [];
+    const newBooking = { id: Date.now(), user_id: req.user.uid, vendor, service, booking_date: booking_date||'', event_date: event_date||'', amount: Number(amount)||0, advance: Number(advance)||0, status: status||'Pending', notes: notes||'' };
+    d.bookings.push(newBooking);
+    writeJSON(d);
+    res.json(newBooking);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    // 2. Process with Gemini
-    const { GoogleGenerativeAI } = require('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
-
-    const prompt = \`You are a receipt data extractor. Extract the following from this receipt/bill image:
-    1. amount (number, the total final amount paid)
-    2. date (string, YYYY-MM-DD format, guess the year if missing based on recent times)
-    3. description (string, short summary of the vendor/items, max 5 words)
-    4. category (string, MUST be exactly one of these: Venue, Catering, Photography, Decoration, Clothing, Jewellery, Invitation Cards, Music / DJ, Mehendi, Makeup, Travel, Accommodation, Gifts, Miscellaneous. Guess the best fit.)
-
-    Return ONLY a raw JSON object with these keys (amount, date, description, category).\`;
-
-    const imageParts = [{ inlineData: { data: base64Image, mimeType: mimeType } }];
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = await result.response;
-    const text = response.text().trim().replace(/^\\s*\`\`\`json/i, '').replace(/^\\s*\`\`\`/i, '').replace(/\`\`\`\\s*$/i, '').trim();
-    
-    let aiData = JSON.parse(text);
-
-    // 3. Save to database as DRAFT
-    const finalAmount = Number(aiData.amount) || 0;
-    const finalDate = aiData.date || new Date().toISOString().split('T')[0];
-    const finalCat = aiData.category || 'Miscellaneous';
-    const finalDesc = aiData.description || 'WhatsApp Upload';
-    
+app.put('/api/bookings/:id', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { vendor, service, booking_date, event_date, amount, advance, status, notes } = req.body;
+  try {
     if (useLibSQL) {
       await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status) VALUES (?, ?, ?, ?, ?)',
-        [finalCat, finalDesc, finalAmount, finalDate, 'draft']
+        'UPDATE bookings SET vendor=?, service=?, booking_date=?, event_date=?, amount=?, advance=?, status=?, notes=? WHERE id=? AND user_id=?',
+        [vendor, service, booking_date, event_date, Number(amount)||0, Number(advance)||0, status, notes, id, req.user.uid]
       );
-    } else {
-      const d = readJSON();
-      d.expenses.push({ id: d._nextExpenseId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', created_at: new Date().toISOString() });
-      writeJSON(d);
+      return res.json({ success: true });
     }
+    const d = readJSON();
+    if (!d.bookings) d.bookings = [];
+    const idx = d.bookings.findIndex(b => b.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Not found' });
+    d.bookings[idx] = { ...d.bookings[idx], vendor, service, booking_date, event_date, amount: Number(amount)||0, advance: Number(advance)||0, status, notes };
+    writeJSON(d);
+    res.json(d.bookings[idx]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    res.send(\`<Response><Message>✅ Receipt scanned successfully! 
-Total: ₹\${finalAmount}
-Category: \${finalCat}
-
-Saved to your portal as a DRAFT. Please review and approve it on the dashboard.</Message></Response>\`);
-  } catch (e) {
-    console.error("WhatsApp Webhook error:", e);
-    res.send(\`<Response><Message>❌ Error processing receipt: \${e.message}</Message></Response>\`);
-  }
+app.delete('/api/bookings/:id', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    if (useLibSQL) { await dbRun('DELETE FROM bookings WHERE id = ?', [id]); return res.json({ success: true }); }
+    const d = readJSON();
+    if (!d.bookings) d.bookings = [];
+    const idx = d.bookings.findIndex(b => b.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Not found' });
+    d.bookings.splice(idx, 1);
+    writeJSON(d);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EXPENSES
+// SAVINGS
 `;
-
-code = code.replace(
-  "// ═══════════════════════════════════════════════════════════════════════════\n// EXPENSES",
-  webhookCode
-);
-
-fs.writeFileSync('server.js', code);
-console.log("server.js patched successfully.");
+  code = code.replace(/\/\/ ═══════════════════════════════════════════════════════════════════════════\n\/\/ SAVINGS/g, bookingsApi);
+  fs.writeFileSync('server.js', code);
+  console.log("Patched server.js with Bookings API");
+} else {
+  console.log("Bookings API already exists");
+}

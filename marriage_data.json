@@ -341,7 +341,7 @@
   "_nextExpenseId": 27,
   "_nextSavingsId": 8,
   "telegram_codes": {
-    "226608": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+    "455332": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
     "866998": "mock-uid-akashtiwarimnnitgmailcom"
   },
   "telegram_links": {
@@ -351,5 +351,19 @@
     "jzSCJChQ1OTinp3PESQzSNeCGlp1": {
       "amount": 600000
     }
-  }
+  },
+  "bookings": [
+    {
+      "id": 1788851575339,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "vendor": "fdgvdf",
+      "service": "fvfd",
+      "booking_date": "2026-09-08",
+      "event_date": "2026-09-24",
+      "amount": 2342,
+      "advance": 233,
+      "status": "Confirmed",
+      "notes": "rtf"
+    }
+  ]
 }

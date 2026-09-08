@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@heroui/react';
-import { LayoutDashboard, Receipt, PiggyBank, ChevronDown, LogOut, User, Gem } from 'lucide-react';
+import { LayoutDashboard, Receipt, PiggyBank, ChevronDown, LogOut, User, Gem, CalendarCheck } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 
 const TABS = [
+  { id: 'bookings',  label: 'Bookings',  Icon: CalendarCheck },
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { id: 'expenses',  label: 'Payments',  Icon: Receipt          },
   { id: 'savings',   label: 'Savings',   Icon: PiggyBank        },
