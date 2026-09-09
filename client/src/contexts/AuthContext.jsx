@@ -39,7 +39,7 @@ function generateMockToken(uid, email) {
   return `mock.${base64}.token`;
 }
 
-const createMockUser = (email) => {
+export const createMockUser = (email) => {
   const uid = email === 'akashtiwari.mnnit@gmail.com' ? 'jzSCJChQ1OTinp3PESQzSNeCGlp1' : `mock-uid-${email.replace(/[^a-zA-Z0-9]/g, '')}`;
   return {
     uid,
@@ -49,30 +49,37 @@ const createMockUser = (email) => {
   };
 };
 
-let app, googleProvider;
-export const auth = isMock
-  ? {
-      get currentUser() {
-        const savedUserEmail = localStorage.getItem('mock_user_email');
-        return savedUserEmail ? createMockUser(savedUserEmail) : null;
-      }
-    }
-  : (() => {
-      app = initializeApp(firebaseConfig);
-      googleProvider = new GoogleAuthProvider();
-      return getAuth(app);
-    })();
+let app;
+let googleProvider;
+export { googleProvider };
+
+export const auth = (() => {
+  try {
+    app = initializeApp(firebaseConfig);
+    googleProvider = new GoogleAuthProvider();
+    return getAuth(app);
+  } catch (e) {
+    console.error("Firebase init error:", e);
+    return null;
+  }
+})();
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedUserEmail = localStorage.getItem('mock_user_email');
+      if (savedUserEmail) return createMockUser(savedUserEmail);
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isMock) {
+    if (isMock || !auth) {
       const savedUserEmail = localStorage.getItem('mock_user_email');
       if (savedUserEmail) {
         setCurrentUser(createMockUser(savedUserEmail));
@@ -84,49 +91,67 @@ export const AuthProvider = ({ children }) => {
     }
 
     const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
+      const mockEmail = localStorage.getItem('mock_user_email');
+      if (mockEmail) {
+        setCurrentUser(createMockUser(mockEmail));
+      } else {
+        setCurrentUser(user);
+      }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
-  const loginWithGoogle = () => {
+  const loginWithGoogle = async () => {
     if (isMock) {
       const user = createMockUser('akashtiwari.mnnit@gmail.com');
       localStorage.setItem('mock_user_email', user.email);
       setCurrentUser(user);
-      return Promise.resolve(user);
+      return user;
     }
-    return signInWithPopup(auth, googleProvider);
+    const res = await signInWithPopup(auth, googleProvider);
+    localStorage.removeItem('mock_user_email');
+    setCurrentUser(res.user);
+    return res.user;
   };
 
-  const loginWithEmail = (email, password) => {
+  const loginWithEmail = async (email, password) => {
     if (isMock) {
       const user = createMockUser(email);
       localStorage.setItem('mock_user_email', user.email);
       setCurrentUser(user);
-      return Promise.resolve(user);
+      return user;
     }
-    return signInWithEmailAndPassword(auth, email, password);
+    const res = await signInWithEmailAndPassword(auth, email, password);
+    localStorage.removeItem('mock_user_email');
+    setCurrentUser(res.user);
+    return res.user;
   };
 
-  const signupWithEmail = (email, password) => {
+  const signupWithEmail = async (email, password) => {
     if (isMock) {
       const user = createMockUser(email);
       localStorage.setItem('mock_user_email', user.email);
       setCurrentUser(user);
-      return Promise.resolve(user);
+      return user;
     }
-    return createUserWithEmailAndPassword(auth, email, password);
+    const res = await createUserWithEmailAndPassword(auth, email, password);
+    localStorage.removeItem('mock_user_email');
+    setCurrentUser(res.user);
+    return res.user;
   };
 
-  const logout = () => {
-    if (isMock) {
+  const logout = async () => {
+    try {
       localStorage.removeItem('mock_user_email');
+      if (auth) {
+        await signOut(auth);
+      }
+    } catch (err) {
+      console.warn('SignOut error:', err);
+    } finally {
       setCurrentUser(null);
-      return Promise.resolve();
     }
-    return signOut(auth);
   };
 
   const resetPassword = (email) => {

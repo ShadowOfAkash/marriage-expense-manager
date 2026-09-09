@@ -62,7 +62,7 @@ export default function Login() {
             <p className="text-zinc-500 mt-2">Welcome back! Please sign in to continue.</p>
           </div>
 
-          <Button
+          <Button radius="sm"
             className="w-full h-12 font-bold bg-white border-1 border-zinc-300 text-zinc-700 shadow-sm hover:bg-zinc-50"
             variant="solid"
             onClick={handleGoogleLogin}
@@ -82,7 +82,7 @@ export default function Login() {
           <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
             <TextField isRequired>
               <Label>Email Address</Label>
-              <Input
+              <Input radius="sm"
                 type="email"
                 placeholder="Email Address"
                 value={email}
@@ -91,7 +91,7 @@ export default function Login() {
             </TextField>
             <TextField isRequired>
               <Label>Password</Label>
-              <Input
+              <Input radius="sm"
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -99,7 +99,7 @@ export default function Login() {
               />
             </TextField>
 
-            <Button type="submit" className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-12 font-bold mt-2" isLoading={loading}>
+            <Button radius="sm" type="submit" className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-12 font-bold mt-2" isLoading={loading}>
               {isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
           </form>

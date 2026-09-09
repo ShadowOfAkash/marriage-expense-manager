@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { TailwindModal } from './TailwindModal';
 import { Button, Select, ListBox, Label, Input, TextField } from "@heroui/react";
-import { Plus, Tag, IndianRupee, Calendar, AlignLeft, Camera, Image as ImageIcon, CalendarDays, StickyNote, CalendarCheck } from 'lucide-react';
+import { Plus, Tag, IndianRupee, Calendar, AlignLeft, Camera, Image as ImageIcon, CalendarDays, StickyNote, CalendarCheck, CreditCard } from 'lucide-react';
 import { ChevronDown } from 'lucide-react';
 import { api, CATEGORIES, MONTH_NAMES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 
-const EMPTY_EXP_FORM = { category: '', description: '', amount: '', date: '', receipt_url: '', booking_id: '' };
+const EMPTY_EXP_FORM = { description: '', amount: '', date: '', receipt_url: '', booking_id: '', payment_type: 'Normal' };
 
 export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }) {
   const toast = useToast();
@@ -21,7 +21,14 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
   useEffect(() => {
     if (isOpen) {
       api.getBookings().then(setBookings).catch(() => {});
-      if (initialBookingId) setF('booking_id', initialBookingId);
+      if (initialBookingId) {
+        setForm(p => ({
+          ...p,
+          booking_id: initialBookingId,
+          payment_type: 'Advance',
+          date: p.date || new Date().toISOString().split('T')[0]
+        }));
+      }
     } else {
       setForm({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] });
     }
@@ -40,7 +47,6 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
           const aiData = await api.scanReceipt(base64String, file.type);
           setForm(prev => ({
             ...prev,
-            category: aiData.category || '',
             description: aiData.description || '',
             amount: aiData.amount ? String(aiData.amount) : '',
             date: aiData.date || new Date().toISOString().split('T')[0],
@@ -60,14 +66,19 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
   };
 
   const handleAdd = async () => {
-    if (!form.category || !form.amount || !form.date) return toast({ title: 'Fill required fields', status: 'warning' });
+    if (!form.amount || !form.date) return toast({ title: 'Fill required fields (Amount, Date)', status: 'warning' });
     setSaving(true);
     try {
-      await api.addExpense({ ...form, amount: Number(form.amount) });
+      const created = await api.addExpense({
+        ...form,
+        amount: Number(form.amount),
+        booking_id: form.booking_id ? Number(form.booking_id) : null,
+        payment_type: form.payment_type || 'Normal'
+      });
       toast({ title: 'Payment saved!', status: 'success' });
       setForm({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] });
       onClose();
-      if (onSuccess) onSuccess();
+      if (onSuccess) await onSuccess(created);
     } catch {
       toast({ title: 'Error saving', status: 'error' });
     } finally {
@@ -93,7 +104,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
                 <ImageIcon size={32} className="text-zinc-900" />
                 <span className="font-bold text-zinc-900">Document Uploaded Successfully!</span>
                 <span className="text-sm text-zinc-500">Click or drag another to replace</span>
-                <Button size="sm" variant="outline" className="mt-2 border-zinc-900 text-zinc-900 hover:bg-zinc-900 hover:text-white" onClick={(e) => { e.stopPropagation(); window.open(form.receipt_url, '_blank'); }}>
+                <Button radius="sm" size="sm" variant="outline" className="mt-2 border-zinc-900 text-zinc-900 hover:bg-zinc-900 hover:text-white" onClick={(e) => { e.stopPropagation(); window.open(form.receipt_url, '_blank'); }}>
                   View Document
                 </Button>
                 {scanning && <span className="text-sm text-zinc-700 font-bold">Analyzing...</span>}
@@ -109,17 +120,36 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
             <input type="file" accept="image/*,application/pdf" ref={fileInputRef} onChange={handleScan} className="hidden" />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><Tag size={12} /> Category</Label>
+              <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><CreditCard size={12} /> Payment Type</Label>
               <div className="relative">
                 <select
-                  value={form.category || ''}
-                  onChange={(e) => setF('category', e.target.value)}
+                  value={form.payment_type || 'Normal'}
+                  onChange={(e) => setF('payment_type', e.target.value)}
                   className="w-full h-10 px-3 bg-zinc-100 hover:bg-zinc-200 transition-colors rounded-lg text-sm font-medium text-zinc-900 border-none outline-none focus:ring-2 focus:ring-zinc-400 appearance-none cursor-pointer"
                 >
-                  <option value="" disabled>— Select —</option>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="Normal">Normal Payment</option>
+                  <option value="Advance">Advance Payment</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><CalendarCheck size={12} /> Linked Booking</Label>
+              <div className="relative">
+                <select
+                  value={form.booking_id || ''}
+                  onChange={(e) => setF('booking_id', e.target.value ? Number(e.target.value) : '')}
+                  className="w-full h-10 px-3 bg-zinc-100 hover:bg-zinc-200 transition-colors rounded-lg text-sm font-medium text-zinc-900 border-none outline-none focus:ring-2 focus:ring-zinc-400 appearance-none cursor-pointer"
+                >
+                  <option value="">— None (Independent) —</option>
+                  {bookings.map(b => (
+                    <option key={b.id} value={b.id}>
+                      {b.vendor} - {b.service}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
               </div>
@@ -127,7 +157,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
 
             <TextField>
               <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><IndianRupee size={12} /> Amount</Label>
-              <Input 
+              <Input radius="sm" 
                 type="number" 
                 value={form.amount} 
                 onChange={e => setF('amount', e.target.value)} 
@@ -137,24 +167,26 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess, initialBookingId }
 
             <TextField>
               <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><Calendar size={12} /> Date</Label>
-              <Input type="date" value={form.date} onChange={e => setF('date', e.target.value)} />
+              <Input radius="sm" type="date" value={form.date} onChange={e => setF('date', e.target.value)} />
             </TextField>
 
-            <TextField>
-              <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><AlignLeft size={12} /> Description</Label>
-              <Input 
-                value={form.description} 
-                onChange={e => setF('description', e.target.value)} 
-                onKeyDown={e => e.key === 'Enter' && handleAdd()} 
-              />
-            </TextField>
+            <div className="col-span-2">
+              <TextField>
+                <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><AlignLeft size={12} /> Description</Label>
+                <Input radius="sm" 
+                  value={form.description} 
+                  onChange={e => setF('description', e.target.value)} 
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()} 
+                />
+              </TextField>
+            </div>
           </div>
 
           <div className="flex gap-2 mt-6">
-            <Button variant="solid" className="bg-zinc-900 text-white hover:bg-zinc-800" onClick={handleAdd} isLoading={saving}>
+            <Button radius="sm" variant="solid" className="bg-zinc-900 text-white hover:bg-zinc-800" onPress={handleAdd} onClick={handleAdd} isLoading={saving}>
               <Plus size={15} /> Save Payment
             </Button>
-            <Button variant="light" onClick={() => setForm({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] })}>
+            <Button radius="sm" variant="light" onClick={() => setForm({ ...EMPTY_EXP_FORM, date: new Date().toISOString().split('T')[0] })}>
               Clear
             </Button>
           </div>
@@ -175,11 +207,11 @@ export function AddSavingModal({ isOpen, onClose, onSuccess }) {
     if (!form.amount || Number(form.amount) <= 0) return toast({ title: 'Enter amount', status: 'warning' });
     setSaving(true);
     try {
-      await api.addSavings(form);
+      const created = await api.addSavings(form);
       toast({ title: 'Savings logged!', status: 'success' });
       setForm({ month: currentMonth(), year: currentYear(), amount: '', note: '' });
       onClose();
-      if (onSuccess) onSuccess();
+      if (onSuccess) await onSuccess(created);
     } catch {
       toast({ title: 'Error saving', status: 'error' });
     } finally {
@@ -207,12 +239,12 @@ export function AddSavingModal({ isOpen, onClose, onSuccess }) {
 
             <TextField>
               <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><CalendarDays size={12} /> Year</Label>
-              <Input type="number" value={form.year} onChange={e => setF('year', e.target.value)} />
+              <Input radius="sm" type="number" value={form.year} onChange={e => setF('year', e.target.value)} />
             </TextField>
 
             <TextField>
               <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><IndianRupee size={12} /> Amount</Label>
-              <Input 
+              <Input radius="sm" 
                 type="number" 
                 value={form.amount} 
                 onChange={e => setF('amount', e.target.value)} 
@@ -222,7 +254,7 @@ export function AddSavingModal({ isOpen, onClose, onSuccess }) {
 
             <TextField>
               <Label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-1.5 mb-1"><StickyNote size={12} /> Notes</Label>
-              <Input 
+              <Input radius="sm" 
                 value={form.note} 
                 onChange={e => setF('note', e.target.value)} 
                 onKeyDown={e => e.key === 'Enter' && handleAdd()} 
@@ -230,10 +262,10 @@ export function AddSavingModal({ isOpen, onClose, onSuccess }) {
             </TextField>
           </div>
           <div className="flex gap-2 mt-6">
-            <Button variant="solid" className="bg-zinc-900 text-white hover:bg-zinc-800" onClick={handleAdd} isLoading={saving}>
+            <Button radius="sm" variant="solid" className="bg-zinc-900 text-white hover:bg-zinc-800" onPress={handleAdd} onClick={handleAdd} isLoading={saving}>
               <Plus size={15} /> Save Entry
             </Button>
-            <Button variant="light" onClick={() => setForm({ month: currentMonth(), year: currentYear(), amount: '', note: '' })}>
+            <Button radius="sm" variant="light" onClick={() => setForm({ month: currentMonth(), year: currentYear(), amount: '', note: '' })}>
               Clear
             </Button>
           </div>

@@ -5,6 +5,12 @@
 @source "../node_modules/@heroui/styles";
 
 @theme {
+  /* HeroUI Global Radius Overrides (remove pill-shape defaults) */
+  --heroui-radius-small: 0.25rem;
+  --heroui-radius-medium: 0.375rem;
+  --heroui-radius-large: 0.5rem;
+
+  /* Brand colors (legacy) */
   --color-brand-50: #f0f5ff;
   --color-brand-100: #abd2fa;
   --color-brand-200: #8ebaff;
@@ -15,8 +21,53 @@
   --color-brand-700: #101a85;
   --color-brand-800: #0c1566;
   --color-brand-900: #091540;
+
+  /* Overriding Zinc with Color Hunt Palette: 1b3c53, 234c6a, 456882, d2c1b6 */
+  --color-zinc-50: #faf7f5;
+  --color-zinc-100: #f2ebe5;
+  --color-zinc-200: #d2c1b6;
+  --color-zinc-300: #b5a498;
+  --color-zinc-400: #7492a8;
+  --color-zinc-500: #456882;
+  --color-zinc-600: #35536b;
+  --color-zinc-700: #234c6a;
+  --color-zinc-800: #1c3e56;
+  --color-zinc-900: #1b3c53;
+  --color-zinc-950: #112838;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 font-sans;
+  @apply bg-zinc-50 text-zinc-900 font-sans antialiased;
+}
+
+/* ── Modern Subtle Corner Radius System ─────────────────────────────────── */
+/* Overrides HeroUI's 24px pill-shaped defaults with clean, modern 8px corners */
+.button:not(.button--icon-only):not(.rounded-full),
+button.button:not(.button--icon-only):not(.rounded-full),
+.input,
+input.input,
+select,
+[data-slot="input-wrapper"]:not(.rounded-full) {
+  border-radius: 0.5rem !important;
+}
+
+.button--icon-only,
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d2c1b6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7492a8;
 }

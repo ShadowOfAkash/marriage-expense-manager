@@ -36,5 +36,8 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
-  return useContext(ToastContext);
+  const ctx = useContext(ToastContext);
+  return ctx || ((opts) => {
+    if (opts?.title) console.log(`[Toast] ${opts.title}: ${opts.description || ''}`);
+  });
 }

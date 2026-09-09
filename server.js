@@ -61,9 +61,11 @@ async function initDB() {
   }
 
   if (useLibSQL) {
+    // Migrate existing expenses table to payments if present
+    try { await db.execute("ALTER TABLE expenses RENAME TO payments"); } catch(e){}
+
     // Create tables in Turso
     await db.executeMultiple(`
-      
       CREATE TABLE IF NOT EXISTS telegram_links (
         chat_id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL
@@ -79,13 +81,17 @@ async function initDB() {
         updated_at TEXT    DEFAULT (datetime('now'))
       );
 
-      CREATE TABLE IF NOT EXISTS expenses (
+      CREATE TABLE IF NOT EXISTS payments (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id     TEXT    NOT NULL DEFAULT 'legacy_user',
         category    TEXT    NOT NULL,
         description TEXT    DEFAULT '',
         amount      REAL    NOT NULL,
         date        TEXT    NOT NULL,
+        status      TEXT    DEFAULT 'approved',
+        receipt_url TEXT    DEFAULT '',
+        payment_type TEXT   DEFAULT 'Normal',
+        booking_id  INTEGER DEFAULT NULL,
         created_at  TEXT    DEFAULT (datetime('now'))
       );
 
@@ -98,10 +104,30 @@ async function initDB() {
         note       TEXT    DEFAULT '',
         created_at TEXT    DEFAULT (datetime('now'))
       );
+
+      CREATE TABLE IF NOT EXISTS bookings (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id      TEXT    NOT NULL DEFAULT 'legacy_user',
+        vendor       TEXT    NOT NULL,
+        service      TEXT    NOT NULL,
+        category     TEXT    DEFAULT 'Miscellaneous',
+        booking_date TEXT    DEFAULT '',
+        event_date   TEXT    DEFAULT '',
+        amount       REAL    DEFAULT 0,
+        advance      REAL    DEFAULT 0,
+        status       TEXT    DEFAULT 'Pending',
+        notes        TEXT    DEFAULT '',
+        created_at   TEXT    DEFAULT (datetime('now'))
+      );
     `);
-    try { await db.execute("ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'approved'"); } catch(e){}
-    try { await db.execute("ALTER TABLE expenses ADD COLUMN receipt_url TEXT DEFAULT ''"); } catch(e){}
-    try { await db.execute("ALTER TABLE expenses ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
+    // Backward compatibility view for legacy queries
+    try { await db.execute("CREATE VIEW IF NOT EXISTS expenses AS SELECT * FROM payments"); } catch(e){}
+    try { await db.execute("ALTER TABLE payments ADD COLUMN status TEXT DEFAULT 'approved'"); } catch(e){}
+    try { await db.execute("ALTER TABLE payments ADD COLUMN receipt_url TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE payments ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
+    try { await db.execute("ALTER TABLE payments ADD COLUMN payment_type TEXT DEFAULT 'Normal'"); } catch(e){}
+    try { await db.execute("ALTER TABLE payments ADD COLUMN booking_id INTEGER DEFAULT NULL"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN category TEXT DEFAULT 'Miscellaneous'"); } catch(e){}
     try { await db.execute("ALTER TABLE savings ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
@@ -112,17 +138,39 @@ async function initDB() {
 // ── JSON file DB helpers (local fallback) ────────────────────────────────────
 const DB_FILE  = path.join(__dirname, 'marriage_data.json');
 const DEFAULT_DB = {
-  budget: { amount: 0 }, expenses: [], savings: [],
-  _nextExpenseId: 1, _nextSavingsId: 1
+  budget: { amount: 0 }, payments: [], expenses: [], savings: [], bookings: [],
+  _nextPaymentId: 1, _nextExpenseId: 1, _nextSavingsId: 1
 };
 
 function readJSON() {
   try {
     if (!fs.existsSync(DB_FILE)) { fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_DB, null, 2)); }
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    const d = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    if (!d.payments) {
+      d.payments = d.expenses || [];
+    }
+    // Mirror expenses and payments so either key references the same array
+    d.expenses = d.payments;
+    if (!d.bookings) d.bookings = [];
+    if (!d.savings) d.savings = [];
+    if (!d._nextPaymentId) {
+      d._nextPaymentId = d._nextExpenseId || (d.payments.length ? Math.max(...d.payments.map(p => p.id || 0)) + 1 : 1);
+    }
+    d._nextExpenseId = d._nextPaymentId;
+    return d;
   } catch { return JSON.parse(JSON.stringify(DEFAULT_DB)); }
 }
-function writeJSON(data) { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
+function writeJSON(data) {
+  if (data.payments) {
+    data.expenses = data.payments;
+  } else if (data.expenses) {
+    data.payments = data.expenses;
+  }
+  if (data._nextPaymentId) {
+    data._nextExpenseId = data._nextPaymentId;
+  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
 
 // ── Unified DB helpers ───────────────────────────────────────────────────────
 async function dbGet(sql, args = []) {
@@ -253,7 +301,7 @@ app.get('/api/summary', requireAuth, async (req, res) => {
     let budgetAmount, totalExpenses, totalSavings;
     if (useLibSQL) {
       const bRow = await dbGet('SELECT amount FROM user_budget WHERE user_id = ?', [req.user.uid]);
-      const eRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM expenses WHERE user_id = ?', [req.user.uid]);
+      const eRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM payments WHERE user_id = ?', [req.user.uid]);
       const sRow = await dbGet('SELECT COALESCE(SUM(amount),0) as total FROM savings WHERE user_id = ?', [req.user.uid]);
       budgetAmount  = bRow?.amount || 0;
       totalExpenses = Number(eRow?.total || 0);
@@ -262,18 +310,20 @@ app.get('/api/summary', requireAuth, async (req, res) => {
       const d = readJSON();
       budgetAmount  = d.user_budgets?.[req.user.uid]?.amount || d.budget?.amount || 0;
       
-      const userExpenses = d.expenses.filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user');
-      const userSavings = d.savings.filter(s => s.user_id === req.user.uid || !s.user_id || s.user_id === 'legacy_user');
+      const userPayments = (d.payments || d.expenses || []).filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user');
+      const userSavings = (d.savings || []).filter(s => s.user_id === req.user.uid || !s.user_id || s.user_id === 'legacy_user');
       
-      totalExpenses = userExpenses.reduce((s, e) => s + e.amount, 0);
+      totalExpenses = userPayments.reduce((s, e) => s + e.amount, 0);
       totalSavings  = userSavings.reduce((s, e) => s + e.amount, 0);
     }
     res.json({
       budget: budgetAmount, totalExpenses, totalSavings,
       amountStillRequired: Math.max(0, budgetAmount - totalSavings),
       availableBalance:    totalSavings - totalExpenses,
-      savingsProgress:     budgetAmount > 0 ? Math.min(100, (totalSavings  / budgetAmount) * 100) : 0,
-      expenseProgress:     budgetAmount > 0 ? Math.min(100, (totalExpenses / budgetAmount) * 100) : 0,
+      savingsProgress:     budgetAmount > 0 ? (totalSavings  / budgetAmount) * 100 : 0,
+      expenseProgress:     budgetAmount > 0 ? (totalExpenses / budgetAmount) * 100 : 0,
+      isOverBudget:        budgetAmount > 0 ? totalExpenses > budgetAmount : false,
+      overBudgetAmount:    Math.max(0, totalExpenses - budgetAmount),
     });
   } catch (e) { 
     console.error("Summary Route Error:", e);
@@ -332,12 +382,13 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
     
     if (useLibSQL) {
       await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO payments (category, description, amount, date, status, receipt_url) VALUES (?, ?, ?, ?, ?, ?)',
         [finalCat, finalDesc, finalAmount, finalDate, 'draft', receipt_url]
       );
     } else {
       const d = readJSON();
-      d.expenses.push({ id: d._nextExpenseId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() });
+      const newPay = { id: d._nextPaymentId++, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() };
+      d.payments.push(newPay);
       writeJSON(d);
     }
 
@@ -362,16 +413,26 @@ app.get('/api/telegram/status', requireAuth, async (req, res) => {
   try {
     let isLinked = false;
     let activeCode = null;
+    let telegramId = null;
 
     if (typeof useLibSQL !== 'undefined' && useLibSQL) {
       const link = await dbGet('SELECT chat_id FROM telegram_links WHERE user_id = ?', [req.user.uid]);
-      if (link) isLinked = true;
+      if (link) {
+        isLinked = true;
+        telegramId = link.chat_id;
+      }
       const codeRow = await dbGet('SELECT code FROM telegram_codes WHERE user_id = ?', [req.user.uid]);
       if (codeRow) activeCode = codeRow.code;
     } else {
       const d = readJSON();
-      if (d.telegram_links && Object.values(d.telegram_links).includes(req.user.uid)) {
-        isLinked = true;
+      if (d.telegram_links) {
+        for (const [chatId, uid] of Object.entries(d.telegram_links)) {
+          if (uid === req.user.uid) {
+            isLinked = true;
+            telegramId = chatId;
+            break;
+          }
+        }
       }
       if (d.telegram_codes) {
         for (const [k, v] of Object.entries(d.telegram_codes)) {
@@ -379,7 +440,7 @@ app.get('/api/telegram/status', requireAuth, async (req, res) => {
         }
       }
     }
-    res.json({ isLinked, activeCode });
+    res.json({ isLinked, activeCode, telegramId, botUsername: 'MarriageExpenseManagementBot' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -400,6 +461,58 @@ app.post('/api/telegram/link-code', requireAuth, async (req, res) => {
       writeJSON(d);
     }
     res.json({ code });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/telegram/set-id', requireAuth, async (req, res) => {
+  const { telegramId } = req.body;
+  if (!telegramId || !String(telegramId).trim()) {
+    return res.status(400).json({ error: 'Telegram ID is required' });
+  }
+  const cleanId = String(telegramId).trim();
+  try {
+    if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+      await dbRun('DELETE FROM telegram_links WHERE user_id = ?', [req.user.uid]);
+      await dbRun('INSERT INTO telegram_links (chat_id, user_id) VALUES (?, ?) ON CONFLICT(chat_id) DO UPDATE SET user_id=excluded.user_id', [cleanId, req.user.uid]);
+      await dbRun('DELETE FROM telegram_codes WHERE user_id = ?', [req.user.uid]);
+    } else {
+      const d = readJSON();
+      if (!d.telegram_links) d.telegram_links = {};
+      for (const [k, v] of Object.entries(d.telegram_links)) {
+        if (v === req.user.uid) delete d.telegram_links[k];
+      }
+      d.telegram_links[cleanId] = req.user.uid;
+      if (d.telegram_codes) {
+        for (const [k, v] of Object.entries(d.telegram_codes)) {
+          if (v === req.user.uid) delete d.telegram_codes[k];
+        }
+      }
+      writeJSON(d);
+    }
+    res.json({ success: true, isLinked: true, telegramId: cleanId });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/telegram/disconnect', requireAuth, async (req, res) => {
+  try {
+    if (typeof useLibSQL !== 'undefined' && useLibSQL) {
+      await dbRun('DELETE FROM telegram_links WHERE user_id = ?', [req.user.uid]);
+      await dbRun('DELETE FROM telegram_codes WHERE user_id = ?', [req.user.uid]);
+    } else {
+      const d = readJSON();
+      if (d.telegram_links) {
+        for (const [k, v] of Object.entries(d.telegram_links)) {
+          if (v === req.user.uid) delete d.telegram_links[k];
+        }
+      }
+      if (d.telegram_codes) {
+        for (const [k, v] of Object.entries(d.telegram_codes)) {
+          if (v === req.user.uid) delete d.telegram_codes[k];
+        }
+      }
+      writeJSON(d);
+    }
+    res.json({ success: true, isLinked: false, telegramId: null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -550,12 +663,13 @@ app.post('/api/telegram/webhook', async (req, res) => {
     
     if (useLibSQL) {
       await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO payments (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [finalCat, finalDesc, finalAmount, finalDate, 'draft', receipt_url, linkedUserId]
       );
     } else {
       const d = readJSON();
-      d.expenses.push({ id: d._nextExpenseId++, user_id: linkedUserId, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() });
+      const newPay = { id: d._nextPaymentId++, user_id: linkedUserId, category: finalCat, description: finalDesc, amount: finalAmount, date: finalDate, status: 'draft', receipt_url, created_at: new Date().toISOString() };
+      d.payments.push(newPay);
       writeJSON(d);
     }
 
@@ -567,11 +681,9 @@ app.post('/api/telegram/webhook', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EXPENSES
-
-
+// PAYMENTS
 // ═══════════════════════════════════════════════════════════════════════════
-app.post('/api/expenses/scan', requireAuth, async (req, res) => {
+app.post(['/api/payments/scan', '/api/expenses/scan'], requireAuth, async (req, res) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -647,73 +759,181 @@ app.post('/api/upload', requireAuth, (req, res) => {
   }
 });
 
-app.get('/api/expenses', requireAuth, async (req, res) => {
+app.get(['/api/payments', '/api/expenses'], requireAuth, async (req, res) => {
   try {
-    if (useLibSQL) return res.json(await dbAll('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC', [req.user.uid]));
-    res.json([...readJSON().expenses].filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user').sort((a, b) => b.date.localeCompare(a.date)));
+    if (useLibSQL) {
+      return res.json(await dbAll(`
+        SELECT p.*, 
+               COALESCE(b.category, p.category, 'Miscellaneous') as category,
+               COALESCE(p.payment_type, 'Normal') as payment_type
+        FROM payments p
+        LEFT JOIN bookings b ON p.booking_id = b.id
+        WHERE p.user_id = ?
+        ORDER BY p.date DESC, p.id DESC
+      `, [req.user.uid]));
+    }
+    const d = readJSON();
+    const bkMap = (d.bookings || []).reduce((acc, b) => { acc[b.id] = b; return acc; }, {});
+    const items = [...(d.payments || d.expenses || [])]
+      .filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user')
+      .map(e => ({
+        ...e,
+        category: (e.booking_id && bkMap[e.booking_id]?.category) || e.category || 'Miscellaneous',
+        payment_type: e.payment_type || 'Normal'
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/expenses', requireAuth, async (req, res) => {
-  const { category, description, amount, date, status, receipt_url, booking_id } = req.body;
+app.post(['/api/payments', '/api/expenses'], requireAuth, async (req, res) => {
+  const { category, description, amount, date, status, receipt_url, booking_id, payment_type } = req.body;
   const finalStatus = status || 'approved';
-  if (!category || !amount || !date) return res.status(400).json({ error: 'Category, amount and date required' });
+  const finalPaymentType = payment_type === 'Advance' ? 'Advance' : 'Normal';
+  if (!amount || !date) return res.status(400).json({ error: 'Amount and date required' });
   try {
+    let resolvedCategory = category || '';
     if (useLibSQL) {
+      if (booking_id && !resolvedCategory) {
+        const bk = await dbGet('SELECT category FROM bookings WHERE id = ?', [booking_id]);
+        if (bk && bk.category) resolvedCategory = bk.category;
+      }
+      if (!resolvedCategory) resolvedCategory = 'Miscellaneous';
+
       const r = await dbRun(
-        'INSERT INTO expenses (category, description, amount, date, status, receipt_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [category, description || '', Number(amount), date, finalStatus, receipt_url || '', req.user.uid]
+        'INSERT INTO payments (category, description, amount, date, status, receipt_url, user_id, booking_id, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [resolvedCategory, description || '', Number(amount), date, finalStatus, receipt_url || '', req.user.uid, booking_id ? Number(booking_id) : null, finalPaymentType]
       );
-      const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [r.lastInsertRowid]);
+      const row = await dbGet('SELECT * FROM payments WHERE id = ?', [r.lastInsertRowid]);
       return res.status(201).json(row);
     }
     const d = readJSON();
-    const expense = { id: d._nextExpenseId++, user_id: req.user.uid, category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || '', created_at: new Date().toISOString() };
-    d.expenses.push(expense); writeJSON(d);
-    res.status(201).json(expense);
+    if (booking_id && !resolvedCategory) {
+      const bk = (d.bookings || []).find(b => b.id === Number(booking_id));
+      if (bk && bk.category) resolvedCategory = bk.category;
+    }
+    if (!resolvedCategory) resolvedCategory = 'Miscellaneous';
+
+    const payment = {
+      id: d._nextPaymentId++,
+      user_id: req.user.uid,
+      category: resolvedCategory,
+      description: description || '',
+      amount: Number(amount),
+      date,
+      status: finalStatus,
+      receipt_url: receipt_url || '',
+      booking_id: booking_id ? Number(booking_id) : null,
+      payment_type: finalPaymentType,
+      created_at: new Date().toISOString()
+    };
+    d.payments.push(payment);
+    writeJSON(d);
+    res.status(201).json(payment);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/expenses/:id', requireAuth, async (req, res) => {
+app.put(['/api/payments/:id', '/api/expenses/:id'], requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
-  const { category, description, amount, date, status, receipt_url } = req.body;
+  const { category, description, amount, date, status, receipt_url, booking_id, payment_type } = req.body;
   const finalStatus = status || 'approved';
+  const finalPaymentType = payment_type === 'Advance' ? 'Advance' : 'Normal';
   try {
+    let resolvedCategory = category || '';
     if (useLibSQL) {
-      await dbRun('UPDATE expenses SET category=?,description=?,amount=?,date=?,status=?,receipt_url=? WHERE id=?',
-        [category, description || '', Number(amount), date, finalStatus, receipt_url || '', id]);
-      const row = await dbGet('SELECT * FROM expenses WHERE id = ?', [id]);
+      if (booking_id && !resolvedCategory) {
+        const bk = await dbGet('SELECT category FROM bookings WHERE id = ?', [booking_id]);
+        if (bk && bk.category) resolvedCategory = bk.category;
+      }
+      if (!resolvedCategory) {
+        const existing = await dbGet('SELECT category FROM payments WHERE id = ?', [id]);
+        resolvedCategory = existing?.category || 'Miscellaneous';
+      }
+      await dbRun('UPDATE payments SET category=?,description=?,amount=?,date=?,status=?,receipt_url=?,booking_id=?,payment_type=? WHERE id=?',
+        [resolvedCategory, description || '', Number(amount), date, finalStatus, receipt_url || '', booking_id ? Number(booking_id) : null, finalPaymentType, id]);
+      const row = await dbGet('SELECT * FROM payments WHERE id = ?', [id]);
       return res.json(row);
     }
-    const d = readJSON(); const idx = d.expenses.findIndex(e => e.id === id);
+    const d = readJSON(); const idx = d.payments.findIndex(e => e.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    d.expenses[idx] = { ...d.expenses[idx], category, description: description || '', amount: Number(amount), date, status: finalStatus, receipt_url: receipt_url || d.expenses[idx].receipt_url || '' };
-    writeJSON(d); res.json(d.expenses[idx]);
+    if (booking_id && !resolvedCategory) {
+      const bk = (d.bookings || []).find(b => b.id === Number(booking_id));
+      if (bk && bk.category) resolvedCategory = bk.category;
+    }
+    if (!resolvedCategory) {
+      resolvedCategory = d.payments[idx].category || 'Miscellaneous';
+    }
+    d.payments[idx] = {
+      ...d.payments[idx],
+      category: resolvedCategory,
+      description: description || '',
+      amount: Number(amount),
+      date,
+      status: finalStatus,
+      receipt_url: receipt_url || d.payments[idx].receipt_url || '',
+      booking_id: booking_id !== undefined ? (booking_id ? Number(booking_id) : null) : d.payments[idx].booking_id,
+      payment_type: finalPaymentType
+    };
+    writeJSON(d); res.json(d.payments[idx]);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/expenses/:id', requireAuth, async (req, res) => {
+app.post(['/api/payments/:id/detach', '/api/expenses/:id/detach'], requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
-    if (useLibSQL) { await dbRun('DELETE FROM expenses WHERE id = ?', [id]); return res.json({ success: true }); }
-    const d = readJSON(); const idx = d.expenses.findIndex(e => e.id === id);
+    if (useLibSQL) {
+      const p = await dbGet('SELECT p.*, b.category as bk_category FROM payments p LEFT JOIN bookings b ON p.booking_id = b.id WHERE p.id = ?', [id]);
+      if (!p) return res.status(404).json({ error: 'Payment not found' });
+      const cat = p.category || p.bk_category || 'Miscellaneous';
+      await dbRun('UPDATE payments SET booking_id = NULL, category = ? WHERE id = ?', [cat, id]);
+      const updated = await dbGet('SELECT * FROM payments WHERE id = ?', [id]);
+      return res.json(updated);
+    }
+    const d = readJSON();
+    const idx = d.payments.findIndex(e => e.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Payment not found' });
+    const bk = (d.bookings || []).find(b => b.id === Number(d.payments[idx].booking_id));
+    d.payments[idx].category = d.payments[idx].category || bk?.category || 'Miscellaneous';
+    d.payments[idx].booking_id = null;
+    writeJSON(d);
+    res.json(d.payments[idx]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete(['/api/payments/:id', '/api/expenses/:id'], requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    if (useLibSQL) { await dbRun('DELETE FROM payments WHERE id = ?', [id]); return res.json({ success: true }); }
+    const d = readJSON(); const idx = d.payments.findIndex(e => e.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    d.expenses.splice(idx, 1); writeJSON(d); res.json({ success: true });
+    d.payments.splice(idx, 1); writeJSON(d); res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/expenses/categories', requireAuth, async (req, res) => {
+app.get(['/api/payments/categories', '/api/expenses/categories'], requireAuth, async (req, res) => {
   try {
     if (useLibSQL) {
-      return res.json(await dbAll(
-        'SELECT category, SUM(amount) as total, COUNT(*) as count FROM expenses WHERE user_id = ? GROUP BY category ORDER BY total DESC',
-        [req.user.uid]
-      ));
+      return res.json(await dbAll(`
+        SELECT COALESCE(b.category, p.category, 'Miscellaneous') as category,
+               SUM(p.amount) as total,
+               COUNT(*) as count
+        FROM payments p
+        LEFT JOIN bookings b ON p.booking_id = b.id
+        WHERE p.user_id = ?
+        GROUP BY COALESCE(b.category, p.category, 'Miscellaneous')
+        ORDER BY total DESC
+      `, [req.user.uid]));
     }
-    const d = readJSON(); const map = {};
-    for (const e of d.expenses.filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user')) {
-      if (!map[e.category]) map[e.category] = { category: e.category, total: 0, count: 0 };
-      map[e.category].total += e.amount; map[e.category].count++;
+    const d = readJSON();
+    const bkMap = (d.bookings || []).reduce((acc, b) => { acc[b.id] = b; return acc; }, {});
+    const map = {};
+    for (const e of (d.payments || d.expenses || []).filter(e => e.user_id === req.user.uid || !e.user_id || e.user_id === 'legacy_user')) {
+      const cat = (e.booking_id && bkMap[e.booking_id]?.category) || e.category || 'Miscellaneous';
+      if (!map[cat]) map[cat] = { category: cat, total: 0, count: 0 };
+      map[cat].total += e.amount;
+      map[cat].count++;
     }
     res.json(Object.values(map).sort((a, b) => b.total - a.total));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -737,19 +957,33 @@ app.get('/api/bookings', requireAuth, async (req, res) => {
 });
 
 app.post('/api/bookings', requireAuth, async (req, res) => {
-  const { vendor, service, booking_date, event_date, amount, advance, status, notes } = req.body;
+  const { vendor, service, category, booking_date, event_date, amount, advance, status, notes } = req.body;
   if (!vendor || !service) return res.status(400).json({ error: 'Vendor and service required' });
+  const finalCategory = category || 'Miscellaneous';
   try {
     if (useLibSQL) {
       const result = await dbRun(
-        'INSERT INTO bookings (user_id, vendor, service, booking_date, event_date, amount, advance, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [req.user.uid, vendor, service, booking_date || '', event_date || '', Number(amount)||0, Number(advance)||0, status || 'Pending', notes || '']
+        'INSERT INTO bookings (user_id, vendor, service, category, booking_date, event_date, amount, advance, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [req.user.uid, vendor, service, finalCategory, booking_date || '', event_date || '', Number(amount)||0, Number(advance)||0, status || 'Pending', notes || '']
       );
-      return res.json({ id: result.lastInsertRowid, success: true });
+      const row = await dbGet('SELECT * FROM bookings WHERE id = ?', [Number(result.lastInsertRowid)]);
+      return res.status(201).json(row || { id: Number(result.lastInsertRowid), user_id: req.user.uid, vendor, service, category: finalCategory, booking_date, event_date, amount: Number(amount)||0, advance: Number(advance)||0, status: status||'Pending', notes });
     }
     const d = readJSON();
     if (!d.bookings) d.bookings = [];
-    const newBooking = { id: Date.now(), user_id: req.user.uid, vendor, service, booking_date: booking_date||'', event_date: event_date||'', amount: Number(amount)||0, advance: Number(advance)||0, status: status||'Pending', notes: notes||'' };
+    const newBooking = {
+      id: Date.now(),
+      user_id: req.user.uid,
+      vendor,
+      service,
+      category: finalCategory,
+      booking_date: booking_date||'',
+      event_date: event_date||'',
+      amount: Number(amount)||0,
+      advance: Number(advance)||0,
+      status: status||'Pending',
+      notes: notes||''
+    };
     d.bookings.push(newBooking);
     writeJSON(d);
     res.json(newBooking);
@@ -758,12 +992,12 @@ app.post('/api/bookings', requireAuth, async (req, res) => {
 
 app.put('/api/bookings/:id', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
-  const { vendor, service, booking_date, event_date, amount, advance, status, notes } = req.body;
+  const { vendor, service, category, booking_date, event_date, amount, advance, status, notes } = req.body;
   try {
     if (useLibSQL) {
       await dbRun(
-        'UPDATE bookings SET vendor=?, service=?, booking_date=?, event_date=?, amount=?, advance=?, status=?, notes=? WHERE id=? AND user_id=?',
-        [vendor, service, booking_date, event_date, Number(amount)||0, Number(advance)||0, status, notes, id, req.user.uid]
+        'UPDATE bookings SET vendor=?, service=?, category=?, booking_date=?, event_date=?, amount=?, advance=?, status=?, notes=? WHERE id=? AND user_id=?',
+        [vendor, service, category || 'Miscellaneous', booking_date, event_date, Number(amount)||0, Number(advance)||0, status, notes, id, req.user.uid]
       );
       return res.json({ success: true });
     }
@@ -771,7 +1005,18 @@ app.put('/api/bookings/:id', requireAuth, async (req, res) => {
     if (!d.bookings) d.bookings = [];
     const idx = d.bookings.findIndex(b => b.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    d.bookings[idx] = { ...d.bookings[idx], vendor, service, booking_date, event_date, amount: Number(amount)||0, advance: Number(advance)||0, status, notes };
+    d.bookings[idx] = {
+      ...d.bookings[idx],
+      vendor,
+      service,
+      category: category || d.bookings[idx].category || 'Miscellaneous',
+      booking_date,
+      event_date,
+      amount: Number(amount)||0,
+      advance: Number(advance)||0,
+      status,
+      notes
+    };
     writeJSON(d);
     res.json(d.bookings[idx]);
   } catch (e) { res.status(500).json({ error: e.message }); }
