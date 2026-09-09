@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Marriage Expense Management Website",
   "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
@@ -13,7 +16,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.18.2",
-    "firebase-admin": "^14.3.0",
+    "firebase-admin": "^13.10.0",
     "glob": "^13.0.6",
     "nodemailer": "^10.0.1",
     "pdfkit": "^0.20.2"
