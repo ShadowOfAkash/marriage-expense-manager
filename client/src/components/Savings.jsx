@@ -116,12 +116,12 @@ export default function Savings() {
       </div>
 
       {/* Savings Table */}
-      <Card className="shadow-sm border border-zinc-200/80 rounded-xl overflow-hidden">
+      <div className="shadow-sm border border-zinc-200/80 rounded-xl overflow-hidden bg-white">
         {savings.length > 0 ? (
           <>
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-zinc-50/95 backdrop-blur-xs border-b border-zinc-200/80">
+                <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
                   <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
                     <th className="py-3.5 px-4 whitespace-nowrap">MONTH</th>
                     <th className="py-3.5 px-4 whitespace-nowrap">YEAR</th>
@@ -181,7 +181,7 @@ export default function Savings() {
             <p className="text-zinc-400 text-xs mt-1">Start tracking your wedding funds by logging your first saving.</p>
           </div>
         )}
-      </Card>
+      </div>
 
       <AddSavingModal 
         isOpen={isAddOpen} 

@@ -7,7 +7,7 @@ import {
   TrendingUp, Wallet,
   PieChart as PieIcon, BarChart2, Receipt,
   ChevronRight, IndianRupee,
-  Smartphone
+  Smartphone, Users
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -145,6 +145,7 @@ export default function Dashboard() {
   const [generatingCode, setGeneratingCode] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(5)
+  const [guestSummary, setGuestSummary] = useState(null)
 
   const handleGenerateTelegramCode = async () => {
     try {
@@ -163,10 +164,12 @@ export default function Dashboard() {
     if (!currentUser) return;
     try {
       setLoading(true)
-      const [sum, exp, sav, cats, tgStatus] = await Promise.all([
-        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(), api.getTelegramStatus().catch(() => ({isLinked: false, activeCode: null, telegramId: null}))
+      const [sum, exp, sav, cats, tgStatus, gSum] = await Promise.all([
+        api.getSummary(), api.getExpenses(), api.getSavings(), api.getCategories(), 
+        api.getTelegramStatus().catch(() => ({isLinked: false, activeCode: null, telegramId: null})),
+        api.getGuestSummary().catch(() => null)
       ])
-      setSummary(sum); setExpenses(exp); setSavings(sav); setCategories(cats)
+      setSummary(sum); setExpenses(exp); setSavings(sav); setCategories(cats); setGuestSummary(gSum)
       if (tgStatus.activeCode) setTelegramCode(tgStatus.activeCode);
       if (tgStatus.telegramId) setTelegramId(tgStatus.telegramId);
       if (tgStatus.botUsername) setTelegramBotUsername(tgStatus.botUsername);
@@ -250,7 +253,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card isPressable onClick={() => setIsAddExpOpen(true)} className="p-4 md:p-5 cursor-pointer bg-white hover:-translate-y-0.5 hover:shadow-md transition-all border border-zinc-200/80 rounded-xl">
           <div>
             <div className="flex items-center justify-between">
@@ -278,6 +281,27 @@ export default function Dashboard() {
                 <div>
                   <div className="font-bold text-zinc-900 text-sm">Log Saving</div>
                   <div className="text-xs text-zinc-500">Record contribution</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-zinc-400" />
+            </div>
+          </div>
+        </Card>
+
+        <Card isPressable onClick={() => navigate('/guests')} className="p-4 md:p-5 cursor-pointer bg-white hover:-translate-y-0.5 hover:shadow-md transition-all border border-zinc-200/80 rounded-xl">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 bg-[#325a77] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <div className="font-bold text-zinc-900 text-sm">Guest List</div>
+                  <div className="text-xs text-zinc-500">
+                    {guestSummary?.totalGuests !== undefined 
+                      ? `${guestSummary.totalGuests} Guests (${guestSummary.expectedAttendance || 0} Exp)` 
+                      : 'Guests & attendance'}
+                  </div>
                 </div>
               </div>
               <ChevronRight size={18} className="text-zinc-400" />
@@ -441,8 +465,8 @@ export default function Dashboard() {
       </div>
 
       {/* Row 3: Recent Payments Table */}
-      <Card className="p-4 md:p-6 border border-zinc-200/80 shadow-sm rounded-xl">
-        <div>
+      <div className="border border-zinc-200/80 shadow-sm rounded-xl overflow-hidden bg-white">
+        <div className="p-4 md:p-5 border-b border-zinc-100">
           <SectionHeader
             icon={Receipt}
             title="Recent Payments"
@@ -453,59 +477,61 @@ export default function Dashboard() {
               </Button>
             }
           />
-          {expenses.length > 0 ? (
-            <>
-              <div className="overflow-x-auto w-full">
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead>
-                    <tr className="border-b border-zinc-200/80 text-zinc-500 font-semibold text-xs tracking-wider">
-                      <th className="py-3 px-2">DATE</th>
-                      <th className="py-3 px-2">TYPE</th>
-                      <th className="py-3 px-2">DESCRIPTION</th>
-                      <th className="py-3 px-2 text-right">AMOUNT</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {expenses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
-                      <tr key={e.id} className="hover:bg-[#1b3c53]/[0.04] transition-colors">
-                        <td className="py-3 px-2"><span className="text-xs text-zinc-500 font-medium">{formatDate(e.date)}</span></td>
-                        <td className="py-3 px-2">
-                          {e.payment_type === 'Advance' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-[#234c6a]/15 text-[#234c6a] border border-[#234c6a]/30">
-                              Advance
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
-                              Normal
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-2">
-                          <span className="text-sm text-zinc-700 truncate block max-w-[240px]">
-                            {e.description || <span className="text-zinc-300">—</span>}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 text-right"><span className="font-bold text-zinc-900">{fmt(e.amount)}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <TablePagination
-                currentPage={currentPage}
-                totalItems={expenses.length}
-                pageSize={pageSize}
-                pageSizeOptions={[5, 10, 20, 50, 100]}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-              />
-            </>
-          ) : (
-            <EmptyState icon={IndianRupee} message="No payments logged yet" actionLabel="Add First Payment →" onAction={() => setIsAddExpOpen(true)} />
-          )}
         </div>
-      </Card>
+        {expenses.length > 0 ? (
+          <>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
+                  <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
+                    <th className="py-3 px-4">DATE</th>
+                    <th className="py-3 px-4">TYPE</th>
+                    <th className="py-3 px-4">DESCRIPTION</th>
+                    <th className="py-3 px-4 text-right">AMOUNT</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {expenses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
+                    <tr key={e.id} className="hover:bg-[#1b3c53]/[0.04] transition-colors">
+                      <td className="py-3 px-4"><span className="text-xs text-zinc-500 font-medium">{formatDate(e.date)}</span></td>
+                      <td className="py-3 px-4">
+                        {e.payment_type === 'Advance' ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-[#234c6a]/15 text-[#234c6a] border border-[#234c6a]/30">
+                            Advance
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+                            Normal
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-sm text-zinc-700 truncate block max-w-[240px]">
+                          {e.description || <span className="text-zinc-300">—</span>}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right"><span className="font-bold text-zinc-900">{fmt(e.amount)}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={expenses.length}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
+        ) : (
+          <div className="p-6">
+            <EmptyState icon={IndianRupee} message="No payments logged yet" actionLabel="Add First Payment →" onAction={() => setIsAddExpOpen(true)} />
+          </div>
+        )}
+      </div>
 
       <AddExpenseModal 
         isOpen={isAddExpOpen} 

@@ -232,8 +232,8 @@ export default function Bookings() {
         )}
       </div>
 
-      {/* Table Card */}
-      <Card className="shadow-sm border border-zinc-200/80 flex-1 flex flex-col overflow-hidden rounded-xl">
+      {/* Table Container */}
+      <div className="shadow-sm border border-zinc-200/80 flex-1 flex flex-col overflow-hidden rounded-xl bg-white">
         {filtered.length > 0 ? (
           <>
             <div className="overflow-auto flex-1 w-full relative">
@@ -377,7 +377,7 @@ export default function Bookings() {
             <p className="text-zinc-400 text-xs mt-1">Get started by creating your first vendor booking.</p>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Add / Edit Booking Modal (Status field deleted as requested) */}
       <TailwindModal isOpen={isAddOpen || isEditOpen} onClose={() => { setIsAddOpen(false); setIsEditOpen(false); }} title={isAddOpen ? "Create New Booking" : "Edit Booking"}>

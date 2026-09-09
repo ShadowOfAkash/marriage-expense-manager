@@ -75,6 +75,53 @@ export const api = {
   getSavings:    ()     => fetchWithAuth('/api/savings'),
   addSavings:    (data) => fetchWithAuth('/api/savings', { method: 'POST', body: JSON.stringify(data) }),
   deleteSavings: (id)   => fetchWithAuth(`/api/savings/${id}`, { method: 'DELETE' }),
+
+  // GUESTS
+  getGuests:        (params = '') => fetchWithAuth(`/api/guests${params}`),
+  getGuestSummary:  ()            => fetchWithAuth('/api/guests/summary'),
+  addGuest:         (data)        => fetchWithAuth('/api/guests', { method: 'POST', body: JSON.stringify(data) }),
+  updateGuest:      (id, data)    => fetchWithAuth(`/api/guests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteGuest:      (id)          => fetchWithAuth(`/api/guests/${id}`, { method: 'DELETE' }),
+  bulkUpdateGuests: (payload)     => fetchWithAuth('/api/guests/bulk', { method: 'POST', body: JSON.stringify(payload) }),
+  importGuests:     (guests)      => fetchWithAuth('/api/guests/import', { method: 'POST', body: JSON.stringify({ guests }) }),
+  sendGuestInvitation: (id, data = {}) => fetchWithAuth(`/api/guests/${id}/send-invitation`, { method: 'POST', body: JSON.stringify(data) }),
+  sendBulkInvitations: (payload)       => fetchWithAuth('/api/guests/send-bulk-invitations', { method: 'POST', body: JSON.stringify(payload) }),
+  updateGuestRsvp:     (id, rsvp_status) => fetchWithAuth(`/api/guests/${id}/rsvp`, { method: 'PATCH', body: JSON.stringify({ rsvp_status }) }),
+  getGuestInvitationPdfUrl: (id)       => `/api/guests/${id}/invitation-pdf`,
+  getPublicRsvp: async (token) => {
+    const res = await fetch(`/api/public/rsvp/${token}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to load invitation details');
+    }
+    return res.json();
+  },
+  submitPublicRsvp: async (token, data) => {
+    const res = await fetch(`/api/public/rsvp/${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to submit response');
+    }
+    return res.json();
+  },
+
+  // Email Delivery Configuration
+  getEmailSettings: () => fetchWithAuth('/api/email/settings'),
+  saveEmailSettings: (data) => fetchWithAuth('/api/email/settings', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  testEmailSettings: (toEmail) => fetchWithAuth('/api/email/test', {
+    method: 'POST',
+    body: JSON.stringify({ toEmail })
+  }),
+  disconnectEmailSettings: () => fetchWithAuth('/api/email/settings/disconnect', {
+    method: 'POST'
+  })
 };
 
 // Currency formatter
@@ -104,4 +151,33 @@ export const CATEGORIES = [
 export const MONTH_NAMES = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
+];
+
+export const WEDDING_EVENTS = [
+  'Mehendi', 'Haldi', 'Sangeet', 'Wedding'
+];
+
+export const RSVP_STATUSES = [
+  'Pending Invitation', 'Invited', 'Confirmed', 'Maybe', 'Declined'
+];
+export const GUEST_STATUSES = RSVP_STATUSES;
+
+export const ATTENDANCE_STATUSES = [
+  'Pending', 'Attended', 'Did Not Attend'
+];
+
+export const GUEST_SIDES = [
+  'Bride', 'Groom', 'Both'
+];
+
+export const RELATIONSHIP_CATEGORIES = [
+  'Family', 'Friend', 'Colleague', 'Other'
+];
+
+export const GUEST_TYPES = [
+  'Individual', 'Couple', 'Family', 'Group', 'Plus-One'
+];
+
+export const COMMON_GUEST_TAGS = [
+  'VIP', 'Close Family', 'College Friends', 'Office', 'Outstation', 'Needs Accommodation', 'Elderly', 'Child', 'Special Attention'
 ];

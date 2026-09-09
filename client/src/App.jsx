@@ -7,6 +7,8 @@ import Expenses  from './components/Expenses'
 import Savings   from './components/Savings'
 import Bookings  from './components/Bookings'
 import BookingDetail from './components/BookingDetail'
+import Guests    from './components/Guests'
+import GuestRsvpPortal from './components/GuestRsvpPortal'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { Menu, Sparkles } from 'lucide-react'
@@ -18,6 +20,7 @@ function MainApp() {
   
   const pageTitles = {
     dashboard: 'Dashboard',
+    guests: 'Guests',
     bookings: 'Bookings',
     expenses: 'Payments',
     savings: 'Savings'
@@ -62,6 +65,7 @@ function MainApp() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/guests" element={<Guests />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/bookings/:id" element={<BookingDetail />} />
@@ -78,7 +82,10 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <MainApp />
+          <Routes>
+            <Route path="/rsvp/:token" element={<GuestRsvpPortal />} />
+            <Route path="/*" element={<MainApp />} />
+          </Routes>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

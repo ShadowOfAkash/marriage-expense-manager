@@ -328,7 +328,7 @@ export default function BookingDetail() {
 
         {/* Right Column: Linked Payments Table */}
         <div className="lg:col-span-2">
-          <Card className="border border-zinc-200/80 shadow-xs bg-white rounded-xl overflow-hidden">
+          <div className="border border-zinc-200/80 shadow-xs bg-white rounded-xl overflow-hidden">
             <div className="p-4 md:p-5 border-b border-zinc-100 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
@@ -352,7 +352,7 @@ export default function BookingDetail() {
               <>
                 <div className="overflow-x-auto w-full">
                 <table className="w-full text-left text-sm border-collapse">
-                  <thead className="bg-zinc-50/95 border-b border-zinc-200/80">
+                  <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
                     <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
                       <th className="py-3 px-4 whitespace-nowrap">DATE</th>
                       <th className="py-3 px-4 whitespace-nowrap">TYPE</th>
@@ -457,7 +457,7 @@ export default function BookingDetail() {
                 </div>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
 

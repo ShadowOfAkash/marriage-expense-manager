@@ -217,12 +217,12 @@ export default function Expenses() {
         </div>
       </div>
 
-      <Card className="shadow-sm border border-zinc-200/80 rounded-xl overflow-hidden">
+      <div className="shadow-sm border border-zinc-200/80 rounded-xl overflow-hidden bg-white">
         {filtered.length > 0 ? (
           <>
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-zinc-50/95 backdrop-blur-xs border-b border-zinc-200/80">
+                <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
                   <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
                     <th className="py-3.5 px-4 whitespace-nowrap">DATE</th>
                     <th className="py-3.5 px-4 whitespace-nowrap">BOOKING</th>
@@ -320,7 +320,7 @@ export default function Expenses() {
             <p className="text-zinc-400 text-xs mt-1">Try adjusting your search query or filter.</p>
           </div>
         )}
-      </Card>
+      </div>
 
       <AddExpenseModal 
         isOpen={isAddOpen} 
