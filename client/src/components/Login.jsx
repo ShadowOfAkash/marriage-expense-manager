@@ -46,7 +46,17 @@ export default function Login() {
     try {
       await loginWithGoogle();
     } catch (err) {
-      toast({ title: 'Google Login Failed', description: err.message, status: 'error' });
+      if (err.code === 'auth/unauthorized-domain') {
+        const domain = window.location.hostname;
+        toast({ 
+          title: 'Domain Not Authorized in Firebase', 
+          description: `Add "${domain}" in Firebase Console → Authentication → Settings → Authorized domains.`, 
+          status: 'error',
+          duration: 10000 
+        });
+      } else {
+        toast({ title: 'Google Login Failed', description: err.message, status: 'error' });
+      }
     }
   }
 
