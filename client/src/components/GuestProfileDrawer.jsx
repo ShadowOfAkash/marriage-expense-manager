@@ -209,7 +209,10 @@ export function GuestProfileDrawer({
                       <button
                         key={opt.id}
                         type="button"
-                        onClick={() => onChangeStayPreference(guest.id, opt.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChangeStayPreference(guest.id, opt.id);
+                        }}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer border ${
                           isSelected
                             ? 'bg-[#234c6a] text-white border-[#234c6a] shadow-2xs'

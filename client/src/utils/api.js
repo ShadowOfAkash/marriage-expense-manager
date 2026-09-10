@@ -87,7 +87,22 @@ export const api = {
   sendGuestInvitation: (id, data = {}) => fetchWithAuth(`/api/guests/${id}/send-invitation`, { method: 'POST', body: JSON.stringify(data) }),
   sendBulkInvitations: (payload)       => fetchWithAuth('/api/guests/send-bulk-invitations', { method: 'POST', body: JSON.stringify(payload) }),
   updateGuestRsvp:     (id, rsvp_status) => fetchWithAuth(`/api/guests/${id}/rsvp`, { method: 'PATCH', body: JSON.stringify({ rsvp_status }) }),
-  updateGuestStayPreference: (id, stay_preference) => fetchWithAuth(`/api/guests/${id}/stay`, { method: 'PATCH', body: JSON.stringify({ stay_preference }) }),
+  updateGuestStayPreference: async (id, stay_preference, fallbackGuest = null) => {
+    try {
+      return await fetchWithAuth(`/api/guests/${id}/stay`, { 
+        method: 'PATCH', 
+        body: JSON.stringify({ stay_preference }) 
+      });
+    } catch (err) {
+      if (fallbackGuest) {
+        return await fetchWithAuth(`/api/guests/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...fallbackGuest, stay_preference })
+        });
+      }
+      throw err;
+    }
+  },
   getGuestInvitationPdfUrl: (id)       => `/api/guests/${id}/invitation-pdf`,
   getPublicRsvp: async (token) => {
     const res = await fetch(`/api/public/rsvp/${token}`);

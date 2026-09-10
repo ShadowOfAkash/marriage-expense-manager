@@ -2602,14 +2602,14 @@ app.patch('/api/guests/:id/rsvp', requireAuth, async (req, res) => {
         UPDATE guests SET
           rsvp_status = ?,
           updated_at = datetime('now')
-        WHERE id = ? AND user_id = ?
+        WHERE id = ? AND (user_id = ? OR user_id = 'legacy_user' OR user_id IS NULL OR user_id = '')
       `, [rsvp_status, id, req.user.uid]);
       const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
       if (!updated) return res.status(404).json({ error: 'Guest not found' });
       guest = formatGuest(updated);
     } else {
       const d = readJSON();
-      const idx = (d.guests || []).findIndex(g => g.id === id);
+      const idx = (d.guests || []).findIndex(g => Number(g.id) === Number(id));
       if (idx === -1) return res.status(404).json({ error: 'Guest not found' });
       d.guests[idx].rsvp_status = rsvp_status;
       d.guests[idx].updated_at = new Date().toISOString();
@@ -2636,14 +2636,14 @@ app.patch('/api/guests/:id/stay', requireAuth, async (req, res) => {
         UPDATE guests SET
           stay_preference = ?,
           updated_at = datetime('now')
-        WHERE id = ? AND user_id = ?
+        WHERE id = ? AND (user_id = ? OR user_id = 'legacy_user' OR user_id IS NULL OR user_id = '')
       `, [stay_preference, id, req.user.uid]);
       const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
       if (!updated) return res.status(404).json({ error: 'Guest not found' });
       guest = formatGuest(updated);
     } else {
       const d = readJSON();
-      const idx = (d.guests || []).findIndex(g => g.id === id);
+      const idx = (d.guests || []).findIndex(g => Number(g.id) === Number(id));
       if (idx === -1) return res.status(404).json({ error: 'Guest not found' });
       d.guests[idx].stay_preference = stay_preference;
       d.guests[idx].updated_at = new Date().toISOString();

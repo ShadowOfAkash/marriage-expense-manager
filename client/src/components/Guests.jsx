@@ -415,19 +415,30 @@ export default function Guests() {
 
   // Manual Stay Preference Update
   const handleChangeStayPreference = async (guestId, newPreference) => {
+    const targetGuest = guests.find(g => Number(g.id) === Number(guestId)) || (viewGuest && Number(viewGuest.id) === Number(guestId) ? viewGuest : null);
+    
+    // Optimistic state update
+    setGuests(prev => prev.map(g => Number(g.id) === Number(guestId) ? { ...g, stay_preference: newPreference } : g));
+    if (viewGuest && Number(viewGuest.id) === Number(guestId)) {
+      setViewGuest(prev => ({ ...prev, stay_preference: newPreference }));
+    }
+
     try {
-      await api.updateGuestStayPreference(guestId, newPreference);
+      await api.updateGuestStayPreference(guestId, newPreference, targetGuest);
       toast({
         title: 'Stay Preference Updated',
         description: `Stay preference set to "${newPreference}".`,
         status: 'success'
       });
-      setGuests(prev => prev.map(g => g.id === guestId ? { ...g, stay_preference: newPreference } : g));
-      if (viewGuest && viewGuest.id === guestId) {
-        setViewGuest(prev => ({ ...prev, stay_preference: newPreference }));
-      }
       await loadData();
     } catch (err) {
+      // Rollback optimistic state if failed
+      if (targetGuest) {
+        setGuests(prev => prev.map(g => Number(g.id) === Number(guestId) ? targetGuest : g));
+        if (viewGuest && Number(viewGuest.id) === Number(guestId)) {
+          setViewGuest(targetGuest);
+        }
+      }
       toast({ title: 'Failed to update stay preference', description: err.message, status: 'error' });
     }
   };
@@ -1426,7 +1437,11 @@ export default function Guests() {
                           <div className="relative inline-block">
                             <select
                               value={g.stay_preference || 'No need of stay'}
-                              onChange={(e) => handleChangeStayPreference(g.id, e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleChangeStayPreference(g.id, e.target.value);
+                              }}
                               aria-label="Stay Preference"
                               className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border appearance-none pr-7 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 transition-all ${
                                 g.stay_preference === 'Hotel'
