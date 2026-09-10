@@ -672,7 +672,7 @@ export default function Guests() {
             </div>
             <div>
               <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Guests</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight font-mono">
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
                 {summary?.totalGuests || guests.length}
               </div>
               <div className="text-xs text-zinc-500 font-medium">
@@ -690,7 +690,7 @@ export default function Guests() {
             </div>
             <div>
               <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Confirmed Guests</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight font-mono">
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
                 {summary?.confirmed || 0}
               </div>
               <div className="text-xs text-zinc-500 font-medium">
@@ -708,7 +708,7 @@ export default function Guests() {
             </div>
             <div>
               <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Expected Headcount</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight font-mono">
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
                 {summary?.expectedAttendance || 0}
               </div>
               <div className="text-xs text-zinc-500 font-medium">
@@ -726,7 +726,7 @@ export default function Guests() {
             </div>
             <div>
               <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Actually Attended</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight font-mono">
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
                 {summary?.actuallyAttended || 0}
               </div>
               <div className="text-xs text-zinc-500 font-medium">
@@ -750,7 +750,7 @@ export default function Guests() {
         >
           <Mail size={16} />
           <span>All Guests & Invitations</span>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold transition-colors ${
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
             activeTab === 'invitations' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {guests.length}
@@ -768,7 +768,7 @@ export default function Guests() {
         >
           <CheckCircle2 size={16} className={activeTab === 'confirmed' ? 'text-emerald-600' : ''} />
           <span>Confirmed & Attending</span>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold transition-colors ${
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
             activeTab === 'confirmed' ? 'bg-emerald-700 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {confirmedGuests.length}
@@ -786,7 +786,7 @@ export default function Guests() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 font-mono text-xs">
+          <div className="flex items-center gap-2.5 text-xs">
             <span className="px-2.5 py-1 bg-white border border-zinc-200/80 rounded-lg text-zinc-800 font-bold shadow-2xs">
               Attended: <strong className="text-emerald-700 font-black">{attendingMetrics.attended}</strong> / {attendingMetrics.totalConfirmed}
             </span>
@@ -1168,7 +1168,7 @@ export default function Guests() {
                         {/* Headcount */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <div className="inline-flex flex-col items-center">
-                            <span className="font-mono font-bold text-zinc-900 text-sm">
+                            <span className="font-bold text-zinc-900 text-sm">
                               {g.expected_attendees || (Number(g.expected_adults||1) + Number(g.expected_children||0))}
                             </span>
                             <span className="text-[10px] text-zinc-400 font-medium">
@@ -1367,7 +1367,7 @@ export default function Guests() {
                         </td>
 
                         {/* Expected Headcount */}
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap font-mono font-bold text-zinc-800">
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap font-bold text-zinc-800">
                           {expectedTotal}
                         </td>
 
@@ -1386,7 +1386,7 @@ export default function Guests() {
                             >
                               <Minus size={12} />
                             </button>
-                            <span className="w-8 font-mono font-bold text-xs text-center text-zinc-900">
+                            <span className="w-8 font-bold text-xs text-center text-zinc-900">
                               {actualCount}
                             </span>
                             <button
@@ -1791,13 +1791,13 @@ export default function Guests() {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
               <span className="text-zinc-500 block text-[10px] uppercase font-bold">With Email</span>
-              <span className="text-base font-bold font-mono text-emerald-700">
+              <span className="text-base font-bold text-emerald-700">
                 {guests.filter(g => selectedIds.includes(g.id) && g.email && g.email.trim()).length}
               </span>
             </div>
             <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
               <span className="text-zinc-500 block text-[10px] uppercase font-bold">Missing Email</span>
-              <span className="text-base font-bold font-mono text-amber-700">
+              <span className="text-base font-bold text-amber-700">
                 {guests.filter(g => selectedIds.includes(g.id) && (!g.email || !g.email.trim())).length}
               </span>
             </div>

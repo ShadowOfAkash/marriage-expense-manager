@@ -105,7 +105,7 @@ export default function GuestRsvpPortal() {
     return (
       <div className="min-h-screen bg-[#102231] flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 rounded-full border-3 border-[#c59b27] border-t-transparent animate-spin mb-4" />
-        <p className="text-white font-serif text-lg tracking-wide">Opening Your Wedding Invitation...</p>
+        <p className="text-white text-lg tracking-wide font-medium">Opening Your Wedding Invitation...</p>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function GuestRsvpPortal() {
       <div className="min-h-screen bg-[#102231] flex flex-col items-center justify-center p-4 text-center">
         <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl max-w-md w-full border border-white/20 shadow-2xl text-white">
           <AlertCircle size={48} className="mx-auto mb-3 text-rose-400" />
-          <h2 className="text-xl font-bold font-serif">Invitation Not Found</h2>
+          <h2 className="text-xl font-bold">Invitation Not Found</h2>
           <p className="text-zinc-300 text-sm mt-2">{error}</p>
           <p className="text-xs text-zinc-400 mt-4">Please check the link provided in your invitation email or contact the wedding hosts.</p>
         </div>
@@ -136,7 +136,7 @@ export default function GuestRsvpPortal() {
           <div className="text-[#f3e5ab] text-xs font-bold tracking-[0.25em] uppercase mb-1">
             ✦ WEDDING CELEBRATION ✦
           </div>
-          <h1 className="text-white font-serif text-2xl md:text-3xl font-bold tracking-tight">
+          <h1 className="text-white text-2xl md:text-3xl font-extrabold tracking-tight">
             The Wedding Celebrations
           </h1>
           <p className="text-zinc-300 text-xs mt-2 italic">
@@ -161,7 +161,7 @@ export default function GuestRsvpPortal() {
           {/* Honored Guest Section */}
           <div className="text-center pb-5 border-b border-zinc-200">
             <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">HONORED GUEST</div>
-            <div className="text-2xl md:text-3xl font-bold text-[#1b3c53] font-serif mt-1">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#1b3c53] tracking-tight mt-1">
               {guest?.name}
             </div>
 
@@ -293,7 +293,7 @@ export default function GuestRsvpPortal() {
                       max="20"
                       value={adults}
                       onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-white font-mono font-bold text-center focus:outline-none focus:border-[#234c6a]"
+                      className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-white font-bold text-center focus:outline-none focus:border-[#234c6a]"
                     />
                   </div>
 
@@ -305,13 +305,13 @@ export default function GuestRsvpPortal() {
                       max="20"
                       value={children}
                       onChange={(e) => setChildren(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-white font-mono font-bold text-center focus:outline-none focus:border-[#234c6a]"
+                      className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-white font-bold text-center focus:outline-none focus:border-[#234c6a]"
                     />
                   </div>
 
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-xs font-semibold text-zinc-600 mb-1">Total Headcount</label>
-                    <div className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-zinc-100/70 font-mono font-black text-center flex items-center justify-center text-zinc-900">
+                    <div className="w-full h-10 px-3 rounded-lg border border-zinc-200 text-sm bg-zinc-100/70 font-black text-center flex items-center justify-center text-zinc-900">
                       {Number(adults) + Number(children)} Guests
                     </div>
                   </div>

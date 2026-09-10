@@ -260,7 +260,7 @@ Sunita Sharma,9876543213,,Aunt,Confirmed,1,"Mehendi, Haldi, Wedding",Family`;
                 value={csvText}
                 onChange={(e) => setCsvText(e.target.value)}
                 placeholder="Guest Name, Phone, Relation, Status&#10;Rahul Sharma, 9876543210, Friend, Confirmed"
-                className="w-full p-3 font-mono text-xs rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 focus:border-[#234c6a]"
+                className="w-full p-3 text-xs rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 focus:border-[#234c6a]"
               />
             </div>
 
@@ -343,7 +343,7 @@ Sunita Sharma,9876543213,,Aunt,Confirmed,1,"Mehendi, Haldi, Wedding",Family`;
                       <th className="p-2">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 font-mono text-[11px]">
+                  <tbody className="divide-y divide-zinc-100 text-[11px]">
                     {parsedRows.slice(0, 3).map((row, idx) => {
                       const getPreviewVal = (key) => {
                         const h = columnMap[key];

@@ -321,7 +321,7 @@ export default function Dashboard() {
                   {isTelegramLinked ? (
                      <div className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5 flex-wrap">
                        <span>Connected ✓</span>
-                       {telegramId && <span className="text-zinc-500 font-mono text-[11px] font-normal">({telegramId})</span>}
+                       {telegramId && <span className="text-zinc-500 text-[11px] font-normal">({telegramId})</span>}
                      </div>
                   ) : (
                      <div className="text-xs text-zinc-500">Link account</div>

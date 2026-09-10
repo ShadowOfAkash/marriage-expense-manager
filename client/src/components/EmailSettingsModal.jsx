@@ -191,7 +191,7 @@ export function EmailSettingsModal({ isOpen, onClose, onSettingsUpdated }) {
                 <span className="text-[10px] uppercase font-bold tracking-wider bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md">Live</span>
               </div>
               <p className="text-emerald-800 text-xs mt-0.5">
-                Invitations are being sent directly from <strong className="font-mono">{smtpUser}</strong> to your guests' inboxes.
+                Invitations are being sent directly from <strong>{smtpUser}</strong> to your guests' inboxes.
               </p>
             </div>
           </div>
@@ -299,7 +299,7 @@ export function EmailSettingsModal({ isOpen, onClose, onSettingsUpdated }) {
                   value={smtpPass}
                   onChange={(e) => setSmtpPass(e.target.value)}
                   placeholder={hasExistingPass ? '•••• •••• •••• •••• (Leave blank to keep saved password)' : 'xxxx xxxx xxxx xxxx'}
-                  className="w-full px-3 py-2 pr-9 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none font-mono"
+                  className="w-full px-3 py-2 pr-9 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none"
                 />
                 <button
                   type="button"
@@ -353,7 +353,7 @@ export function EmailSettingsModal({ isOpen, onClose, onSettingsUpdated }) {
                   value={smtpPort}
                   onChange={(e) => setSmtpPort(e.target.value)}
                   placeholder="587"
-                  className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none font-mono"
+                  className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none"
                 />
               </div>
             </div>
@@ -377,7 +377,7 @@ export function EmailSettingsModal({ isOpen, onClose, onSettingsUpdated }) {
                   value={smtpPass}
                   onChange={(e) => setSmtpPass(e.target.value)}
                   placeholder={hasExistingPass ? '•••••••• (Leave blank to keep saved password)' : 'Enter SMTP password or API key'}
-                  className="w-full px-3 py-2 pr-9 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none font-mono"
+                  className="w-full px-3 py-2 pr-9 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none"
                 />
                 <button
                   type="button"

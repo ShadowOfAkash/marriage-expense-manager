@@ -184,7 +184,7 @@ export function TelegramModal({
             <div className="mt-3.5 pt-3 border-t border-emerald-200/60 flex items-center justify-between flex-wrap gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <span className="text-zinc-600 font-medium">Existing Telegram ID:</span>
-                <code className="px-2.5 py-1 bg-white border border-emerald-200 rounded-md font-mono font-bold text-emerald-900 text-xs shadow-2xs select-all">
+                <code className="px-2.5 py-1 bg-white border border-emerald-200 rounded-md font-bold text-emerald-900 text-xs shadow-2xs select-all">
                   {currentIdLocal}
                 </code>
               </div>
@@ -220,7 +220,7 @@ export function TelegramModal({
                   value={telegramIdInput}
                   onChange={(e) => setTelegramIdInput(e.target.value)}
                   placeholder="e.g. 1256918427"
-                  className="w-full h-10 px-3 py-2 rounded-lg border border-zinc-200 text-sm font-mono text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 focus:border-[#234c6a] transition-all"
+                  className="w-full h-10 px-3 py-2 rounded-lg border border-zinc-200 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 focus:border-[#234c6a] transition-all"
                 />
               </div>
               <button
@@ -290,7 +290,7 @@ export function TelegramModal({
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs text-zinc-500 font-medium">Your 6-Digit Link Code:</span>
-                  <div className="text-2xl font-black tracking-widest text-[#1b3c53] font-mono mt-0.5">
+                  <div className="text-2xl font-black tracking-widest text-[#1b3c53] mt-0.5">
                     {code}
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export function TelegramModal({
                 </div>
               </div>
               <p className="text-[11px] text-zinc-500">
-                Send <code className="bg-zinc-100 px-1 py-0.5 rounded font-mono text-zinc-800">/link {code}</code> in the Telegram bot chat to complete linking.
+                Send <code className="bg-zinc-100 px-1 py-0.5 rounded font-semibold text-zinc-800">/link {code}</code> in the Telegram bot chat to complete linking.
               </p>
             </div>
           ) : (

@@ -436,7 +436,7 @@ export function GuestProfileDrawer({
             <p className="text-xs text-indigo-900/80">
               Face identity profile initialized for automatic matching once wedding ceremony photos are uploaded.
             </p>
-            <div className="flex items-center justify-between pt-2 border-t border-indigo-200/60 text-xs font-mono">
+            <div className="flex items-center justify-between pt-2 border-t border-indigo-200/60 text-xs">
               <span className="text-indigo-600">Guest Name:</span>
               <strong className="text-indigo-900">{guest.name}</strong>
             </div>
