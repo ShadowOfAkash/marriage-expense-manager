@@ -1191,7 +1191,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_b0e4516e98f02e54_1788969300000",
-      "invitation_sent_at": "2026-09-09T17:45:21.878Z"
+      "invitation_sent_at": "2026-09-09T17:45:21.878Z",
+      "stay_preference": "Hotel"
     },
     {
       "id": 1788969300001,
@@ -1233,7 +1234,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_abd15a8d40e239bc_1788969300001",
-      "invitation_sent_at": "2026-09-09T17:45:24.376Z"
+      "invitation_sent_at": "2026-09-09T17:45:24.376Z",
+      "stay_preference": "Home Stay"
     },
     {
       "id": 1788969300002,
@@ -1277,7 +1279,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_9e224e737950bde6_1788969300002",
-      "invitation_sent_at": "2026-09-09T17:45:28.226Z"
+      "invitation_sent_at": "2026-09-09T17:45:28.226Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300003,
@@ -1322,7 +1325,8 @@
       "updated_at": "2026-09-09T19:05:20.392Z",
       "rsvp_token": "rsvp_d691ed627743f509_1788969300003",
       "invitation_sent_at": "2026-09-09T17:45:30.728Z",
-      "dependents": []
+      "dependents": [],
+      "stay_preference": "Hotel"
     },
     {
       "id": 1788969300004,
@@ -1366,7 +1370,8 @@
       "updated_at": "2026-09-09T19:05:19.825Z",
       "rsvp_token": "rsvp_a63063787375331c_1788969300004",
       "invitation_sent_at": "2026-09-09T17:45:33.317Z",
-      "dependents": []
+      "dependents": [],
+      "stay_preference": "Home Stay"
     },
     {
       "id": 1788969300005,
@@ -1411,7 +1416,8 @@
       "check_in_time": "2026-09-09T17:37:46.325Z",
       "dependents": [],
       "rsvp_token": "rsvp_a121eb075cc96892_1788969300005",
-      "invitation_sent_at": "2026-09-09T17:45:35.945Z"
+      "invitation_sent_at": "2026-09-09T17:45:35.945Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300006,
@@ -1451,7 +1457,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_a948d966e53bf378_1788969300006",
-      "invitation_sent_at": "2026-09-09T17:45:38.608Z"
+      "invitation_sent_at": "2026-09-09T17:45:38.608Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300007,
@@ -1492,7 +1499,8 @@
       "check_in_time": "2026-09-09T17:37:44.676Z",
       "dependents": [],
       "rsvp_token": "rsvp_fec86cf4ba9fbc94_1788969300007",
-      "invitation_sent_at": "2026-09-09T17:45:41.181Z"
+      "invitation_sent_at": "2026-09-09T17:45:41.181Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300008,
@@ -1530,7 +1538,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_f0c33a7b8e55f580_1788969300008",
-      "invitation_sent_at": "2026-09-09T17:45:43.706Z"
+      "invitation_sent_at": "2026-09-09T17:45:43.706Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300009,
@@ -1568,7 +1577,8 @@
       "created_at": "2026-09-09T15:57:41.510Z",
       "updated_at": "2026-09-09T17:45:50.341Z",
       "rsvp_token": "rsvp_229f4b40c113ed65_1788969300009",
-      "invitation_sent_at": "2026-09-09T17:45:46.332Z"
+      "invitation_sent_at": "2026-09-09T17:45:46.332Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788969300010,
@@ -1591,9 +1601,9 @@
       "expected_adults": 2,
       "expected_children": 0,
       "expected_attendees": 2,
-      "actual_attendance": "Pending",
-      "actual_attendees": 0,
-      "check_in_status": false,
+      "actual_attendance": "Attended",
+      "actual_attendees": 2,
+      "check_in_status": true,
       "food_preference": "Vegetarian",
       "special_requirements": "Easy parking assistance",
       "notes": "",
@@ -1607,11 +1617,12 @@
         "Mehendi"
       ],
       "created_at": "2026-09-09T15:57:41.510Z",
-      "updated_at": "2026-09-09T19:05:19.233Z",
-      "check_in_time": null,
+      "updated_at": "2026-09-10T05:39:11.480Z",
+      "check_in_time": "2026-09-10T05:39:11.472Z",
       "dependents": [],
       "rsvp_token": "rsvp_cd9de4d89d809da6_1788969300010",
-      "invitation_sent_at": "2026-09-09T17:45:48.867Z"
+      "invitation_sent_at": "2026-09-09T17:45:48.867Z",
+      "stay_preference": "Hotel"
     },
     {
       "id": 1788971913430,
@@ -1662,7 +1673,8 @@
       "created_at": "2026-09-09T16:38:33.430Z",
       "updated_at": "2026-09-09T17:51:47.682Z",
       "rsvp_token": "rsvp_2b151cfcc5ad13a9_1788971913430",
-      "invitation_sent_at": "2026-09-09T17:51:47.682Z"
+      "invitation_sent_at": "2026-09-09T17:51:47.682Z",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788971946580,
@@ -1714,7 +1726,8 @@
       "updated_at": "2026-09-09T18:39:40.932Z",
       "rsvp_token": "rsvp_d0d0fab5f36763b1_1788971946580",
       "invitation_sent_at": "2026-09-09T18:23:46.883Z",
-      "rsvp_response_note": ""
+      "rsvp_response_note": "",
+      "stay_preference": "No need of stay"
     },
     {
       "id": 1788980251028,
@@ -1737,10 +1750,10 @@
       "expected_adults": 1,
       "expected_children": 0,
       "expected_attendees": 1,
-      "actual_attendance": "Pending",
-      "actual_attendees": 0,
-      "check_in_status": false,
-      "check_in_time": null,
+      "actual_attendance": "Attended",
+      "actual_attendees": 1,
+      "check_in_status": true,
+      "check_in_time": "2026-09-10T05:39:09.923Z",
       "food_preference": "Vegetarian",
       "special_requirements": "",
       "notes": "",
@@ -1752,10 +1765,11 @@
       ],
       "dependents": [],
       "created_at": "2026-09-09T18:57:31.028Z",
-      "updated_at": "2026-09-09T19:07:10.574Z",
+      "updated_at": "2026-09-10T05:48:52.791Z",
       "rsvp_token": "rsvp_814e9b6b412b31ab_1788980251028",
       "invitation_sent_at": "2026-09-09T19:06:11.996Z",
-      "rsvp_response_note": ""
+      "rsvp_response_note": "",
+      "stay_preference": "No need of stay"
     }
   ],
   "_nextGuestId": 1015,

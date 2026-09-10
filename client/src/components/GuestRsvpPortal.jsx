@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { 
   Heart, CheckCircle2, AlertCircle, Clock, 
-  Download, Calendar, Users, Send, Sparkles, MessageSquare 
+  Download, Calendar, Users, Send, Sparkles, MessageSquare,
+  Building2, Home, Bed
 } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -19,6 +20,7 @@ export default function GuestRsvpPortal() {
 
   // Form State
   const [selectedStatus, setSelectedStatus] = useState('Confirmed');
+  const [stayPreference, setStayPreference] = useState('No need of stay');
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [note, setNote] = useState('');
@@ -43,6 +45,7 @@ export default function GuestRsvpPortal() {
         setAdults(Number(data.expected_adults) || 1);
         setChildren(Number(data.expected_children) || 0);
         setNote(data.rsvp_response_note || '');
+        setStayPreference(data.stay_preference || 'No need of stay');
 
         // If direct action provided via email click and not yet confirmed with that action, auto submit!
         if (directAction && ['Confirmed', 'Maybe', 'Declined'].includes(directAction) && data.rsvp_status !== directAction) {
@@ -50,6 +53,7 @@ export default function GuestRsvpPortal() {
             const expTotal = (Number(data.expected_adults) || 1) + (Number(data.expected_children) || 0);
             await api.submitPublicRsvp(token, {
               rsvp_status: directAction,
+              stay_preference: data.stay_preference || 'No need of stay',
               expected_adults: Number(data.expected_adults) || 1,
               expected_children: Number(data.expected_children) || 0,
               expected_attendees: expTotal,
@@ -87,6 +91,7 @@ export default function GuestRsvpPortal() {
       const expTotal = Number(adults) + Number(children);
       const res = await api.submitPublicRsvp(token, {
         rsvp_status: selectedStatus,
+        stay_preference: selectedStatus === 'Declined' ? (guest?.stay_preference || 'No need of stay') : stayPreference,
         expected_adults: Number(adults),
         expected_children: Number(children),
         expected_attendees: expTotal,
@@ -154,6 +159,11 @@ export default function GuestRsvpPortal() {
               <div>
                 <div className="font-bold text-sm">Status: {guest?.rsvp_status}</div>
                 <div className="text-xs mt-0.5">{successMsg}</div>
+                {guest?.stay_preference && guest.rsvp_status !== 'Declined' && (
+                  <div className="text-xs font-semibold text-emerald-800 mt-1">
+                    Stay Arrangement: <span className="underline">{guest.stay_preference}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -315,6 +325,57 @@ export default function GuestRsvpPortal() {
                       {Number(adults) + Number(children)} Guests
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Stay & Accommodation Preference */}
+            {selectedStatus !== 'Declined' && (
+              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-700 uppercase tracking-wider">
+                    <Building2 size={14} className="text-[#234c6a]" />
+                    <span>Stay & Accommodation Arrangement</span>
+                  </div>
+                  <span className="text-[11px] text-zinc-500 font-medium">Do you need lodging?</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    { id: 'Hotel', label: 'Hotel', desc: 'Arranged hotel room', icon: Building2 },
+                    { id: 'Home Stay', label: 'Home Stay', desc: 'Stay at family home', icon: Home },
+                    { id: 'No need of stay', label: 'No need of stay', desc: 'Local / Self arranged', icon: Bed }
+                  ].map(opt => {
+                    const isSelected = stayPreference === opt.id;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setStayPreference(opt.id)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                          isSelected
+                            ? 'border-[#234c6a] bg-blue-50/50 shadow-xs ring-1 ring-[#234c6a]'
+                            : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
+                              isSelected ? 'bg-[#234c6a] text-white' : 'bg-zinc-100 text-zinc-500'
+                            }`}>
+                              <Icon size={13} />
+                            </div>
+                            <span className="text-xs font-bold text-zinc-900">{opt.label}</span>
+                          </div>
+                          {isSelected && (
+                            <CheckCircle2 size={15} className="text-[#234c6a]" />
+                          )}
+                        </div>
+                        <span className="text-[10.5px] text-zinc-500 pl-8">{opt.desc}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

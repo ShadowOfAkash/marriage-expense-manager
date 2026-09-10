@@ -87,6 +87,7 @@ export const api = {
   sendGuestInvitation: (id, data = {}) => fetchWithAuth(`/api/guests/${id}/send-invitation`, { method: 'POST', body: JSON.stringify(data) }),
   sendBulkInvitations: (payload)       => fetchWithAuth('/api/guests/send-bulk-invitations', { method: 'POST', body: JSON.stringify(payload) }),
   updateGuestRsvp:     (id, rsvp_status) => fetchWithAuth(`/api/guests/${id}/rsvp`, { method: 'PATCH', body: JSON.stringify({ rsvp_status }) }),
+  updateGuestStayPreference: (id, stay_preference) => fetchWithAuth(`/api/guests/${id}/stay`, { method: 'PATCH', body: JSON.stringify({ stay_preference }) }),
   getGuestInvitationPdfUrl: (id)       => `/api/guests/${id}/invitation-pdf`,
   getPublicRsvp: async (token) => {
     const res = await fetch(`/api/public/rsvp/${token}`);
@@ -180,4 +181,8 @@ export const GUEST_TYPES = [
 
 export const COMMON_GUEST_TAGS = [
   'VIP', 'Close Family', 'College Friends', 'Office', 'Outstation', 'Needs Accommodation', 'Elderly', 'Child', 'Special Attention'
+];
+
+export const STAY_PREFERENCES = [
+  'Hotel', 'Home Stay', 'No need of stay'
 ];

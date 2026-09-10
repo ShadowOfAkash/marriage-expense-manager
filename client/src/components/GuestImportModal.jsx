@@ -13,6 +13,7 @@ const TARGET_FIELDS = [
   { key: 'household_name', label: 'Household / Family', match: ['household', 'family', 'group', 'household name', 'family name'] },
   { key: 'guest_type', label: 'Guest Type', match: ['type', 'guest type', 'individual/family'] },
   { key: 'rsvp_status', label: 'Status', match: ['status', 'rsvp', 'rsvp status', 'attendance rsvp'] },
+  { key: 'stay_preference', label: 'Stay Preference', match: ['stay', 'stay preference', 'accommodation', 'hotel', 'hotel/home stay', 'lodging'] },
   { key: 'expected_attendees', label: 'Expected Headcount', match: ['headcount', 'members', 'total members', 'expected', 'expected count', 'attendees'] },
   { key: 'events', label: 'Wedding Events', match: ['events', 'ceremonies', 'functions'] },
   { key: 'tags', label: 'Tags', match: ['tags', 'tag', 'labels'] }
@@ -123,11 +124,11 @@ export function GuestImportModal({ isOpen, onClose, onImportSuccess }) {
   };
 
   const handleDownloadSample = () => {
-    const sample = `Guest Name,Phone,Email,Relation,Status,Members,Events,Tags
-Rahul Sharma,9876543210,rahul@example.com,College Friend,Confirmed,2,"Sangeet, Wedding","College Friends, VIP"
-Amit Sharma,9876543211,amit@example.com,Uncle,Confirmed,4,"Haldi, Sangeet, Wedding",Close Family
-Priya Verma,9876543212,priya@example.com,Friend,Maybe,1,"Mehendi, Sangeet, Wedding",
-Sunita Sharma,9876543213,,Aunt,Confirmed,1,"Mehendi, Haldi, Wedding",Family`;
+    const sample = `Guest Name,Phone,Email,Relation,Status,Stay Preference,Members,Events,Tags
+Rahul Sharma,9876543210,rahul@example.com,College Friend,Confirmed,Hotel,2,"Sangeet, Wedding","College Friends, VIP"
+Amit Sharma,9876543211,amit@example.com,Uncle,Confirmed,Home Stay,4,"Haldi, Sangeet, Wedding",Close Family
+Priya Verma,9876543212,priya@example.com,Friend,Maybe,No need of stay,1,"Mehendi, Sangeet, Wedding",
+Sunita Sharma,9876543213,,Aunt,Confirmed,Home Stay,1,"Mehendi, Haldi, Wedding",Family`;
 
     const blob = new Blob([sample], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -171,6 +172,16 @@ Sunita Sharma,9876543213,,Aunt,Confirmed,1,"Mehendi, Haldi, Wedding",Family`;
 
         const members = parseInt(getVal('expected_attendees'), 10) || 1;
 
+        const rawStay = getVal('stay_preference');
+        let stay_preference = 'No need of stay';
+        if (rawStay) {
+          const lower = rawStay.toLowerCase().trim();
+          if (lower.includes('hotel')) stay_preference = 'Hotel';
+          else if (lower.includes('home')) stay_preference = 'Home Stay';
+          else if (lower.includes('no')) stay_preference = 'No need of stay';
+          else stay_preference = rawStay;
+        }
+
         return {
           name,
           phone: getVal('phone'),
@@ -180,6 +191,7 @@ Sunita Sharma,9876543213,,Aunt,Confirmed,1,"Mehendi, Haldi, Wedding",Family`;
           household_name: getVal('household_name'),
           guest_type: getVal('guest_type') || (members > 1 ? 'Family' : 'Individual'),
           rsvp_status: (getVal('rsvp_status') === 'Not Responded' || !getVal('rsvp_status')) ? 'Pending Invitation' : getVal('rsvp_status'),
+          stay_preference,
           expected_adults: members,
           expected_children: 0,
           expected_attendees: members,

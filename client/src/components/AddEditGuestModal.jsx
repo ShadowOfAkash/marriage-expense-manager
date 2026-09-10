@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { TailwindModal } from './TailwindModal';
 import { 
   User, Phone, Mail, Users, CalendarCheck, 
-  Tag, Heart, Check, Plus, X 
+  Tag, Heart, Check, Plus, X, Building2, Home, Bed
 } from 'lucide-react';
 import { 
   WEDDING_EVENTS, RSVP_STATUSES, ATTENDANCE_STATUSES, 
   RELATIONSHIP_CATEGORIES, GUEST_TYPES, 
-  COMMON_GUEST_TAGS 
+  COMMON_GUEST_TAGS, STAY_PREFERENCES
 } from '../utils/api';
 
 const DEFAULT_GUEST_FORM = {
@@ -22,6 +22,7 @@ const DEFAULT_GUEST_FORM = {
   plus_one_allowed: false,
   plus_one_name: '',
   rsvp_status: 'Pending Invitation',
+  stay_preference: 'No need of stay',
   expected_adults: 1,
   expected_children: 0,
   expected_attendees: 1,
@@ -49,6 +50,7 @@ export function AddEditGuestModal({
       setForm({
         ...DEFAULT_GUEST_FORM,
         ...initialGuest,
+        stay_preference: initialGuest.stay_preference || 'No need of stay',
         rsvp_status: (initialGuest.rsvp_status === 'Not Responded' || !initialGuest.rsvp_status) ? 'Pending Invitation' : initialGuest.rsvp_status,
         dependents: Array.isArray(initialGuest.dependents) ? initialGuest.dependents : [],
         events: Array.isArray(initialGuest.events) ? initialGuest.events : ['Mehendi', 'Haldi', 'Wedding'],
@@ -489,7 +491,73 @@ export function AddEditGuestModal({
           </div>
         </div>
 
-        {/* 5. Wedding Events Selection */}
+        {/* 5. Stay / Accommodation Preference */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-1.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-600 flex items-center gap-1.5">
+              <Building2 size={14} className="text-[#234c6a]" />
+              <span>Stay / Accommodation Preference</span>
+            </h4>
+            <span className="text-[11px] font-medium text-zinc-500">Do they need stay arrangements?</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              {
+                id: 'Hotel',
+                label: 'Hotel',
+                desc: 'Hotel room arrangement required',
+                icon: Building2
+              },
+              {
+                id: 'Home Stay',
+                label: 'Home Stay',
+                desc: 'Stay at family / home accommodation',
+                icon: Home
+              },
+              {
+                id: 'No need of stay',
+                label: 'No need of stay',
+                desc: 'Local guest / self-arranged stay',
+                icon: Bed
+              }
+            ].map(opt => {
+              const isSelected = (form.stay_preference || 'No need of stay') === opt.id;
+              const Icon = opt.icon;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => handleChange('stay_preference', opt.id)}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                    isSelected
+                      ? 'border-[#234c6a] bg-blue-50/40 shadow-xs ring-1 ring-[#234c6a]'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                        isSelected ? 'bg-[#234c6a] text-white' : 'bg-zinc-100 text-zinc-500'
+                      }`}>
+                        <Icon size={14} />
+                      </div>
+                      <span className="text-sm font-bold text-zinc-900">{opt.label}</span>
+                    </div>
+                    {isSelected && (
+                      <div className="w-5 h-5 rounded-full bg-[#234c6a] text-white flex items-center justify-center">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-zinc-500 pl-9">{opt.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 6. Wedding Events Selection */}
         <div className="space-y-3">
           <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-600 flex items-center gap-1.5 border-b border-zinc-100 pb-1.5">
             <CalendarCheck size={14} className="text-[#234c6a]" />

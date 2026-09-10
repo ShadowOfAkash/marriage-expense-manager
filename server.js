@@ -170,6 +170,7 @@ async function initDB() {
         invitation_sent_at    TEXT    DEFAULT NULL,
         rsvp_token            TEXT    DEFAULT NULL,
         rsvp_response_note    TEXT    DEFAULT '',
+        stay_preference       TEXT    DEFAULT 'No need of stay',
         created_at            TEXT    DEFAULT (datetime('now')),
         updated_at            TEXT    DEFAULT (datetime('now'))
       );
@@ -187,6 +188,7 @@ async function initDB() {
     try { await db.execute("ALTER TABLE guests ADD COLUMN invitation_sent_at TEXT DEFAULT NULL"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN rsvp_token TEXT DEFAULT NULL"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN rsvp_response_note TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE guests ADD COLUMN stay_preference TEXT DEFAULT 'No need of stay'"); } catch(e){}
     try { await db.execute("UPDATE guests SET rsvp_status = 'Pending Invitation' WHERE rsvp_status = 'Not Responded' OR rsvp_status IS NULL"); } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
@@ -1624,6 +1626,7 @@ function formatGuest(g) {
     rsvp_token: token,
     invitation_sent_at: g.invitation_sent_at || null,
     rsvp_response_note: g.rsvp_response_note || '',
+    stay_preference: g.stay_preference || 'No need of stay',
     tags: typeof g.tags === 'string' ? JSON.parse(g.tags || '[]') : (g.tags || []),
     events: typeof g.events === 'string' ? JSON.parse(g.events || '[]') : (g.events || []),
     dependents: typeof g.dependents === 'string' ? JSON.parse(g.dependents || '[]') : (Array.isArray(g.dependents) ? g.dependents : []),
@@ -1804,7 +1807,8 @@ app.post('/api/guests', requireAuth, async (req, res) => {
     household_name, household_role, plus_one_allowed, plus_one_name,
     rsvp_status, expected_adults, expected_children, expected_attendees,
     actual_attendance, actual_attendees, check_in_status,
-    food_preference, special_requirements, notes, tags, events, dependents
+    food_preference, special_requirements, notes, tags, events, dependents,
+    stay_preference
   } = req.body;
 
   if (!name || !name.trim()) {
@@ -1820,6 +1824,7 @@ app.post('/api/guests', requireAuth, async (req, res) => {
   const dependentsJSON = JSON.stringify(Array.isArray(dependents) ? dependents : []);
   const checkIn = check_in_status ? 1 : 0;
   const checkInTime = checkIn ? new Date().toISOString() : null;
+  const stayPref = stay_preference || 'No need of stay';
 
   try {
     if (useLibSQL) {
@@ -1834,8 +1839,9 @@ app.post('/api/guests', requireAuth, async (req, res) => {
           household_name, household_role, plus_one_allowed, plus_one_name,
           rsvp_status, expected_adults, expected_children, expected_attendees,
           actual_attendance, actual_attendees, check_in_status, check_in_time,
-          food_preference, special_requirements, notes, tags, events, dependents, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+          food_preference, special_requirements, notes, tags, events, dependents,
+          stay_preference, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
       `, [
         guestId, req.user.uid, name.trim(), phone || '', email || '', gender || '', age_group || 'Adult',
         side || 'Bride', relationship_category || 'Family', relationship_detail || '', guest_type || 'Individual',
@@ -1843,7 +1849,7 @@ app.post('/api/guests', requireAuth, async (req, res) => {
         rsvp_status || 'Pending Invitation', expAdults, expChildren, expTotal,
         actual_attendance || 'Pending', actAttendees, checkIn, checkInTime,
         food_preference || 'Vegetarian', special_requirements || '', notes || '',
-        tagsJSON, eventsJSON, dependentsJSON
+        tagsJSON, eventsJSON, dependentsJSON, stayPref
       ]);
 
       const inserted = await dbGet('SELECT * FROM guests WHERE id = ?', [Number(result.lastInsertRowid)]);
@@ -1854,9 +1860,10 @@ app.post('/api/guests', requireAuth, async (req, res) => {
     if (!d.guests) d.guests = [];
     const nextNum = d._nextGuestId ? d._nextGuestId++ : (d.guests.length + 1001);
     const guestId = `GST-${nextNum}`;
+    const newId = Date.now();
 
     const newGuest = {
-      id: Date.now(),
+      id: newId,
       guest_id: guestId,
       user_id: req.user.uid,
       name: name.trim(),
@@ -1874,6 +1881,7 @@ app.post('/api/guests', requireAuth, async (req, res) => {
       plus_one_name: plus_one_name || '',
       rsvp_status: rsvp_status || 'Pending Invitation',
       rsvp_token: generateRsvpToken(newId),
+      stay_preference: stayPref,
       expected_adults: expAdults,
       expected_children: expChildren,
       expected_attendees: expTotal,
@@ -1908,7 +1916,8 @@ app.put('/api/guests/:id', requireAuth, async (req, res) => {
     household_name, household_role, plus_one_allowed, plus_one_name,
     rsvp_status, expected_adults, expected_children, expected_attendees,
     actual_attendance, actual_attendees, check_in_status,
-    food_preference, special_requirements, notes, tags, events, dependents
+    food_preference, special_requirements, notes, tags, events, dependents,
+    stay_preference
   } = req.body;
 
   const expAdults = Number(expected_adults) !== undefined && !isNaN(Number(expected_adults)) ? Number(expected_adults) : 1;
@@ -1931,6 +1940,7 @@ app.put('/api/guests/:id', requireAuth, async (req, res) => {
           rsvp_status = ?, expected_adults = ?, expected_children = ?, expected_attendees = ?,
           actual_attendance = ?, actual_attendees = ?, check_in_status = ?, check_in_time = ?,
           food_preference = ?, special_requirements = ?, notes = ?, tags = ?, events = ?, dependents = ?,
+          stay_preference = COALESCE(?, stay_preference),
           updated_at = datetime('now')
         WHERE id = ? AND user_id = ?
       `, [
@@ -1940,7 +1950,8 @@ app.put('/api/guests/:id', requireAuth, async (req, res) => {
         rsvp_status || 'Pending Invitation', expAdults, expChildren, expTotal,
         actual_attendance || 'Pending', actAttendees, checkIn, checkInTime,
         food_preference || 'Vegetarian', special_requirements || '', notes || '',
-        tagsJSON, eventsJSON, dependentsJSON, id, req.user.uid
+        tagsJSON, eventsJSON, dependentsJSON, stay_preference !== undefined ? stay_preference : null,
+        id, req.user.uid
       ]);
 
       const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
@@ -1969,6 +1980,7 @@ app.put('/api/guests/:id', requireAuth, async (req, res) => {
       plus_one_allowed: plus_one_allowed !== undefined ? Boolean(plus_one_allowed) : d.guests[idx].plus_one_allowed,
       plus_one_name: plus_one_name !== undefined ? plus_one_name : d.guests[idx].plus_one_name,
       rsvp_status: rsvp_status !== undefined ? rsvp_status : d.guests[idx].rsvp_status,
+      stay_preference: stay_preference !== undefined ? stay_preference : (d.guests[idx].stay_preference || 'No need of stay'),
       expected_adults: expAdults,
       expected_children: expChildren,
       expected_attendees: expTotal,
@@ -2026,6 +2038,8 @@ app.post('/api/guests/bulk', requireAuth, async (req, res) => {
           await dbRun('DELETE FROM guests WHERE id = ? AND user_id = ?', [id, req.user.uid]);
         } else if (action === 'change_rsvp') {
           await dbRun('UPDATE guests SET rsvp_status = ?, updated_at = datetime("now") WHERE id = ? AND user_id = ?', [data.rsvp_status, id, req.user.uid]);
+        } else if (action === 'change_stay') {
+          await dbRun('UPDATE guests SET stay_preference = ?, updated_at = datetime("now") WHERE id = ? AND user_id = ?', [data.stay_preference, id, req.user.uid]);
         } else if (action === 'mark_attendance') {
           const isAttended = data.actual_attendance === 'Attended';
           await dbRun(`
@@ -2053,6 +2067,8 @@ app.post('/api/guests/bulk', requireAuth, async (req, res) => {
         if (guestIds.map(Number).includes(Number(g.id))) {
           if (action === 'change_rsvp') {
             g.rsvp_status = data.rsvp_status;
+          } else if (action === 'change_stay') {
+            g.stay_preference = data.stay_preference;
           } else if (action === 'mark_attendance') {
             g.actual_attendance = data.actual_attendance;
             const isAttended = data.actual_attendance === 'Attended';
@@ -2122,6 +2138,7 @@ app.post('/api/guests/import', requireAuth, async (req, res) => {
         plus_one_allowed: Boolean(raw.plus_one_allowed),
         plus_one_name: raw.plus_one_name || '',
         rsvp_status: (raw.rsvp_status === 'Not Responded' || !raw.rsvp_status) ? 'Pending Invitation' : raw.rsvp_status,
+        stay_preference: raw.stay_preference || 'No need of stay',
         expected_adults: expAdults,
         expected_children: expChildren,
         expected_attendees: expTotal,
@@ -2146,8 +2163,8 @@ app.post('/api/guests/import', requireAuth, async (req, res) => {
             household_name, household_role, plus_one_allowed, plus_one_name,
             rsvp_status, expected_adults, expected_children, expected_attendees,
             actual_attendance, actual_attendees, check_in_status, check_in_time,
-            food_preference, special_requirements, notes, tags, events, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+            food_preference, special_requirements, notes, tags, events, stay_preference, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
         `, [
           guestItem.guest_id, req.user.uid, guestItem.name, guestItem.phone, guestItem.email, guestItem.gender, guestItem.age_group,
           guestItem.side, guestItem.relationship_category, guestItem.relationship_detail, guestItem.guest_type,
@@ -2155,7 +2172,7 @@ app.post('/api/guests/import', requireAuth, async (req, res) => {
           guestItem.rsvp_status, guestItem.expected_adults, guestItem.expected_children, guestItem.expected_attendees,
           guestItem.actual_attendance, guestItem.actual_attendees, guestItem.check_in_status ? 1 : 0, guestItem.check_in_time,
           guestItem.food_preference, guestItem.special_requirements, guestItem.notes,
-          JSON.stringify(guestItem.tags), JSON.stringify(guestItem.events)
+          JSON.stringify(guestItem.tags), JSON.stringify(guestItem.events), guestItem.stay_preference
         ]);
       } else {
         d.guests.push(guestItem);
@@ -2606,6 +2623,40 @@ app.patch('/api/guests/:id/rsvp', requireAuth, async (req, res) => {
   }
 });
 
+// 11b. PATCH /api/guests/:id/stay - Quick stay preference update
+app.patch('/api/guests/:id/stay', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { stay_preference } = req.body;
+  if (!stay_preference) return res.status(400).json({ error: 'stay_preference is required' });
+
+  try {
+    let guest;
+    if (useLibSQL) {
+      await dbRun(`
+        UPDATE guests SET
+          stay_preference = ?,
+          updated_at = datetime('now')
+        WHERE id = ? AND user_id = ?
+      `, [stay_preference, id, req.user.uid]);
+      const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
+      if (!updated) return res.status(404).json({ error: 'Guest not found' });
+      guest = formatGuest(updated);
+    } else {
+      const d = readJSON();
+      const idx = (d.guests || []).findIndex(g => g.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Guest not found' });
+      d.guests[idx].stay_preference = stay_preference;
+      d.guests[idx].updated_at = new Date().toISOString();
+      writeJSON(d);
+      guest = formatGuest(d.guests[idx]);
+    }
+
+    res.json({ success: true, guest });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 12. GET /api/public/rsvp/:token - Public endpoint to retrieve guest invitation details
 app.get('/api/public/rsvp/:token', async (req, res) => {
   const { token } = req.params;
@@ -2645,7 +2696,7 @@ app.get('/api/public/rsvp/:token', async (req, res) => {
 // 13. POST /api/public/rsvp/:token - Public endpoint for guests to submit RSVP response
 app.post('/api/public/rsvp/:token', async (req, res) => {
   const { token } = req.params;
-  const { rsvp_status, expected_adults, expected_children, expected_attendees, rsvp_response_note } = req.body || {};
+  const { rsvp_status, expected_adults, expected_children, expected_attendees, rsvp_response_note, stay_preference } = req.body || {};
 
   if (!rsvp_status || !['Confirmed', 'Maybe', 'Declined'].includes(rsvp_status)) {
     return res.status(400).json({ error: 'Valid rsvp_status (Confirmed, Maybe, Declined) is required.' });
@@ -2661,6 +2712,7 @@ app.post('/api/public/rsvp/:token', async (req, res) => {
       const c = expected_children !== undefined ? Number(expected_children) : (row.expected_children || 0);
       const total = expected_attendees !== undefined ? Number(expected_attendees) : (a + c);
       const note = rsvp_response_note !== undefined ? rsvp_response_note : (row.rsvp_response_note || '');
+      const stay = stay_preference !== undefined ? stay_preference : (row.stay_preference || 'No need of stay');
 
       await dbRun(`
         UPDATE guests SET
@@ -2669,9 +2721,10 @@ app.post('/api/public/rsvp/:token', async (req, res) => {
           expected_children = ?,
           expected_attendees = ?,
           rsvp_response_note = ?,
+          stay_preference = ?,
           updated_at = datetime('now')
         WHERE rsvp_token = ?
-      `, [rsvp_status, a, c, total, note, token]);
+      `, [rsvp_status, a, c, total, note, stay, token]);
 
       const updated = await dbGet('SELECT * FROM guests WHERE rsvp_token = ?', [token]);
       guest = formatGuest(updated);
@@ -2684,12 +2737,14 @@ app.post('/api/public/rsvp/:token', async (req, res) => {
       const c = expected_children !== undefined ? Number(expected_children) : (d.guests[idx].expected_children || 0);
       const total = expected_attendees !== undefined ? Number(expected_attendees) : (a + c);
       const note = rsvp_response_note !== undefined ? rsvp_response_note : (d.guests[idx].rsvp_response_note || '');
+      const stay = stay_preference !== undefined ? stay_preference : (d.guests[idx].stay_preference || 'No need of stay');
 
       d.guests[idx].rsvp_status = rsvp_status;
       d.guests[idx].expected_adults = a;
       d.guests[idx].expected_children = c;
       d.guests[idx].expected_attendees = total;
       d.guests[idx].rsvp_response_note = note;
+      d.guests[idx].stay_preference = stay;
       d.guests[idx].updated_at = new Date().toISOString();
       writeJSON(d);
       guest = formatGuest(d.guests[idx]);

@@ -3,7 +3,7 @@ import {
   X, User, Phone, Mail, Users, CalendarCheck, CheckCircle2, 
   XCircle, Clock, Tag, Heart, Sparkles, Edit, 
   Trash2, ShieldCheck, AlertCircle, Baby, Check, ExternalLink,
-  Copy, Download, Send
+  Copy, Download, Send, Building2, Home, Bed
 } from 'lucide-react';
 import { formatDate, WEDDING_EVENTS } from '../utils/api';
 
@@ -18,7 +18,8 @@ export function GuestProfileDrawer({
   onSelectGuest,
   onUpdateEvents,
   onSendInvitation,
-  onChangeRsvp
+  onChangeRsvp,
+  onChangeStayPreference
 }) {
   const [copiedLink, setCopiedLink] = useState(false);
   if (!isOpen || !guest) return null;
@@ -115,7 +116,7 @@ export function GuestProfileDrawer({
 
           {/* 1. RSVP & Attendance Status Card */}
           <div className="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Status</span>
                 <div className="mt-1 flex items-center gap-1.5">
@@ -127,6 +128,22 @@ export function GuestProfileDrawer({
                     'bg-zinc-100 text-zinc-800 border border-zinc-200'
                   }`}>
                     {(guest.rsvp_status === 'Not Responded' || !guest.rsvp_status) ? 'Pending Invitation' : guest.rsvp_status}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Stay Preference</span>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${
+                    guest.stay_preference === 'Hotel' ? 'bg-indigo-100 text-indigo-900 border border-indigo-200' :
+                    guest.stay_preference === 'Home Stay' ? 'bg-emerald-100 text-emerald-900 border border-emerald-200' :
+                    'bg-zinc-100 text-zinc-700 border border-zinc-200'
+                  }`}>
+                    {guest.stay_preference === 'Hotel' && <Building2 size={12} className="text-indigo-700" />}
+                    {guest.stay_preference === 'Home Stay' && <Home size={12} className="text-emerald-700" />}
+                    {(!guest.stay_preference || guest.stay_preference === 'No need of stay') && <Bed size={12} className="text-zinc-500" />}
+                    <span>{guest.stay_preference || 'No need of stay'}</span>
                   </span>
                 </div>
               </div>
@@ -170,6 +187,40 @@ export function GuestProfileDrawer({
                       {st}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Manual Stay Preference Chips */}
+            {onChangeStayPreference && (
+              <div className="pt-2 border-t border-zinc-200/80">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                  Update Stay Preference:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: 'Hotel', label: 'Hotel', icon: Building2 },
+                    { id: 'Home Stay', label: 'Home Stay', icon: Home },
+                    { id: 'No need of stay', label: 'No need of stay', icon: Bed }
+                  ].map(opt => {
+                    const isSelected = (guest.stay_preference || 'No need of stay') === opt.id;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => onChangeStayPreference(guest.id, opt.id)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-[#234c6a] text-white border-[#234c6a] shadow-2xs'
+                            : 'bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200'
+                        }`}
+                      >
+                        <Icon size={12} />
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

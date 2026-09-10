@@ -5,9 +5,9 @@ import {
   XCircle, ChevronDown, Trash2, CalendarCheck, 
   RefreshCw, X, Mail, UserCheck, Minus, ArrowRight,
   User, Heart, Send, ExternalLink, FileText, Sparkles,
-  AlertTriangle, Settings2
+  AlertTriangle, Settings2, Building2, Home, Bed
 } from 'lucide-react';
-import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES } from '../utils/api';
+import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES, STAY_PREFERENCES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
 import TablePagination from './TablePagination';
 import { GuestActionMenu } from './GuestActionMenu';
@@ -32,6 +32,7 @@ export default function Guests() {
   const [filterRsvp, setFilterRsvp] = useState('All');
   const [filterAttendance, setFilterAttendance] = useState('All');
   const [filterEvent, setFilterEvent] = useState('All');
+  const [filterStay, setFilterStay] = useState('All');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -144,8 +145,11 @@ export default function Guests() {
       const isAttended = g.actual_attendance === 'Attended' || g.check_in_status;
       return sum + (isAttended ? (Number(g.actual_attendees) || Number(g.expected_attendees) || 1) : 0);
     }, 0);
+    const hotelCount = confirmedGuests.filter(g => g.stay_preference === 'Hotel').length;
+    const homeStayCount = confirmedGuests.filter(g => g.stay_preference === 'Home Stay').length;
+    const noStayCount = confirmedGuests.filter(g => !g.stay_preference || g.stay_preference === 'No need of stay').length;
 
-    return { totalConfirmed, attended, pending, expectedHeadcount, actualHeadcount };
+    return { totalConfirmed, attended, pending, expectedHeadcount, actualHeadcount, hotelCount, homeStayCount, noStayCount };
   }, [confirmedGuests]);
 
   // Base list depending on active tab
@@ -191,9 +195,14 @@ export default function Guests() {
         if (!Array.isArray(g.events) || !g.events.includes(filterEvent)) return false;
       }
 
+      if (filterStay !== 'All') {
+        const pref = g.stay_preference || 'No need of stay';
+        if (pref !== filterStay) return false;
+      }
+
       return true;
     });
-  }, [baseGuests, search, filterCategory, filterRsvp, filterAttendance, filterEvent, activeTab]);
+  }, [baseGuests, search, filterCategory, filterRsvp, filterAttendance, filterEvent, filterStay, activeTab]);
 
   // Paginated guests
   const paginatedGuests = useMemo(() => {
@@ -401,6 +410,25 @@ export default function Guests() {
       await loadData();
     } catch (err) {
       toast({ title: 'Failed to update status', description: err.message, status: 'error' });
+    }
+  };
+
+  // Manual Stay Preference Update
+  const handleChangeStayPreference = async (guestId, newPreference) => {
+    try {
+      await api.updateGuestStayPreference(guestId, newPreference);
+      toast({
+        title: 'Stay Preference Updated',
+        description: `Stay preference set to "${newPreference}".`,
+        status: 'success'
+      });
+      setGuests(prev => prev.map(g => g.id === guestId ? { ...g, stay_preference: newPreference } : g));
+      if (viewGuest && viewGuest.id === guestId) {
+        setViewGuest(prev => ({ ...prev, stay_preference: newPreference }));
+      }
+      await loadData();
+    } catch (err) {
+      toast({ title: 'Failed to update stay preference', description: err.message, status: 'error' });
     }
   };
 
@@ -786,12 +814,20 @@ export default function Guests() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs">
+          <div className="flex items-center gap-2 flex-wrap text-xs">
             <span className="px-2.5 py-1 bg-white border border-zinc-200/80 rounded-lg text-zinc-800 font-bold shadow-2xs">
               Attended: <strong className="text-emerald-700 font-black">{attendingMetrics.attended}</strong> / {attendingMetrics.totalConfirmed}
             </span>
             <span className="px-2.5 py-1 bg-white border border-zinc-200/80 rounded-lg text-zinc-800 font-bold shadow-2xs">
               Pending: <strong className="text-amber-700 font-black">{attendingMetrics.pending}</strong>
+            </span>
+            <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-200/80 rounded-lg text-indigo-900 font-bold shadow-2xs inline-flex items-center gap-1">
+              <Building2 size={12} className="text-indigo-600" />
+              <span>Hotel: <strong>{attendingMetrics.hotelCount}</strong></span>
+            </span>
+            <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-200/80 rounded-lg text-emerald-900 font-bold shadow-2xs inline-flex items-center gap-1">
+              <Home size={12} className="text-emerald-600" />
+              <span>Home Stay: <strong>{attendingMetrics.homeStayCount}</strong></span>
             </span>
             <span className="px-2.5 py-1 bg-zinc-900 text-white rounded-lg font-bold shadow-2xs">
               Actual Headcount: {attendingMetrics.actualHeadcount}
@@ -873,6 +909,21 @@ export default function Guests() {
                 <option value="Attended">Attended</option>
                 <option value="Pending">Pending</option>
                 <option value="Did Not Attend">Absent</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            </div>
+          )}
+
+          {/* Stay Preference Filter (Tab 2) */}
+          {activeTab === 'confirmed' && (
+            <div className="relative">
+              <select
+                value={filterStay}
+                onChange={(e) => { setFilterStay(e.target.value); setCurrentPage(1); }}
+                className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+              >
+                <option value="All">All Stays</option>
+                {STAY_PREFERENCES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
             </div>
@@ -1254,6 +1305,7 @@ export default function Guests() {
                   </th>
                   <th className="py-3.5 px-4 whitespace-nowrap">CONFIRMED GUEST</th>
                   <th className="py-3.5 px-4 whitespace-nowrap">GUEST TYPE / FAMILY</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap">STAY PREFERENCE</th>
                   <th className="py-3.5 px-4 text-center whitespace-nowrap">EXPECTED</th>
                   <th className="py-3.5 px-4 text-center whitespace-nowrap">ACTUAL ATTENDEES</th>
                   <th className="py-3.5 px-4 whitespace-nowrap">ATTENDANCE STATUS</th>
@@ -1264,14 +1316,14 @@ export default function Guests() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-zinc-400">
+                    <td colSpan={8} className="text-center py-16 text-zinc-400">
                       <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-[#234c6a]" />
                       <span>Loading confirmed attendees...</span>
                     </td>
                   </tr>
                 ) : paginatedGuests.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-zinc-400">
+                    <td colSpan={8} className="text-center py-16 text-zinc-400">
                       <CheckCircle2 size={32} className="mx-auto mb-2 text-emerald-400" />
                       <p className="font-semibold text-zinc-700 text-sm">No confirmed guests found</p>
                       <p className="text-xs text-zinc-400 mt-1">
@@ -1364,6 +1416,32 @@ export default function Guests() {
                               <span>{g.guest_type || 'Individual'}</span>
                             </span>
                           )}
+                        </td>
+
+                        {/* Stay Preference */}
+                        <td 
+                          className="py-3.5 px-4 whitespace-nowrap"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="relative inline-block">
+                            <select
+                              value={g.stay_preference || 'No need of stay'}
+                              onChange={(e) => handleChangeStayPreference(g.id, e.target.value)}
+                              aria-label="Stay Preference"
+                              className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border appearance-none pr-7 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#234c6a]/20 transition-all ${
+                                g.stay_preference === 'Hotel'
+                                  ? 'bg-indigo-50 text-indigo-900 border-indigo-200 hover:bg-indigo-100 font-bold'
+                                  : g.stay_preference === 'Home Stay'
+                                  ? 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100 font-bold'
+                                  : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200/80 font-medium'
+                              }`}
+                            >
+                              <option value="Hotel">🏨 Hotel</option>
+                              <option value="Home Stay">🏡 Home Stay</option>
+                              <option value="No need of stay">🚫 No need of stay</option>
+                            </select>
+                            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500" />
+                          </div>
                         </td>
 
                         {/* Expected Headcount */}
@@ -1488,6 +1566,7 @@ export default function Guests() {
         onUpdateEvents={handleUpdateEvents}
         onSendInvitation={(g) => handleOpenInviteModal(g)}
         onChangeRsvp={handleChangeRsvp}
+        onChangeStayPreference={handleChangeStayPreference}
       />
 
       {/* Add / Edit Modal */}
