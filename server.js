@@ -3,12 +3,21 @@ const cors    = require('cors');
 const path    = require('path');
 const fs      = require('fs');
 const crypto  = require('crypto');
+const dns     = require('node:dns');
 const nodemailer = require('nodemailer');
 const PDFDocument = require('pdfkit');
 require('dotenv').config();
 
+// Force IPv4 first for all DNS lookups (critical for cloud hosts like Render/Railway/Heroku connecting to smtp.gmail.com)
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
 const app  = express();
 const PORT = process.env.PORT || 3000;
+
+// Trust reverse proxy (Render, Railway, Heroku, Cloudflare, etc.)
+app.set('trust proxy', 1);
 
 // ── Hardcoded credentials ────────────────────────────────────────────────────
 const USERS = [
@@ -190,6 +199,22 @@ async function initDB() {
     try { await db.execute("ALTER TABLE guests ADD COLUMN rsvp_response_note TEXT DEFAULT ''"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN stay_preference TEXT DEFAULT 'No need of stay'"); } catch(e){}
     try { await db.execute("UPDATE guests SET rsvp_status = 'Pending Invitation' WHERE rsvp_status = 'Not Responded' OR rsvp_status IS NULL"); } catch(e){}
+    try {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS email_settings (
+          user_id     TEXT PRIMARY KEY,
+          provider    TEXT DEFAULT 'gmail',
+          smtp_host   TEXT DEFAULT '',
+          smtp_port   INTEGER DEFAULT 587,
+          smtp_secure INTEGER DEFAULT 0,
+          smtp_user   TEXT DEFAULT '',
+          smtp_pass   TEXT DEFAULT '',
+          sender_name TEXT DEFAULT '',
+          created_at  TEXT DEFAULT (datetime('now')),
+          updated_at  TEXT DEFAULT (datetime('now'))
+        )
+      `);
+    } catch(e){}
     console.log('✅ Turso tables ready');
   } else {
     console.log('📁 Using local JSON file database');
@@ -1370,59 +1395,86 @@ function generateInvitationPDF(guest, baseUrl = 'http://localhost:3000') {
 
 let etherealAccount = null;
 
+// Public Base URL helper for links in emails and PDFs
+function getPublicBaseUrl(req) {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/+$/, '');
+  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/+$/, '');
+  if (process.env.RENDER_EXTERNAL_URL) return process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, '');
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) return `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    return `${proto}://${host}`;
+  }
+  return 'http://localhost:3000';
+}
+
+function getEnvEmailConfig() {
+  const user = process.env.GMAIL_USER || process.env.GMAIL_EMAIL || process.env.EMAIL_USER || process.env.SMTP_USER || process.env.MAIL_USERNAME;
+  const rawPass = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASSWORD || process.env.GMAIL_PASS || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS || process.env.SMTP_PASSWORD || process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
+
+  if (!user || !rawPass) return null;
+
+  const cleanPass = String(rawPass).replace(/["'\s]/g, '').trim();
+  const cleanUser = String(user).trim();
+  const host = process.env.SMTP_HOST || process.env.MAIL_HOST || 'smtp.gmail.com';
+  const port = Number(process.env.SMTP_PORT || process.env.MAIL_PORT) || 587;
+  const isGmail = host.includes('gmail.com') || cleanUser.includes('@gmail.com');
+  const provider = isGmail ? 'gmail' : (process.env.EMAIL_PROVIDER || 'smtp');
+  const senderName = process.env.EMAIL_SENDER_NAME || process.env.MAIL_FROM_NAME || 'Wedding Celebrations';
+
+  return {
+    provider,
+    smtp_host: host,
+    smtp_port: port,
+    smtp_secure: port === 465,
+    smtp_user: cleanUser,
+    smtp_pass: cleanPass,
+    sender_name: senderName,
+    fromEnv: true
+  };
+}
+
 async function getUserEmailConfig(userId) {
   let settings = null;
   if (useLibSQL) {
     try {
-      const row = await dbGet('SELECT * FROM email_settings WHERE user_id = ?', [userId]);
+      let row = await dbGet('SELECT * FROM email_settings WHERE user_id = ?', [userId]);
+      if (!row) {
+        // Fallback to any saved email settings in the database
+        row = await dbGet('SELECT * FROM email_settings LIMIT 1');
+      }
       if (row) settings = row;
     } catch (e) {
       console.warn('Error reading email_settings from DB:', e.message);
     }
   } else {
     const d = readJSON();
-    if (d.email_settings && d.email_settings[userId]) {
-      settings = d.email_settings[userId];
+    if (d.email_settings) {
+      settings = (userId && d.email_settings[userId]) || Object.values(d.email_settings)[0] || null;
     }
   }
 
-  // If user has saved settings:
+  // If user has saved settings in database:
   if (settings && settings.smtp_user && settings.smtp_pass) {
+    const cleanUser = String(settings.smtp_user).trim();
+    const cleanPass = String(settings.smtp_pass).replace(/["'\s]/g, '').trim();
+    const isGmail = settings.provider === 'gmail' || cleanUser.includes('@gmail.com');
     return {
-      provider: settings.provider || (settings.smtp_user.includes('@gmail.com') ? 'gmail' : 'smtp'),
-      smtp_host: settings.smtp_host || 'smtp.gmail.com',
-      smtp_port: Number(settings.smtp_port) || 587,
-      smtp_secure: Boolean(settings.smtp_secure),
-      smtp_user: settings.smtp_user,
-      smtp_pass: settings.smtp_pass,
-      sender_name: settings.sender_name || 'Wedding Celebrations'
+      provider: isGmail ? 'gmail' : 'smtp',
+      smtp_host: settings.smtp_host || (isGmail ? 'smtp.gmail.com' : ''),
+      smtp_port: Number(settings.smtp_port) || (isGmail ? 465 : 587),
+      smtp_secure: Boolean(settings.smtp_secure) || Number(settings.smtp_port) === 465,
+      smtp_user: cleanUser,
+      smtp_pass: cleanPass,
+      sender_name: settings.sender_name || 'Wedding Celebrations',
+      fromDB: true
     };
   }
 
-  // Fallback to process.env
-  if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    return {
-      provider: 'gmail',
-      smtp_host: 'smtp.gmail.com',
-      smtp_port: 587,
-      smtp_secure: false,
-      smtp_user: process.env.GMAIL_USER,
-      smtp_pass: process.env.GMAIL_APP_PASSWORD,
-      sender_name: process.env.EMAIL_SENDER_NAME || 'Wedding Celebrations'
-    };
-  }
-
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return {
-      provider: 'smtp',
-      smtp_host: process.env.SMTP_HOST,
-      smtp_port: Number(process.env.SMTP_PORT) || 587,
-      smtp_secure: Number(process.env.SMTP_PORT) === 465,
-      smtp_user: process.env.SMTP_USER,
-      smtp_pass: process.env.SMTP_PASS,
-      sender_name: process.env.EMAIL_SENDER_NAME || 'Wedding Celebrations'
-    };
-  }
+  // Fallback to environment variables
+  const envConfig = getEnvEmailConfig();
+  if (envConfig) return envConfig;
 
   return null;
 }
@@ -1433,12 +1485,21 @@ async function getEmailTransporter(userId) {
   if (config) {
     let transporter;
     if (config.provider === 'gmail') {
+      // Primary Gmail transporter on port 465 with explicit connection timeout and TLS options
       transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
           user: config.smtp_user,
           pass: config.smtp_pass
-        }
+        },
+        tls: {
+          rejectUnauthorized: false
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000
       });
     } else {
       transporter = nodemailer.createTransport({
@@ -1448,7 +1509,13 @@ async function getEmailTransporter(userId) {
         auth: {
           user: config.smtp_user,
           pass: config.smtp_pass
-        }
+        },
+        tls: {
+          rejectUnauthorized: false
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000
       });
     }
 
@@ -1463,9 +1530,10 @@ async function getEmailTransporter(userId) {
   // Ethereal Test Account (Sandbox fallback when unconfigured)
   if (!etherealAccount) {
     try {
-      etherealAccount = await nodemailer.createTestAccount();
+      const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('Ethereal setup timeout')), 3500));
+      etherealAccount = await Promise.race([nodemailer.createTestAccount(), timeoutPromise]);
     } catch (e) {
-      console.warn('Could not create Ethereal account, falling back to JSON mock transport:', e.message);
+      console.warn('Ethereal test account unavailable, using jsonTransport:', e.message);
     }
   }
 
@@ -1478,7 +1546,9 @@ async function getEmailTransporter(userId) {
         auth: {
           user: etherealAccount.user,
           pass: etherealAccount.pass
-        }
+        },
+        tls: { rejectUnauthorized: false },
+        connectionTimeout: 6000
       }),
       isConfigured: false,
       config: null,
@@ -1494,16 +1564,17 @@ async function getEmailTransporter(userId) {
   }
 }
 
-async function sendInvitationEmail({ guest, customSubject, customMessage, baseUrl = 'http://localhost:3000', userId }) {
+async function sendInvitationEmail({ guest, customSubject, customMessage, baseUrl, userId }) {
   if (!guest.email) {
     throw new Error('Guest does not have an email address');
   }
 
+  const effectiveBaseUrl = baseUrl || getPublicBaseUrl();
   const { transporter, isConfigured, config, isTest } = await getEmailTransporter(userId || guest.user_id);
-  const pdfBuffer = await generateInvitationPDF(guest, baseUrl);
+  const pdfBuffer = await generateInvitationPDF(guest, effectiveBaseUrl);
 
   const subject = customSubject || `Wedding Invitation: You are cordially invited! 💍`;
-  const rsvpUrl = `${baseUrl}/rsvp/${guest.rsvp_token}`;
+  const rsvpUrl = `${effectiveBaseUrl}/rsvp/${guest.rsvp_token}`;
   const confirmUrl = `${rsvpUrl}?action=Confirmed`;
   const maybeUrl = `${rsvpUrl}?action=Maybe`;
   const declineUrl = `${rsvpUrl}?action=Declined`;
@@ -1586,7 +1657,7 @@ async function sendInvitationEmail({ guest, customSubject, customMessage, baseUr
     ? (config.sender_name ? `"${config.sender_name}" <${config.smtp_user}>` : config.smtp_user)
     : (process.env.EMAIL_FROM || '"Wedding Celebrations" <invitations@weddingmanager.com>');
 
-  const info = await transporter.sendMail({
+  const mailOptions = {
     from: fromAddress,
     to: guest.email,
     subject,
@@ -1598,7 +1669,34 @@ async function sendInvitationEmail({ guest, customSubject, customMessage, baseUr
         contentType: 'application/pdf'
       }
     ]
-  });
+  };
+
+  let info;
+  console.log(`[Email Delivery] Attempting to deliver invitation to ${guest.email} (configured: ${isConfigured}, sender: ${config?.smtp_user || 'Sandbox'})...`);
+
+  if (isConfigured && config.provider === 'gmail') {
+    // Try primary port 465 (SSL)
+    try {
+      info = await transporter.sendMail(mailOptions);
+    } catch (primaryErr) {
+      console.warn(`[Email Delivery] Gmail send error on port 465 (${primaryErr.message}). Retrying via port 587 (STARTTLS)...`);
+      // Fallback to port 587 (STARTTLS)
+      const fallbackTransporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: { user: config.smtp_user, pass: config.smtp_pass },
+        tls: { rejectUnauthorized: false },
+        connectionTimeout: 12000,
+        greetingTimeout: 12000,
+        socketTimeout: 15000
+      });
+      info = await fallbackTransporter.sendMail(mailOptions);
+    }
+  } else {
+    info = await transporter.sendMail(mailOptions);
+  }
 
   const previewUrl = isTest && nodemailer.getTestMessageUrl ? nodemailer.getTestMessageUrl(info) : null;
   if (isTest) {
@@ -2236,7 +2334,9 @@ app.post('/api/email/settings', requireAuth, async (req, res) => {
 
     const cleanUser = String(smtp_user).trim();
     const existing = await getUserEmailConfig(req.user.uid);
-    const passToUse = (smtp_pass && String(smtp_pass).trim()) ? String(smtp_pass).trim() : (existing ? existing.smtp_pass : '');
+    let passToUse = (smtp_pass && String(smtp_pass).trim()) ? String(smtp_pass).trim() : (existing ? existing.smtp_pass : '');
+    // Clean spaces and quotes from password (very common when copying 16-character Google App Passwords)
+    passToUse = passToUse ? passToUse.replace(/["'\s]/g, '') : '';
 
     if (!passToUse) {
       return res.status(400).json({ error: 'Password or Google App Password is required' });
@@ -2244,33 +2344,77 @@ app.post('/api/email/settings', requireAuth, async (req, res) => {
 
     const providerToUse = provider || (cleanUser.includes('@gmail.com') ? 'gmail' : 'smtp');
     const hostToUse = (smtp_host && String(smtp_host).trim()) ? String(smtp_host).trim() : 'smtp.gmail.com';
-    const portToUse = Number(smtp_port) || (providerToUse === 'gmail' ? 587 : 587);
+    const portToUse = Number(smtp_port) || (providerToUse === 'gmail' ? 465 : 587);
     const secureToUse = Boolean(smtp_secure) || portToUse === 465;
     const senderNameToUse = sender_name && String(sender_name).trim() ? String(sender_name).trim() : 'Wedding Celebrations';
 
-    // Verify SMTP connection before saving
-    let testTransporter;
+    // Verify SMTP connection before saving (dual-port check for cloud hosting reliability)
+    let verified = false;
+    let verifyError = null;
+
     if (providerToUse === 'gmail') {
-      testTransporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: cleanUser, pass: passToUse }
-      });
+      // 1. Try port 465 (SSL)
+      try {
+        const trans465 = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: { user: cleanUser, pass: passToUse },
+          tls: { rejectUnauthorized: false },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000
+        });
+        await trans465.verify();
+        verified = true;
+      } catch (err465) {
+        console.warn(`[SMTP Verify] Gmail port 465 failed (${err465.message}). Retrying via port 587 (STARTTLS)...`);
+        verifyError = err465;
+        // 2. Fallback to port 587 (STARTTLS)
+        try {
+          const trans587 = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: { user: cleanUser, pass: passToUse },
+            tls: { rejectUnauthorized: false },
+            connectionTimeout: 12000,
+            greetingTimeout: 12000,
+            socketTimeout: 15000
+          });
+          await trans587.verify();
+          verified = true;
+        } catch (err587) {
+          verifyError = err587;
+        }
+      }
     } else {
-      testTransporter = nodemailer.createTransport({
-        host: hostToUse,
-        port: portToUse,
-        secure: secureToUse,
-        auth: { user: cleanUser, pass: passToUse }
-      });
+      try {
+        const customTrans = nodemailer.createTransport({
+          host: hostToUse,
+          port: portToUse,
+          secure: secureToUse,
+          auth: { user: cleanUser, pass: passToUse },
+          tls: { rejectUnauthorized: false },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000
+        });
+        await customTrans.verify();
+        verified = true;
+      } catch (e) {
+        verifyError = e;
+      }
     }
 
-    try {
-      await testTransporter.verify();
-    } catch (verifyErr) {
-      console.error('SMTP verify error:', verifyErr.message);
-      let errorHint = verifyErr.message;
-      if (providerToUse === 'gmail' && (errorHint.includes('Invalid login') || errorHint.includes('535') || errorHint.includes('Username and Password not accepted'))) {
-        errorHint = 'Google rejected the login. Please use a 16-character Google App Password (not your normal Gmail login password). You can generate one at myaccount.google.com/apppasswords.';
+    if (!verified) {
+      console.error('[SMTP Verify] Connection failed:', verifyError?.message);
+      let errorHint = verifyError ? verifyError.message : 'Unknown connection error';
+      if (providerToUse === 'gmail' && (errorHint.includes('Invalid login') || errorHint.includes('535') || errorHint.includes('Username and Password not accepted') || errorHint.includes('BadCredentials'))) {
+        errorHint = 'Google rejected the login credentials. Please ensure 2-Step Verification is turned ON on your Google Account and generate a 16-character App Password at https://myaccount.google.com/apppasswords (do NOT use your normal Google account login password).';
+      } else if (errorHint.includes('ETIMEDOUT') || errorHint.includes('ESOCKETTIMEDOUT')) {
+        errorHint = 'Connection timed out connecting to mail server. Your hosting provider firewall may be restricting outbound SMTP connections.';
       }
       return res.status(400).json({ error: `Connection verification failed: ${errorHint}` });
     }
@@ -2336,7 +2480,7 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
       ? `"${config.sender_name}" <${config.smtp_user}>` 
       : config.smtp_user;
 
-    const info = await transporter.sendMail({
+    const testMailOptions = {
       from: fromAddress,
       to: recipient,
       subject: '💍 Test Email: Wedding Invitation Delivery Verified!',
@@ -2362,7 +2506,30 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
           </div>
         </div>
       `
-    });
+    };
+
+    let info;
+    if (config.provider === 'gmail') {
+      try {
+        info = await transporter.sendMail(testMailOptions);
+      } catch (err465) {
+        console.warn(`[Test Email] Port 465 send failed (${err465.message}). Retrying via port 587 (STARTTLS)...`);
+        const fallbackTransporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          requireTLS: true,
+          auth: { user: config.smtp_user, pass: config.smtp_pass },
+          tls: { rejectUnauthorized: false },
+          connectionTimeout: 12000,
+          greetingTimeout: 12000,
+          socketTimeout: 15000
+        });
+        info = await fallbackTransporter.sendMail(testMailOptions);
+      }
+    } else {
+      info = await transporter.sendMail(testMailOptions);
+    }
 
     console.log(`[Email Test] Test email delivered to ${recipient}. MessageId: ${info.messageId}`);
     res.json({
@@ -2402,7 +2569,10 @@ app.post('/api/guests/:id/send-invitation', requireAuth, async (req, res) => {
   try {
     let guest;
     if (useLibSQL) {
-      const row = await dbGet('SELECT * FROM guests WHERE id = ? AND user_id = ?', [id, req.user.uid]);
+      let row = await dbGet('SELECT * FROM guests WHERE id = ? AND (user_id = ? OR user_id = \'legacy_user\' OR user_id IS NULL OR user_id = \'\')', [id, req.user.uid]);
+      if (!row) {
+        row = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
+      }
       if (!row) return res.status(404).json({ error: 'Guest not found' });
       guest = formatGuest(row);
     } else {
@@ -2422,7 +2592,7 @@ app.post('/api/guests/:id/send-invitation', requireAuth, async (req, res) => {
     guest.rsvp_token = token;
     guest.email = recipientEmail;
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = getPublicBaseUrl(req);
     const mailResult = await sendInvitationEmail({
       guest,
       customSubject,
@@ -2440,8 +2610,8 @@ app.post('/api/guests/:id/send-invitation', requireAuth, async (req, res) => {
           rsvp_status = 'Invited',
           invitation_sent_at = ?,
           updated_at = datetime('now')
-        WHERE id = ? AND user_id = ?
-      `, [recipientEmail, token, now, id, req.user.uid]);
+        WHERE id = ?
+      `, [recipientEmail, token, now, id]);
       const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
       guest = formatGuest(updated);
     } else {
@@ -2468,7 +2638,7 @@ app.post('/api/guests/:id/send-invitation', requireAuth, async (req, res) => {
       isTest: mailResult.isTest,
       isConfigured: mailResult.isConfigured,
       warning: mailResult.isTest
-        ? 'Real email delivery not configured yet. Configure Email Delivery Settings in Guests to deliver to real recipient inboxes.'
+        ? 'Real email delivery not configured yet. Configure Email Delivery Settings in Guests or set GMAIL_USER and GMAIL_APP_PASSWORD in environment variables.'
         : null,
       guest
     });
@@ -2488,7 +2658,7 @@ app.post('/api/guests/send-bulk-invitations', requireAuth, async (req, res) => {
   try {
     let allGuests = [];
     if (useLibSQL) {
-      const rows = await dbAll('SELECT * FROM guests WHERE user_id = ?', [req.user.uid]);
+      const rows = await dbAll('SELECT * FROM guests WHERE user_id = ? OR user_id = \'legacy_user\' OR user_id IS NULL OR user_id = \'\'', [req.user.uid]);
       allGuests = rows.map(formatGuest);
     } else {
       const d = readJSON();
@@ -2496,7 +2666,7 @@ app.post('/api/guests/send-bulk-invitations', requireAuth, async (req, res) => {
     }
 
     const targetGuests = allGuests.filter(g => guestIds.includes(g.id));
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = getPublicBaseUrl(req);
     let sentCount = 0;
     let skippedCount = 0;
     const errors = [];
@@ -2525,8 +2695,8 @@ app.post('/api/guests/send-bulk-invitations', requireAuth, async (req, res) => {
               rsvp_status = 'Invited',
               invitation_sent_at = ?,
               updated_at = datetime('now')
-            WHERE id = ? AND user_id = ?
-          `, [token, now, g.id, req.user.uid]);
+            WHERE id = ?
+          `, [token, now, g.id]);
         } else {
           const d = readJSON();
           const idx = (d.guests || []).findIndex(item => item.id === g.id);
@@ -2550,14 +2720,16 @@ app.post('/api/guests/send-bulk-invitations', requireAuth, async (req, res) => {
       success: true,
       sentCount,
       skippedCount,
+      errorCount: errors.length,
+      errors: errors.length > 0 ? errors : undefined,
       isConfigured: Boolean(emailConfig),
       warning: !emailConfig
-        ? 'Real email delivery not configured yet. Bulk invitations were simulated in test mode. Please configure Email Settings in Guests.'
-        : null,
-      errors
+        ? 'Invitations generated in Sandbox mode because real email credentials are not yet configured. Guests did not receive real emails.'
+        : null
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error in bulk invitations:', err);
+    res.status(500).json({ error: err.message || 'Bulk invitations failed' });
   }
 });
 
@@ -2577,7 +2749,7 @@ app.get('/api/guests/:id/invitation-pdf', async (req, res) => {
       guest = formatGuest(item);
     }
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = getPublicBaseUrl(req);
     const pdfBuffer = await generateInvitationPDF(guest, baseUrl);
 
     res.setHeader('Content-Type', 'application/pdf');
