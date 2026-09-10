@@ -1641,10 +1641,10 @@
       "household_role": "Primary",
       "plus_one_allowed": false,
       "plus_one_name": "",
-      "rsvp_status": "Invited",
-      "expected_adults": 2,
-      "expected_children": 1,
-      "expected_attendees": 3,
+      "rsvp_status": "Maybe",
+      "expected_adults": 1,
+      "expected_children": 0,
+      "expected_attendees": 1,
       "actual_attendance": "Pending",
       "actual_attendees": 0,
       "check_in_status": false,
@@ -1671,10 +1671,11 @@
         }
       ],
       "created_at": "2026-09-09T16:38:33.430Z",
-      "updated_at": "2026-09-09T17:51:47.682Z",
+      "updated_at": "2026-09-10T11:24:36.693Z",
       "rsvp_token": "rsvp_2b151cfcc5ad13a9_1788971913430",
-      "invitation_sent_at": "2026-09-09T17:51:47.682Z",
-      "stay_preference": "No need of stay"
+      "invitation_sent_at": "2026-09-10T09:11:36.995Z",
+      "stay_preference": "Home Stay",
+      "rsvp_response_note": ""
     },
     {
       "id": 1788971946580,
