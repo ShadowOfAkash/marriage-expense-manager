@@ -1,5 +1,5 @@
 const { isLibSQL, dbGet, dbRun, readJSON, writeJSON } = require('../db');
-const { processTelegramWebhookMessage } = require('../services/telegramService');
+const { processTelegramWebhookMessage, handleTelegramCallbackQuery } = require('../services/telegramService');
 
 async function getStatus(req, res) {
   try {
@@ -118,7 +118,11 @@ async function disconnect(req, res) {
 async function handleWebhook(req, res) {
   res.sendStatus(200);
   try {
-    await processTelegramWebhookMessage(req.body.message);
+    if (req.body.message) {
+      await processTelegramWebhookMessage(req.body.message);
+    } else if (req.body.callback_query) {
+      await handleTelegramCallbackQuery(req.body.callback_query);
+    }
   } catch (err) {
     console.error('Telegram Webhook error:', err);
   }

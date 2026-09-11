@@ -1,6 +1,7 @@
 const { isLibSQL, dbGet, dbAll, dbRun, readJSON, writeJSON, generateRsvpToken } = require('../db');
 const { getPublicBaseUrl, sendInvitationEmail, getUserEmailConfig } = require('../services/emailService');
 const { generateInvitationPDF } = require('../services/pdfService');
+const { generateTelegramInvitationText, sendTelegramReply, sendTelegramDocument } = require('../services/telegramService');
 
 function formatGuest(g) {
   if (!g) return null;
@@ -9,6 +10,8 @@ function formatGuest(g) {
     ...g,
     rsvp_token: token,
     invitation_sent_at: g.invitation_sent_at || null,
+    invitation_channel: g.invitation_channel || null,
+    telegram_chat_id: g.telegram_chat_id || null,
     rsvp_response_note: g.rsvp_response_note || '',
     stay_preference: g.stay_preference || 'No need of stay',
     tags: typeof g.tags === 'string' ? JSON.parse(g.tags || '[]') : (g.tags || []),
@@ -713,6 +716,111 @@ async function sendSingleInvitation(req, res) {
   }
 }
 
+async function sendTelegramInvitation(req, res) {
+  const id = parseInt(req.params.id);
+  const { phone, customMessage } = req.body || {};
+
+  try {
+    let guest;
+    if (isLibSQL()) {
+      let row = await dbGet('SELECT * FROM guests WHERE id = ? AND (user_id = ? OR user_id = "legacy_user" OR user_id IS NULL OR user_id = "")', [id, req.user.uid]);
+      if (!row) {
+        row = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
+      }
+      if (!row) return res.status(404).json({ error: 'Guest not found' });
+      guest = formatGuest(row);
+    } else {
+      const d = readJSON();
+      const item = (d.guests || []).find(g => g.id === id);
+      if (!item) return res.status(404).json({ error: 'Guest not found' });
+      guest = formatGuest(item);
+    }
+
+    const recipientPhone = (phone || guest.phone || '').trim();
+    const token = guest.rsvp_token || generateRsvpToken(guest.id);
+    guest.rsvp_token = token;
+    if (recipientPhone) guest.phone = recipientPhone;
+
+    const baseUrl = getPublicBaseUrl(req);
+    const rsvpUrl = `${baseUrl.replace(/\/+$/, '')}/rsvp/${token}`;
+    const pdfUrl = `${baseUrl.replace(/\/+$/, '')}/api/guests/${id}/invitation-pdf`;
+    const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'MarriageExpenseManagementBot';
+    const botStartUrl = `https://t.me/${botUsername}?start=${token.startsWith('rsvp_') ? token : `rsvp_${token}`}`;
+
+    const invitationText = customMessage && customMessage.trim()
+      ? customMessage.trim()
+      : generateTelegramInvitationText(guest, baseUrl);
+
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(rsvpUrl)}&text=${encodeURIComponent(invitationText)}`;
+    const deepLink = `tg://msg_url?url=${encodeURIComponent(rsvpUrl)}&text=${encodeURIComponent(invitationText)}`;
+
+    let botSent = false;
+    if (guest.telegram_chat_id && process.env.TELEGRAM_BOT_TOKEN) {
+      try {
+        await sendTelegramReply(guest.telegram_chat_id, invitationText, { parse_mode: 'Markdown' });
+        const pdfBuffer = await generateInvitationPDF(guest, baseUrl);
+        await sendTelegramDocument(
+          guest.telegram_chat_id,
+          pdfBuffer,
+          `Wedding_Invitation_${(guest.name || 'Guest').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+          `📜 डिजिटल आमंत्रण पत्रिका - ${guest.name}`
+        );
+        botSent = true;
+      } catch (botErr) {
+        console.warn('Direct Telegram Bot message error:', botErr.message);
+      }
+    }
+
+    const now = new Date().toISOString();
+    if (isLibSQL()) {
+      await dbRun(`
+        UPDATE guests SET
+          phone = ?,
+          rsvp_token = ?,
+          rsvp_status = 'Invited',
+          invitation_sent_at = ?,
+          invitation_channel = 'Telegram',
+          updated_at = datetime('now')
+        WHERE id = ?
+      `, [recipientPhone, token, now, id]);
+      const updated = await dbGet('SELECT * FROM guests WHERE id = ?', [id]);
+      guest = formatGuest(updated);
+    } else {
+      const d = readJSON();
+      const idx = (d.guests || []).findIndex(g => g.id === id);
+      if (idx !== -1) {
+        if (recipientPhone) d.guests[idx].phone = recipientPhone;
+        d.guests[idx].rsvp_token = token;
+        d.guests[idx].rsvp_status = 'Invited';
+        d.guests[idx].invitation_sent_at = now;
+        d.guests[idx].invitation_channel = 'Telegram';
+        d.guests[idx].updated_at = now;
+        writeJSON(d);
+        guest = formatGuest(d.guests[idx]);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: botSent
+        ? `Telegram invitation successfully delivered directly to ${guest.name} via Telegram Bot!`
+        : `Telegram invitation link ready for ${guest.name}${recipientPhone ? ` (${recipientPhone})` : ''}`,
+      recipientPhone,
+      invitationText,
+      shareUrl,
+      deepLink,
+      botStartUrl,
+      rsvpUrl,
+      pdfUrl,
+      botSent,
+      guest
+    });
+  } catch (err) {
+    console.error('Error in sendTelegramInvitation:', err);
+    res.status(500).json({ error: err.message || 'Failed to send Telegram invitation' });
+  }
+}
+
 async function sendBulkInvitations(req, res) {
   const { guestIds, customSubject, customMessage } = req.body || {};
   if (!Array.isArray(guestIds) || guestIds.length === 0) {
@@ -857,6 +965,7 @@ module.exports = {
   patchRsvpStatus,
   patchStayPreference,
   sendSingleInvitation,
+  sendTelegramInvitation,
   sendBulkInvitations,
   downloadInvitationPdf
 };

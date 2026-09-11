@@ -1,0 +1,14 @@
+{
+  "appId": "com.marriage.expensemanager",
+  "appName": "Marriage Manager",
+  "webDir": "../public",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "preferredContentMode": "mobile"
+  }
+}

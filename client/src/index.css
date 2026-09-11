@@ -116,3 +116,31 @@ select,
 ::-webkit-scrollbar-thumb:hover {
   background: #7492a8;
 }
+
+/* ── iOS Safe Area & Standalone Mobile Experience ────────────────────────── */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+.pt-safe {
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)) !important;
+}
+
+.pb-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+  }
+}
+

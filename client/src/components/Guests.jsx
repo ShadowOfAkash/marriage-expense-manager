@@ -5,7 +5,8 @@ import {
   XCircle, ChevronDown, Trash2, CalendarCheck, 
   RefreshCw, X, Mail, UserCheck, Minus, ArrowRight,
   User, Heart, Send, ExternalLink, FileText, Sparkles,
-  AlertTriangle, Settings2, Building2, Home, Bed
+  AlertTriangle, Settings2, Building2, Home, Bed,
+  Copy, Check, Smartphone
 } from 'lucide-react';
 import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES, STAY_PREFERENCES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
@@ -56,10 +57,15 @@ export default function Guests() {
 
   // Invitation Modals state
   const [inviteModalGuest, setInviteModalGuest] = useState(null);
+  const [inviteChannel, setInviteChannel] = useState('telegram'); // 'telegram' | 'email'
   const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePhone, setInvitePhone] = useState('');
   const [inviteSubject, setInviteSubject] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
+  const [telegramInviteText, setTelegramInviteText] = useState('');
   const [sendingInvite, setSendingInvite] = useState(false);
+  const [sendingTelegram, setSendingTelegram] = useState(false);
+  const [copiedTelegram, setCopiedTelegram] = useState(false);
 
   // Bulk Invitation state
   const [bulkInviteOpen, setBulkInviteOpen] = useState(false);
@@ -299,13 +305,81 @@ export default function Guests() {
   };
 
   // Open Single Invite Modal
-  const handleOpenInviteModal = (g) => {
+  const handleOpenInviteModal = (g, defaultChannel = 'telegram') => {
     setInviteModalGuest(g);
+    setInviteChannel(defaultChannel);
     setInviteEmail(g.email || '');
+    setInvitePhone(g.phone || '');
     setInviteSubject('Royal Wedding Invitation: Join Us in Celebrating!');
     setInviteMessage(
       `Dear ${g.name},\n\nWe would be honored and delighted to have your presence to celebrate our wedding. Please find our royal wedding invitation card attached. You can confirm your attendance online using the link in this email.\n\nWarmest regards,\nAkash & Family`
     );
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const rsvpLink = `${origin}/rsvp/${g.rsvp_token || ''}`;
+    const pdfLink = `${origin}/api/guests/${g.id}/invitation-pdf`;
+    const eventsText = Array.isArray(g.events) && g.events.length > 0
+      ? g.events.map(e => `• ${e}`).join('\n')
+      : '• Shubh Vivah & Celebrations';
+
+    setTelegramInviteText(
+      `🌸 卐 श्री गणेशाय नमः 卐 🌸\n\n` +
+      `प्रिय *${g.name}* जी,\n\n` +
+      `सस्नेह निमंत्रण! हमारे परिवार के शुभ विवाह समारोह में आप सपरिवार सादर आमंत्रित हैं। 💒✨\n\n` +
+      `📅 *शुभ कार्यक्रम:*\n${eventsText}\n\n` +
+      `💌 *कृपया अपनी उपस्थिति (RSVP) कन्फर्म करें:*\n👉 ${rsvpLink}\n\n` +
+      `📄 *डिजिटल आमंत्रण पत्रिका (PDF) डाउनलोड करें:*\n👉 ${pdfLink}\n\n` +
+      `आपके पावन आशीर्वाद एवं स्नेह की प्रतीक्षा में,\n` +
+      `*तिवारी परिवार* 💐`
+    );
+  };
+
+  // Submit Send Telegram Invitation
+  const handleSendTelegramInvite = async (autoOpenTelegram = true) => {
+    if (!inviteModalGuest) return;
+    setSendingTelegram(true);
+    try {
+      const res = await api.sendTelegramInvitation(inviteModalGuest.id, {
+        phone: invitePhone.trim(),
+        customMessage: telegramInviteText
+      });
+
+      if (autoOpenTelegram && res.shareUrl) {
+        window.open(res.shareUrl, '_blank');
+      }
+
+      toast({
+        title: 'Telegram Invitation Ready!',
+        description: res.botSent
+          ? `Delivered directly via Telegram Bot to ${inviteModalGuest.name}!`
+          : `Telegram share opened with invitation for ${inviteModalGuest.name}. Guest marked as Invited.`,
+        status: 'success'
+      });
+
+      setInviteModalGuest(null);
+      await loadData();
+      if (viewGuest?.id === inviteModalGuest.id) {
+        setViewGuest(prev => ({
+          ...prev,
+          phone: invitePhone.trim(),
+          rsvp_status: 'Invited',
+          invitation_channel: 'Telegram',
+          invitation_sent_at: new Date().toISOString()
+        }));
+      }
+    } catch (err) {
+      toast({ title: 'Failed to send Telegram invitation', description: err.message, status: 'error' });
+    } finally {
+      setSendingTelegram(false);
+    }
+  };
+
+  const handleCopyTelegramText = () => {
+    if (!telegramInviteText) return;
+    navigator.clipboard.writeText(telegramInviteText);
+    setCopiedTelegram(true);
+    toast({ title: 'Copied!', description: 'Telegram invitation message copied to clipboard.', status: 'success' });
+    setTimeout(() => setCopiedTelegram(false), 2000);
   };
 
   // Submit Send Single Invitation
@@ -1288,7 +1362,8 @@ export default function Guests() {
                             onEdit={() => setEditGuest(g)}
                             onToggleCheckIn={() => handleToggleCheckIn(g)}
                             onDelete={() => setDeleteGuest(g)}
-                            onSendInvitation={() => handleOpenInviteModal(g)}
+                            onSendInvitation={() => handleOpenInviteModal(g, 'email')}
+                            onSendTelegramInvitation={() => handleOpenInviteModal(g, 'telegram')}
                             onDownloadPdf={() => handleDownloadPdf(g)}
                             onChangeRsvp={(status) => handleChangeRsvp(g.id, status)}
                           />
@@ -1542,7 +1617,8 @@ export default function Guests() {
                             onEdit={() => setEditGuest(g)}
                             onToggleCheckIn={() => handleToggleCheckIn(g)}
                             onDelete={() => setDeleteGuest(g)}
-                            onSendInvitation={() => handleOpenInviteModal(g)}
+                            onSendInvitation={() => handleOpenInviteModal(g, 'email')}
+                            onSendTelegramInvitation={() => handleOpenInviteModal(g, 'telegram')}
                             onDownloadPdf={() => handleDownloadPdf(g)}
                             onChangeRsvp={(status) => handleChangeRsvp(g.id, status)}
                           />
@@ -1579,7 +1655,8 @@ export default function Guests() {
         onDelete={(g) => { setViewGuest(null); setDeleteGuest(g); }}
         onSelectGuest={(m) => setViewGuest(m)}
         onUpdateEvents={handleUpdateEvents}
-        onSendInvitation={(g) => handleOpenInviteModal(g)}
+        onSendInvitation={(g) => handleOpenInviteModal(g, 'email')}
+        onSendTelegramInvitation={(g) => handleOpenInviteModal(g, 'telegram')}
         onChangeRsvp={handleChangeRsvp}
         onChangeStayPreference={handleChangeStayPreference}
       />
@@ -1671,152 +1748,296 @@ export default function Guests() {
         maxWidth="max-w-lg"
       >
         <div className="space-y-4">
+          {/* Header Info */}
           <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#1b3c53] text-[#f3e5ab] flex items-center justify-center shrink-0 shadow-xs">
-              <Mail size={20} />
+              {inviteChannel === 'telegram' ? <Send size={20} className="text-[#0088cc]" /> : <Mail size={20} />}
             </div>
             <div className="text-xs text-zinc-700 min-w-0">
               <p className="font-bold text-zinc-900 text-sm truncate">
                 Inviting {inviteModalGuest?.name}
               </p>
               <p className="text-zinc-500 mt-0.5 leading-relaxed">
-                An elegant, personalized A5 Royal Wedding Invitation card (PDF) will be automatically rendered and attached to this email along with their dedicated attendance confirmation link.
+                Personalized Royal Wedding Invitation card (PDF) and dedicated RSVP link ready to send.
               </p>
             </div>
           </div>
 
-          {/* Email Delivery Status Banner */}
-          {emailSettings?.configured ? (
-            <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                <span>Delivering via <strong>{emailSettings.smtp_user}</strong> ({emailSettings.provider === 'gmail' ? 'Gmail' : 'Custom SMTP'})</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsEmailSettingsOpen(true)}
-                className="text-emerald-700 underline font-semibold text-[11px] hover:text-emerald-900 cursor-pointer"
-              >
-                Change
-              </button>
-            </div>
-          ) : (
-            <div className="p-3 bg-amber-50/90 border border-amber-300 rounded-xl flex items-start justify-between gap-3 text-xs text-amber-900">
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle size={17} className="text-amber-600 shrink-0 mt-0.5" />
+          {/* Channel Selector Toggle */}
+          <div className="flex rounded-xl bg-zinc-100 p-1 border border-zinc-200">
+            <button
+              type="button"
+              onClick={() => setInviteChannel('telegram')}
+              className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                inviteChannel === 'telegram'
+                  ? 'bg-white text-[#0088cc] shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <Send size={13} className="text-[#0088cc]" />
+              <span>Telegram (Phone)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setInviteChannel('email')}
+              className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                inviteChannel === 'email'
+                  ? 'bg-white text-[#1b3c53] shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              <Mail size={13} />
+              <span>Email Delivery</span>
+            </button>
+          </div>
+
+          {inviteChannel === 'telegram' ? (
+            /* TELEGRAM INVITATION TAB */
+            <div className="space-y-3.5 text-xs">
+              <div className="p-3 bg-sky-50/80 border border-sky-200 rounded-xl flex items-start gap-2.5 text-xs text-sky-900">
+                <Smartphone size={16} className="text-[#0088cc] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-amber-950">Real Email Delivery Not Configured</p>
-                  <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                    Emails are currently running in Sandbox Test Mode and will not be received by real guest inboxes. Connect Gmail (App Password) or custom SMTP to send real emails.
+                  <p className="font-bold text-sky-950">Send Invitation on Telegram</p>
+                  <p className="text-[11px] text-sky-800 mt-0.5 leading-relaxed">
+                    Sends to the guest's phone number on Telegram with direct RSVP link, event details, and Royal PDF card.
                   </p>
                 </div>
               </div>
-              <Button
-                radius="sm"
-                size="sm"
-                variant="bordered"
-                type="button"
-                onClick={() => setIsEmailSettingsOpen(true)}
-                className="bg-white border-amber-300 text-amber-900 text-xs font-bold shrink-0 hover:bg-amber-100 shadow-2xs"
-              >
-                Configure
-              </Button>
+
+              {/* Guest Phone Number */}
+              <div>
+                <label className="block font-bold text-zinc-700 mb-1">
+                  Guest Phone Number (Telegram)
+                </label>
+                <input
+                  type="tel"
+                  value={invitePhone}
+                  onChange={(e) => setInvitePhone(e.target.value)}
+                  placeholder="e.g. +91 9876543210"
+                  className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:border-[#0088cc] outline-none transition-colors"
+                />
+              </div>
+
+              {/* Telegram Message Preview */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-zinc-700">
+                    Personalized Telegram Invitation Message
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleCopyTelegramText}
+                    className="text-[11px] font-semibold text-[#0088cc] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedTelegram ? <Check size={11} className="text-emerald-600" /> : <Copy size={11} />}
+                    <span>{copiedTelegram ? 'Copied' : 'Copy Message'}</span>
+                  </button>
+                </div>
+                <textarea
+                  rows={6}
+                  value={telegramInviteText}
+                  onChange={(e) => setTelegramInviteText(e.target.value)}
+                  className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-mono text-zinc-900 focus:bg-white focus:border-[#0088cc] outline-none resize-none transition-colors leading-relaxed"
+                />
+              </div>
+
+              {/* Preview PDF card link */}
+              {inviteModalGuest && (
+                <div className="flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
+                  <div className="flex items-center gap-2 text-zinc-700 font-medium">
+                    <FileText size={15} className="text-[#c59b27]" />
+                    <span>Invitation Card (PDF Attachment)</span>
+                  </div>
+                  <a
+                    href={`/api/guests/${inviteModalGuest.id}/invitation-pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 font-bold text-xs text-[#0088cc] hover:underline"
+                  >
+                    <ExternalLink size={12} />
+                    <span>Preview PDF</span>
+                  </a>
+                </div>
+              )}
+
+              <div className="flex justify-end items-center gap-2 pt-3 border-t border-zinc-200">
+                <Button
+                  radius="sm"
+                  variant="bordered"
+                  type="button"
+                  onClick={() => setInviteModalGuest(null)}
+                  className="text-xs font-medium text-zinc-600 hover:bg-zinc-100"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  radius="sm"
+                  variant="flat"
+                  type="button"
+                  onClick={handleCopyTelegramText}
+                  className="text-xs font-semibold text-[#0088cc] bg-sky-50 hover:bg-sky-100 inline-flex items-center gap-1.5"
+                >
+                  <Copy size={13} />
+                  <span>Copy Message</span>
+                </Button>
+                <Button
+                  radius="sm"
+                  type="button"
+                  disabled={sendingTelegram}
+                  onClick={() => handleSendTelegramInvite(true)}
+                  className="text-xs font-semibold bg-[#0088cc] hover:bg-[#0077b5] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  {sendingTelegram ? (
+                    <>
+                      <RefreshCw size={13} className="animate-spin" />
+                      <span>Sending Telegram...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={13} className="text-white" />
+                      <span>Send via Telegram</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* EMAIL INVITATION TAB */
+            <div className="space-y-3.5 text-xs">
+              {/* Email Delivery Status Banner */}
+              {emailSettings?.configured ? (
+                <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span>Delivering via <strong>{emailSettings.smtp_user}</strong> ({emailSettings.provider === 'gmail' ? 'Gmail' : 'Custom SMTP'})</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEmailSettingsOpen(true)}
+                    className="text-emerald-700 underline font-semibold text-[11px] hover:text-emerald-900 cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <div className="p-3 bg-amber-50/90 border border-amber-300 rounded-xl flex items-start justify-between gap-3 text-xs text-amber-900">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle size={17} className="text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-amber-950">Real Email Delivery Not Configured</p>
+                      <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                        Emails are currently running in Sandbox Test Mode and will not be received by real guest inboxes. Connect Gmail (App Password) or custom SMTP to send real emails.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    radius="sm"
+                    size="sm"
+                    variant="bordered"
+                    type="button"
+                    onClick={() => setIsEmailSettingsOpen(true)}
+                    className="bg-white border-amber-300 text-amber-900 text-xs font-bold shrink-0 hover:bg-amber-100 shadow-2xs"
+                  >
+                    Configure
+                  </Button>
+                </div>
+              )}
+
+              <form onSubmit={handleSendInviteSubmit} className="space-y-3.5 text-xs">
+                {/* Recipient Email */}
+                <div>
+                  <label className="block font-bold text-zinc-700 mb-1">
+                    Recipient Email <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="e.g. guest@example.com"
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label className="block font-bold text-zinc-700 mb-1">
+                    Email Subject
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteSubject}
+                    onChange={(e) => setInviteSubject(e.target.value)}
+                    placeholder="Royal Wedding Invitation..."
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Custom Message */}
+                <div>
+                  <label className="block font-bold text-zinc-700 mb-1">
+                    Personal Invitation Note
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={inviteMessage}
+                    onChange={(e) => setInviteMessage(e.target.value)}
+                    placeholder="Write a warm personal message..."
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none resize-none transition-colors"
+                  />
+                </div>
+
+                {/* Preview PDF card link */}
+                {inviteModalGuest && (
+                  <div className="flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
+                    <div className="flex items-center gap-2 text-zinc-700 font-medium">
+                      <FileText size={15} className="text-[#c59b27]" />
+                      <span>Invitation Card (PDF Attachment)</span>
+                    </div>
+                    <a
+                      href={`/api/guests/${inviteModalGuest.id}/invitation-pdf`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-bold text-xs text-[#1b3c53] hover:underline"
+                    >
+                      <ExternalLink size={12} />
+                      <span>Preview PDF</span>
+                    </a>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
+                  <Button
+                    radius="sm"
+                    variant="bordered"
+                    type="button"
+                    onClick={() => setInviteModalGuest(null)}
+                    className="text-xs font-medium text-zinc-600 hover:bg-zinc-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    radius="sm"
+                    type="submit"
+                    disabled={sendingInvite}
+                    className="text-xs font-semibold bg-[#1b3c53] hover:bg-[#132e40] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    {sendingInvite ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Sending Invitation...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={13} className="text-[#f3e5ab]" />
+                        <span>Send Invitation Email</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
             </div>
           )}
-
-          <form onSubmit={handleSendInviteSubmit} className="space-y-3.5 text-xs">
-            {/* Recipient Email */}
-            <div>
-              <label className="block font-bold text-zinc-700 mb-1">
-                Recipient Email <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="e.g. guest@example.com"
-                className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none transition-colors"
-              />
-            </div>
-
-            {/* Subject */}
-            <div>
-              <label className="block font-bold text-zinc-700 mb-1">
-                Email Subject
-              </label>
-              <input
-                type="text"
-                value={inviteSubject}
-                onChange={(e) => setInviteSubject(e.target.value)}
-                placeholder="Royal Wedding Invitation..."
-                className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none transition-colors"
-              />
-            </div>
-
-            {/* Custom Message */}
-            <div>
-              <label className="block font-bold text-zinc-700 mb-1">
-                Personal Invitation Note
-              </label>
-              <textarea
-                rows={4}
-                value={inviteMessage}
-                onChange={(e) => setInviteMessage(e.target.value)}
-                placeholder="Write a warm personal message..."
-                className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:border-[#1b3c53] outline-none resize-none transition-colors"
-              />
-            </div>
-
-            {/* Preview PDF card link */}
-            {inviteModalGuest && (
-              <div className="flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
-                <div className="flex items-center gap-2 text-zinc-700 font-medium">
-                  <FileText size={15} className="text-[#c59b27]" />
-                  <span>Invitation Card (PDF Attachment)</span>
-                </div>
-                <a
-                  href={`/api/guests/${inviteModalGuest.id}/invitation-pdf`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 font-bold text-xs text-[#1b3c53] hover:underline"
-                >
-                  <ExternalLink size={12} />
-                  <span>Preview PDF</span>
-                </a>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
-              <Button
-                radius="sm"
-                variant="bordered"
-                type="button"
-                onClick={() => setInviteModalGuest(null)}
-                className="text-xs font-medium text-zinc-600 hover:bg-zinc-100"
-              >
-                Cancel
-              </Button>
-              <Button
-                radius="sm"
-                type="submit"
-                disabled={sendingInvite}
-                className="text-xs font-semibold bg-[#1b3c53] hover:bg-[#132e40] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
-              >
-                {sendingInvite ? (
-                  <>
-                    <RefreshCw size={13} className="animate-spin" />
-                    <span>Sending Invitation...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send size={13} className="text-[#f3e5ab]" />
-                    <span>Send Invitation Email</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
         </div>
       </TailwindModal>
 

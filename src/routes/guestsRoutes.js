@@ -21,5 +21,6 @@ router.delete('/:id', requireAuth, guestsController.deleteGuest);
 router.patch('/:id/rsvp', requireAuth, guestsController.patchRsvpStatus);
 router.patch('/:id/stay', requireAuth, guestsController.patchStayPreference);
 router.post('/:id/send-invitation', requireAuth, guestsController.sendSingleInvitation);
+router.post('/:id/send-telegram-invitation', requireAuth, guestsController.sendTelegramInvitation);
 
 module.exports = router;

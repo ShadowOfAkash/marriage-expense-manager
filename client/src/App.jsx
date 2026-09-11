@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login     from './components/Login'
 import Sidebar   from './components/Sidebar'
@@ -11,7 +11,50 @@ import Guests    from './components/Guests'
 import GuestRsvpPortal from './components/GuestRsvpPortal'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { Menu, Sparkles } from 'lucide-react'
+import { Menu, Sparkles, Share, X } from 'lucide-react'
+
+function IosInstallBanner() {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches
+    const dismissed = localStorage.getItem('ios_pwa_dismissed')
+    if (isIos && !isStandalone && !dismissed) {
+      setShow(true)
+    }
+  }, [])
+
+  if (!show) return null
+
+  return (
+    <div className="fixed bottom-4 inset-x-3 z-50 p-3.5 bg-zinc-950/95 backdrop-blur-md text-white rounded-2xl border border-zinc-800 shadow-2xl flex items-center justify-between gap-3 text-xs md:hidden">
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+          <Share size={15} />
+        </div>
+        <div>
+          <p className="font-semibold text-zinc-100">Install on iPhone Home Screen</p>
+          <p className="text-zinc-400 text-[11px] leading-tight">
+            Tap the Safari <span className="text-amber-400 font-bold">Share</span> button, then choose <span className="text-white font-bold">"Add to Home Screen"</span>
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem('ios_pwa_dismissed', 'true')
+          setShow(false)
+        }}
+        className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors"
+        aria-label="Dismiss banner"
+      >
+        <X size={16} />
+      </button>
+    </div>
+  )
+}
 
 function MainApp() {
   const { currentUser } = useAuth()
@@ -32,8 +75,10 @@ function MainApp() {
 
   return (
     <div className="flex min-h-screen bg-zinc-50 flex-col md:flex-row">
-      {/* Mobile Top Navigation Header */}
-      <header className="md:hidden sticky top-0 z-30 bg-zinc-950 text-white px-4 py-3 flex items-center justify-between border-b border-zinc-900 shadow-sm">
+      <IosInstallBanner />
+
+      {/* Mobile Top Navigation Header with iOS Safe Area support */}
+      <header className="md:hidden sticky top-0 z-30 bg-zinc-950 text-white px-4 pt-safe pb-3 flex items-center justify-between border-b border-zinc-900 shadow-sm">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}

@@ -1,5 +1,21 @@
 import { auth, createMockUser } from '../contexts/AuthContext';
 
+export const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('api_server_url');
+    if (custom) return custom.replace(/\/+$/, '');
+    
+    // When running inside native Capacitor/iOS webview
+    if (window.location.protocol.startsWith('capacitor') || window.location.protocol.startsWith('ionic') || window.location.protocol === 'file:') {
+      return 'http://192.168.1.4:3000';
+    }
+  }
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+  }
+  return '';
+};
+
 const handleResponse = async (res) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Request failed');
@@ -32,7 +48,9 @@ const fetchWithAuth = async (url, options = {}) => {
     ...options.headers
   };
   
-  const res = await fetch(url, { ...options, headers });
+  const baseUrl = getApiBaseUrl();
+  const targetUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const res = await fetch(targetUrl, { ...options, headers });
   return handleResponse(res);
 };
 
@@ -85,6 +103,7 @@ export const api = {
   bulkUpdateGuests: (payload)     => fetchWithAuth('/api/guests/bulk', { method: 'POST', body: JSON.stringify(payload) }),
   importGuests:     (guests)      => fetchWithAuth('/api/guests/import', { method: 'POST', body: JSON.stringify({ guests }) }),
   sendGuestInvitation: (id, data = {}) => fetchWithAuth(`/api/guests/${id}/send-invitation`, { method: 'POST', body: JSON.stringify(data) }),
+  sendTelegramInvitation: (id, data = {}) => fetchWithAuth(`/api/guests/${id}/send-telegram-invitation`, { method: 'POST', body: JSON.stringify(data) }),
   sendBulkInvitations: (payload)       => fetchWithAuth('/api/guests/send-bulk-invitations', { method: 'POST', body: JSON.stringify(payload) }),
   updateGuestRsvp:     (id, rsvp_status) => fetchWithAuth(`/api/guests/${id}/rsvp`, { method: 'PATCH', body: JSON.stringify({ rsvp_status }) }),
   updateGuestStayPreference: async (id, stay_preference, fallbackGuest = null) => {
@@ -103,9 +122,9 @@ export const api = {
       throw err;
     }
   },
-  getGuestInvitationPdfUrl: (id)       => `/api/guests/${id}/invitation-pdf`,
+  getGuestInvitationPdfUrl: (id)       => `${getApiBaseUrl()}/api/guests/${id}/invitation-pdf`,
   getPublicRsvp: async (token) => {
-    const res = await fetch(`/api/public/rsvp/${token}`);
+    const res = await fetch(`${getApiBaseUrl()}/api/public/rsvp/${token}`);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || 'Failed to load invitation details');
@@ -113,7 +132,7 @@ export const api = {
     return res.json();
   },
   submitPublicRsvp: async (token, data) => {
-    const res = await fetch(`/api/public/rsvp/${token}`, {
+    const res = await fetch(`${getApiBaseUrl()}/api/public/rsvp/${token}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)

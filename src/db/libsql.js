@@ -141,6 +141,8 @@ async function initLibSQL() {
     try { await db.execute("ALTER TABLE guests ADD COLUMN rsvp_token TEXT DEFAULT NULL"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN rsvp_response_note TEXT DEFAULT ''"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN stay_preference TEXT DEFAULT 'No need of stay'"); } catch(e){}
+    try { await db.execute("ALTER TABLE guests ADD COLUMN telegram_chat_id TEXT DEFAULT NULL"); } catch(e){}
+    try { await db.execute("ALTER TABLE guests ADD COLUMN invitation_channel TEXT DEFAULT NULL"); } catch(e){}
     try { await db.execute("UPDATE guests SET rsvp_status = 'Pending Invitation' WHERE rsvp_status = 'Not Responded' OR rsvp_status IS NULL"); } catch(e){}
     try {
       await db.execute(`

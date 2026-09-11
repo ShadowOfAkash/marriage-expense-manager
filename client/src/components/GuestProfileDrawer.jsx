@@ -18,6 +18,7 @@ export function GuestProfileDrawer({
   onSelectGuest,
   onUpdateEvents,
   onSendInvitation,
+  onSendTelegramInvitation,
   onChangeRsvp,
   onChangeStayPreference
 }) {
@@ -277,7 +278,18 @@ export function GuestProfileDrawer({
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+              {onSendTelegramInvitation && (
+                <button
+                  type="button"
+                  onClick={() => onSendTelegramInvitation(guest)}
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-[#0088cc] hover:bg-[#0077b5] text-white transition-colors cursor-pointer shadow-2xs"
+                >
+                  <Send size={13} className="text-white" />
+                  <span>Telegram Invite</span>
+                </button>
+              )}
+
               {onSendInvitation && (
                 <button
                   type="button"
@@ -285,7 +297,7 @@ export function GuestProfileDrawer({
                   className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-[#1b3c53] hover:bg-[#132e40] text-white transition-colors cursor-pointer shadow-2xs"
                 >
                   <Mail size={13} className="text-[#f3e5ab]" />
-                  <span>{guest.invitation_sent_at ? 'Resend Invitation' : 'Send Invitation Email'}</span>
+                  <span>Email Invite</span>
                 </button>
               )}
 
@@ -296,7 +308,7 @@ export function GuestProfileDrawer({
                 className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-zinc-50 text-[#1b3c53] border border-zinc-200 transition-colors cursor-pointer shadow-2xs"
               >
                 <Download size={13} className="text-[#c59b27]" />
-                <span>Download PDF Card</span>
+                <span>PDF Card</span>
               </a>
             </div>
 

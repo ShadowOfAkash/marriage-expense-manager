@@ -11,6 +11,7 @@ export function GuestActionMenu({
   onToggleCheckIn, 
   onDelete,
   onSendInvitation,
+  onSendTelegramInvitation,
   onDownloadPdf,
   onChangeRsvp
 }) {
@@ -71,7 +72,19 @@ export function GuestActionMenu({
               className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#1b3c53] hover:bg-sky-50 flex items-center gap-2.5 transition-colors cursor-pointer"
             >
               <Mail size={14} className="text-[#234c6a] shrink-0" />
-              <span>{guest?.invitation_sent_at ? 'Resend Invitation' : 'Send Invitation'}</span>
+              <span>{guest?.invitation_sent_at ? 'Resend Email' : 'Send Email Invite'}</span>
+            </button>
+          )}
+
+          {/* 2b. Send Telegram Invitation */}
+          {onSendTelegramInvitation && (
+            <button 
+              type="button"
+              onClick={() => { setIsOpen(false); onSendTelegramInvitation(); }}
+              className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#0088cc] hover:bg-sky-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+            >
+              <Send size={14} className="text-[#0088cc] shrink-0" />
+              <span>Send Telegram Invite</span>
             </button>
           )}
 
