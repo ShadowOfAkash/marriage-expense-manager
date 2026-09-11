@@ -6,7 +6,7 @@ import {
   RefreshCw, X, Mail, UserCheck, Minus, ArrowRight,
   User, Heart, Send, ExternalLink, FileText, Sparkles,
   AlertTriangle, Settings2, Building2, Home, Bed,
-  Copy, Check, Smartphone, MessageCircle
+  Copy, Check, Smartphone, MessageCircle, QrCode, Globe
 } from 'lucide-react';
 import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES, STAY_PREFERENCES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
@@ -66,6 +66,7 @@ export default function Guests() {
   const [sendingInvite, setSendingInvite] = useState(false);
   const [sendingTelegram, setSendingTelegram] = useState(false);
   const [copiedTelegram, setCopiedTelegram] = useState(false);
+  const [showTelegramQr, setShowTelegramQr] = useState(false);
 
   // Bulk Invitation state
   const [bulkInviteOpen, setBulkInviteOpen] = useState(false);
@@ -337,40 +338,54 @@ export default function Guests() {
   // Submit Send Telegram / WhatsApp Invitation
   const handleSendTelegramInvite = async (actionType = 'direct_telegram') => {
     if (!inviteModalGuest) return;
+
+    // 1. Immediately copy the full invitation text to clipboard
+    if (telegramInviteText) {
+      try {
+        await navigator.clipboard.writeText(telegramInviteText);
+        setCopiedTelegram(true);
+        setTimeout(() => setCopiedTelegram(false), 2500);
+      } catch (_) {}
+    }
+
+    // 2. Compute URLs immediately so window.open is never blocked by browser popup blocker
+    const cleanDigits = (invitePhone || '').replace(/\D/g, '');
+    const phoneWithCode = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+
+    let targetUrl = '';
+    if (actionType === 'direct_telegram') {
+      targetUrl = phoneWithCode ? `https://t.me/+${phoneWithCode}` : 'https://t.me/MarriageExpenseManagementBot';
+    } else if (actionType === 'telegram_web') {
+      targetUrl = phoneWithCode ? `https://web.telegram.org/a/#?phone=${phoneWithCode}` : 'https://web.telegram.org/';
+    } else if (actionType === 'whatsapp') {
+      targetUrl = phoneWithCode
+        ? `https://api.whatsapp.com/send?phone=${phoneWithCode}&text=${encodeURIComponent(telegramInviteText)}`
+        : `https://api.whatsapp.com/send?text=${encodeURIComponent(telegramInviteText)}`;
+    } else if (actionType === 'share_picker') {
+      const rsvpUrl = `${window.location.origin}/rsvp/${inviteModalGuest.rsvp_token || ''}`;
+      targetUrl = `https://t.me/share/url?url=${encodeURIComponent(rsvpUrl)}&text=${encodeURIComponent(telegramInviteText)}`;
+    }
+
+    // Synchronously open the target URL to prevent browser popup blocker from blocking it!
+    if (targetUrl) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    const channelName = actionType === 'whatsapp' ? 'WhatsApp' : 'Telegram';
+    toast({
+      title: actionType === 'whatsapp' ? 'Opening WhatsApp...' : 'Copied & Opening Telegram...',
+      description: actionType === 'whatsapp'
+        ? `WhatsApp opened with pre-filled invitation for ${inviteModalGuest.name}.`
+        : `Invitation copied to clipboard! Opening Telegram for ${inviteModalGuest.name} — simply paste & send.`,
+      status: 'success'
+    });
+
     setSendingTelegram(true);
     try {
-      // 1. Automatically copy the full invitation text to clipboard
-      if (telegramInviteText) {
-        try {
-          await navigator.clipboard.writeText(telegramInviteText);
-          setCopiedTelegram(true);
-          setTimeout(() => setCopiedTelegram(false), 2500);
-        } catch (_) {}
-      }
-
-      // 2. Call backend API to update guest status and fetch direct links
-      const res = await api.sendTelegramInvitation(inviteModalGuest.id, {
+      // 3. Background call to update guest status in database
+      await api.sendTelegramInvitation(inviteModalGuest.id, {
         phone: invitePhone.trim(),
         customMessage: telegramInviteText
-      });
-
-      // 3. Open appropriate messaging destination
-      if (actionType === 'direct_telegram') {
-        const urlToOpen = res.directPhoneUrl || res.shareUrl;
-        if (urlToOpen) window.open(urlToOpen, '_blank');
-      } else if (actionType === 'share_picker' && res.shareUrl) {
-        window.open(res.shareUrl, '_blank');
-      } else if (actionType === 'whatsapp' && res.whatsappUrl) {
-        window.open(res.whatsappUrl, '_blank');
-      }
-
-      const channelName = actionType === 'whatsapp' ? 'WhatsApp' : 'Telegram';
-      toast({
-        title: actionType === 'whatsapp' ? 'Opening WhatsApp...' : 'Copied & Opening Telegram...',
-        description: actionType === 'whatsapp'
-          ? `WhatsApp opened with invitation text for ${inviteModalGuest.name}.`
-          : `Invitation copied to clipboard! Opening Telegram for ${inviteModalGuest.name} — simply paste & send.`,
-        status: 'success'
       });
 
       setInviteModalGuest(null);
@@ -385,7 +400,7 @@ export default function Guests() {
         }));
       }
     } catch (err) {
-      toast({ title: 'Failed to process invitation', description: err.message, status: 'error' });
+      console.warn('Telegram invite logging notice:', err.message);
     } finally {
       setSendingTelegram(false);
     }
@@ -1881,6 +1896,44 @@ export default function Guests() {
                 </div>
               )}
 
+              {/* QR Code & Direct Web fallback toggle */}
+              <div className="flex items-center justify-between p-2.5 bg-zinc-50 rounded-xl border border-zinc-200">
+                <div className="flex items-center gap-2">
+                  <QrCode size={15} className="text-[#0088cc]" />
+                  <span className="font-semibold text-zinc-700 text-xs">Scan with Mobile Phone Camera</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTelegramQr(!showTelegramQr)}
+                  className="text-[11px] font-bold text-[#0088cc] hover:underline cursor-pointer"
+                >
+                  {showTelegramQr ? 'Hide QR' : 'Show QR'}
+                </button>
+              </div>
+
+              {showTelegramQr && inviteModalGuest && (
+                <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col items-center justify-center gap-2 text-center shadow-xs">
+                  <p className="text-[11px] text-zinc-600 font-medium">
+                    Scan with your phone camera to open Telegram directly:
+                  </p>
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(
+                      `https://t.me/MarriageExpenseManagementBot?start=${inviteModalGuest.rsvp_token?.startsWith('rsvp_') ? inviteModalGuest.rsvp_token : `rsvp_${inviteModalGuest.rsvp_token}`}`
+                    )}`}
+                    alt="Telegram RSVP QR Code"
+                    className="w-32 h-32 rounded-lg border border-zinc-100 shadow-2xs"
+                  />
+                  <p className="text-[10px] text-zinc-400">
+                    Links directly to Wedding RSVP Bot on Telegram
+                  </p>
+                </div>
+              )}
+
+              {/* Troubleshooting explanation */}
+              <div className="p-2.5 bg-amber-50/90 border border-amber-200 rounded-lg text-[11px] text-amber-900 leading-relaxed">
+                <span className="font-bold">⚠️ Note for Mac/PC users:</span> Telegram's "Open Chat" button requires the <strong>Telegram Desktop app</strong> installed on your computer. If not installed, click <strong>"Telegram Web"</strong>, use <strong>"Send via WhatsApp"</strong> (works in browser), or scan the <strong>QR Code</strong> with your phone!
+              </div>
+
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-200">
                 <Button
@@ -1905,6 +1958,20 @@ export default function Guests() {
                   >
                     {copiedTelegram ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                     <span>{copiedTelegram ? 'Copied' : 'Copy Text'}</span>
+                  </Button>
+
+                  {/* Telegram Web */}
+                  <Button
+                    radius="sm"
+                    size="sm"
+                    variant="flat"
+                    type="button"
+                    disabled={sendingTelegram}
+                    onClick={() => handleSendTelegramInvite('telegram_web')}
+                    className="text-xs font-semibold text-[#0088cc] bg-sky-50 hover:bg-sky-100 inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Globe size={13} />
+                    <span>Telegram Web</span>
                   </Button>
 
                   {/* WhatsApp Quick Send */}
