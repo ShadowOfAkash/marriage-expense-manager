@@ -6,7 +6,7 @@ import {
   RefreshCw, X, Mail, UserCheck, Minus, ArrowRight,
   User, Heart, Send, ExternalLink, FileText, Sparkles,
   AlertTriangle, Settings2, Building2, Home, Bed,
-  Copy, Check, Smartphone
+  Copy, Check, Smartphone, MessageCircle
 } from 'lucide-react';
 import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES, STAY_PREFERENCES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
@@ -334,25 +334,42 @@ export default function Guests() {
     );
   };
 
-  // Submit Send Telegram Invitation
-  const handleSendTelegramInvite = async (autoOpenTelegram = true) => {
+  // Submit Send Telegram / WhatsApp Invitation
+  const handleSendTelegramInvite = async (actionType = 'direct_telegram') => {
     if (!inviteModalGuest) return;
     setSendingTelegram(true);
     try {
+      // 1. Automatically copy the full invitation text to clipboard
+      if (telegramInviteText) {
+        try {
+          await navigator.clipboard.writeText(telegramInviteText);
+          setCopiedTelegram(true);
+          setTimeout(() => setCopiedTelegram(false), 2500);
+        } catch (_) {}
+      }
+
+      // 2. Call backend API to update guest status and fetch direct links
       const res = await api.sendTelegramInvitation(inviteModalGuest.id, {
         phone: invitePhone.trim(),
         customMessage: telegramInviteText
       });
 
-      if (autoOpenTelegram && res.shareUrl) {
+      // 3. Open appropriate messaging destination
+      if (actionType === 'direct_telegram') {
+        const urlToOpen = res.directPhoneUrl || res.shareUrl;
+        if (urlToOpen) window.open(urlToOpen, '_blank');
+      } else if (actionType === 'share_picker' && res.shareUrl) {
         window.open(res.shareUrl, '_blank');
+      } else if (actionType === 'whatsapp' && res.whatsappUrl) {
+        window.open(res.whatsappUrl, '_blank');
       }
 
+      const channelName = actionType === 'whatsapp' ? 'WhatsApp' : 'Telegram';
       toast({
-        title: 'Telegram Invitation Ready!',
-        description: res.botSent
-          ? `Delivered directly via Telegram Bot to ${inviteModalGuest.name}!`
-          : `Telegram share opened with invitation for ${inviteModalGuest.name}. Guest marked as Invited.`,
+        title: actionType === 'whatsapp' ? 'Opening WhatsApp...' : 'Copied & Opening Telegram...',
+        description: actionType === 'whatsapp'
+          ? `WhatsApp opened with invitation text for ${inviteModalGuest.name}.`
+          : `Invitation copied to clipboard! Opening Telegram for ${inviteModalGuest.name} — simply paste & send.`,
         status: 'success'
       });
 
@@ -363,12 +380,12 @@ export default function Guests() {
           ...prev,
           phone: invitePhone.trim(),
           rsvp_status: 'Invited',
-          invitation_channel: 'Telegram',
+          invitation_channel: channelName,
           invitation_sent_at: new Date().toISOString()
         }));
       }
     } catch (err) {
-      toast({ title: 'Failed to send Telegram invitation', description: err.message, status: 'error' });
+      toast({ title: 'Failed to process invitation', description: err.message, status: 'error' });
     } finally {
       setSendingTelegram(false);
     }
@@ -1794,12 +1811,16 @@ export default function Guests() {
           {inviteChannel === 'telegram' ? (
             /* TELEGRAM INVITATION TAB */
             <div className="space-y-3.5 text-xs">
-              <div className="p-3 bg-sky-50/80 border border-sky-200 rounded-xl flex items-start gap-2.5 text-xs text-sky-900">
-                <Smartphone size={16} className="text-[#0088cc] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-sky-950">Send Invitation on Telegram</p>
-                  <p className="text-[11px] text-sky-800 mt-0.5 leading-relaxed">
-                    Sends to the guest's phone number on Telegram with direct RSVP link, event details, and Royal PDF card.
+              <div className="p-3 bg-sky-50/90 border border-sky-200 rounded-xl flex items-start gap-2.5 text-xs text-sky-950">
+                <Smartphone size={17} className="text-[#0088cc] shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold text-sky-950">Direct Telegram & WhatsApp Delivery</p>
+                  <p className="text-[11px] text-sky-800 leading-relaxed">
+                    Telegram protects user privacy by prohibiting bots or servers from sending unsolicited messages to random phone numbers. 
+                    Tapping <strong>"Chat on Telegram"</strong> automatically copies the message and opens the guest's chat — just paste and send!
+                  </p>
+                  <p className="text-[11px] text-sky-800/90 leading-relaxed">
+                    💡 <em>Once the guest taps the Wedding Bot link in the message, the bot activates to send them digital PDF cards and 1-tap RSVP buttons.</em>
                   </p>
                 </div>
               </div>
@@ -1807,7 +1828,7 @@ export default function Guests() {
               {/* Guest Phone Number */}
               <div>
                 <label className="block font-bold text-zinc-700 mb-1">
-                  Guest Phone Number (Telegram)
+                  Guest Phone Number (Telegram / WhatsApp)
                 </label>
                 <input
                   type="tel"
@@ -1822,7 +1843,7 @@ export default function Guests() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="font-bold text-zinc-700">
-                    Personalized Telegram Invitation Message
+                    Personalized Invitation Message Preview
                   </label>
                   <button
                     type="button"
@@ -1834,7 +1855,7 @@ export default function Guests() {
                   </button>
                 </div>
                 <textarea
-                  rows={6}
+                  rows={5}
                   value={telegramInviteText}
                   onChange={(e) => setTelegramInviteText(e.target.value)}
                   className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-mono text-zinc-900 focus:bg-white focus:border-[#0088cc] outline-none resize-none transition-colors leading-relaxed"
@@ -1843,7 +1864,7 @@ export default function Guests() {
 
               {/* Preview PDF card link */}
               {inviteModalGuest && (
-                <div className="flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200">
+                <div className="flex items-center justify-between p-2 bg-zinc-50 rounded-lg border border-zinc-200">
                   <div className="flex items-center gap-2 text-zinc-700 font-medium">
                     <FileText size={15} className="text-[#c59b27]" />
                     <span>Invitation Card (PDF Attachment)</span>
@@ -1860,45 +1881,67 @@ export default function Guests() {
                 </div>
               )}
 
-              <div className="flex justify-end items-center gap-2 pt-3 border-t border-zinc-200">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-200">
                 <Button
                   radius="sm"
                   variant="bordered"
+                  size="sm"
                   type="button"
                   onClick={() => setInviteModalGuest(null)}
                   className="text-xs font-medium text-zinc-600 hover:bg-zinc-100"
                 >
                   Cancel
                 </Button>
-                <Button
-                  radius="sm"
-                  variant="flat"
-                  type="button"
-                  onClick={handleCopyTelegramText}
-                  className="text-xs font-semibold text-[#0088cc] bg-sky-50 hover:bg-sky-100 inline-flex items-center gap-1.5"
-                >
-                  <Copy size={13} />
-                  <span>Copy Message</span>
-                </Button>
-                <Button
-                  radius="sm"
-                  type="button"
-                  disabled={sendingTelegram}
-                  onClick={() => handleSendTelegramInvite(true)}
-                  className="text-xs font-semibold bg-[#0088cc] hover:bg-[#0077b5] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
-                >
-                  {sendingTelegram ? (
-                    <>
-                      <RefreshCw size={13} className="animate-spin" />
-                      <span>Sending Telegram...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send size={13} className="text-white" />
-                      <span>Send via Telegram</span>
-                    </>
-                  )}
-                </Button>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    radius="sm"
+                    size="sm"
+                    variant="flat"
+                    type="button"
+                    onClick={handleCopyTelegramText}
+                    className="text-xs font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1"
+                  >
+                    {copiedTelegram ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                    <span>{copiedTelegram ? 'Copied' : 'Copy Text'}</span>
+                  </Button>
+
+                  {/* WhatsApp Quick Send */}
+                  <Button
+                    radius="sm"
+                    size="sm"
+                    type="button"
+                    disabled={sendingTelegram}
+                    onClick={() => handleSendTelegramInvite('whatsapp')}
+                    className="text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <MessageCircle size={13} />
+                    <span>Send via WhatsApp</span>
+                  </Button>
+
+                  {/* Telegram Direct Chat */}
+                  <Button
+                    radius="sm"
+                    size="sm"
+                    type="button"
+                    disabled={sendingTelegram}
+                    onClick={() => handleSendTelegramInvite('direct_telegram')}
+                    className="text-xs font-semibold bg-[#0088cc] hover:bg-[#0077b5] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    {sendingTelegram ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Opening Telegram...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send size={13} className="text-white" />
+                        <span>Chat on Telegram</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (

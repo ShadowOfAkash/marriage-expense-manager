@@ -751,6 +751,12 @@ async function sendTelegramInvitation(req, res) {
       ? customMessage.trim()
       : generateTelegramInvitationText(guest, baseUrl);
 
+    const digitsOnly = recipientPhone.replace(/\D/g, '');
+    const phoneWithCountry = digitsOnly.length === 10 ? `91${digitsOnly}` : digitsOnly;
+    const directPhoneUrl = phoneWithCountry ? `https://t.me/+${phoneWithCountry}` : null;
+    const directPhoneTg = phoneWithCountry ? `tg://resolve?phone=${phoneWithCountry}` : null;
+    const whatsappUrl = phoneWithCountry ? `https://api.whatsapp.com/send?phone=${phoneWithCountry}&text=${encodeURIComponent(invitationText)}` : null;
+
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(rsvpUrl)}&text=${encodeURIComponent(invitationText)}`;
     const deepLink = `tg://msg_url?url=${encodeURIComponent(rsvpUrl)}&text=${encodeURIComponent(invitationText)}`;
 
@@ -809,6 +815,9 @@ async function sendTelegramInvitation(req, res) {
       invitationText,
       shareUrl,
       deepLink,
+      directPhoneUrl,
+      directPhoneTg,
+      whatsappUrl,
       botStartUrl,
       rsvpUrl,
       pdfUrl,

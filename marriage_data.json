@@ -587,9 +587,10 @@
       "created_at": "2026-08-24T22:12:09.833Z"
     }
   ],
-  "_nextExpenseId": 48,
-  "_nextSavingsId": 8,
+  "_nextExpenseId": 49,
+  "_nextSavingsId": 9,
   "telegram_codes": {
+    "371018": "test_dev_user_123",
     "866998": "mock-uid-akashtiwarimnnitgmailcom"
   },
   "telegram_links": {
@@ -597,6 +598,9 @@
   },
   "user_budgets": {
     "jzSCJChQ1OTinp3PESQzSNeCGlp1": {
+      "amount": 600000
+    },
+    "test_dev_user_123": {
       "amount": 600000
     }
   },
@@ -1147,7 +1151,7 @@
       "created_at": "2026-09-09T10:02:36.931Z"
     }
   ],
-  "_nextPaymentId": 48,
+  "_nextPaymentId": 49,
   "guests": [
     {
       "id": 1788969300000,
@@ -1773,7 +1777,7 @@
       "stay_preference": "Home Stay"
     }
   ],
-  "_nextGuestId": 1015,
+  "_nextGuestId": 1018,
   "email_settings": {
     "jzSCJChQ1OTinp3PESQzSNeCGlp1": {
       "provider": "gmail",
