@@ -156,8 +156,44 @@ export const api = {
   }),
   disconnectEmailSettings: () => fetchWithAuth('/api/email/settings/disconnect', {
     method: 'POST'
-  })
+  }),
+
+  // CHECKLIST
+  getChecklistTasks:        ()         => fetchWithAuth('/api/checklist'),
+  createChecklistTask:      (data)     => fetchWithAuth('/api/checklist', { method: 'POST', body: JSON.stringify(data) }),
+  updateChecklistTask:      (id, data) => fetchWithAuth(`/api/checklist/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  toggleChecklistTask:      (id)       => fetchWithAuth(`/api/checklist/${id}/toggle`, { method: 'PATCH' }),
+  deleteChecklistTask:      (id)       => fetchWithAuth(`/api/checklist/${id}`, { method: 'DELETE' }),
+  seedChecklistTasks:       (data)     => fetchWithAuth('/api/checklist/seed', { method: 'POST', body: JSON.stringify(data || {}) }),
+  bulkUpdateChecklistTasks: (data)     => fetchWithAuth('/api/checklist/bulk', { method: 'POST', body: JSON.stringify(data) })
 };
+
+export const CHECKLIST_CATEGORIES = [
+  'Budget & Planning',
+  'Venues',
+  'Photography & Video',
+  'Decor & Design',
+  'Attire & Beauty',
+  'Ceremonies & Music',
+  'Catering & Food',
+  'Invitations & Guests',
+  'Logistics & Gifts'
+];
+
+export const TIMELINE_STAGES = [
+  '9 to 12 Months Before',
+  '6 to 8 Months Before',
+  '4 to 5 Months Before',
+  '3 Months Before',
+  '2 Months Before',
+  '1 Month Before',
+  '2 to 3 Weeks Before',
+  '1 Week Before',
+  'Day of Wedding',
+  'Post-Wedding'
+];
+
+export const TASK_PRIORITIES = ['High', 'Medium', 'Low'];
 
 // Currency formatter
 export const fmt = (n) =>

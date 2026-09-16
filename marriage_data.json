@@ -587,10 +587,10 @@
       "created_at": "2026-08-24T22:12:09.833Z"
     }
   ],
-  "_nextExpenseId": 49,
-  "_nextSavingsId": 9,
+  "_nextExpenseId": 50,
+  "_nextSavingsId": 10,
   "telegram_codes": {
-    "371018": "test_dev_user_123",
+    "238483": "test_dev_user_123",
     "866998": "mock-uid-akashtiwarimnnitgmailcom"
   },
   "telegram_links": {
@@ -1151,7 +1151,7 @@
       "created_at": "2026-09-09T10:02:36.931Z"
     }
   ],
-  "_nextPaymentId": 49,
+  "_nextPaymentId": 50,
   "guests": [
     {
       "id": 1788969300000,
@@ -1777,7 +1777,7 @@
       "stay_preference": "Home Stay"
     }
   ],
-  "_nextGuestId": 1018,
+  "_nextGuestId": 1021,
   "email_settings": {
     "jzSCJChQ1OTinp3PESQzSNeCGlp1": {
       "provider": "gmail",
@@ -1789,5 +1789,6 @@
       "sender_name": "Wedding Celebrations",
       "updated_at": "2026-09-09T18:23:26.735Z"
     }
-  }
+  },
+  "checklist_tasks": []
 }

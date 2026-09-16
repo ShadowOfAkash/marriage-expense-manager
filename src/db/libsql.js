@@ -161,6 +161,35 @@ async function initLibSQL() {
       `);
     } catch(e){}
 
+    try {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS checklist_tasks (
+          id                INTEGER PRIMARY KEY AUTOINCREMENT,
+          task_id           TEXT    UNIQUE,
+          user_id           TEXT    NOT NULL DEFAULT 'legacy_user',
+          title             TEXT    NOT NULL,
+          category          TEXT    NOT NULL DEFAULT 'General',
+          timeline_stage    TEXT    NOT NULL DEFAULT 'General',
+          due_date          TEXT    DEFAULT '',
+          completed         INTEGER DEFAULT 0,
+          completed_at      TEXT    DEFAULT NULL,
+          priority          TEXT    DEFAULT 'Medium',
+          assigned_to       TEXT    DEFAULT '',
+          estimated_cost    REAL    DEFAULT 0,
+          actual_cost       REAL    DEFAULT 0,
+          linked_booking_id INTEGER DEFAULT NULL,
+          linked_payment_id INTEGER DEFAULT NULL,
+          notes             TEXT    DEFAULT '',
+          is_custom         INTEGER DEFAULT 0,
+          sort_order        INTEGER DEFAULT 0,
+          created_at        TEXT    DEFAULT (datetime('now')),
+          updated_at        TEXT    DEFAULT (datetime('now'))
+        )
+      `);
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_checklist_user ON checklist_tasks (user_id)");
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_checklist_stage ON checklist_tasks (user_id, timeline_stage)");
+    } catch(e){}
+
     console.log('✅ Turso tables ready');
     return true;
   } catch (e) {
