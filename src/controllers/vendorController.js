@@ -6,10 +6,25 @@ const PLACES_BASE = 'https://places.googleapis.com/v1';
 
 // ── Helpers ──────────────────────────────────────────
 
-async function placesTextSearch(query, lat, lng, radius = 10000) {
+function getHaversineKm(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+async function placesTextSearch(query, lat, lng, radius = 10000, sortBy = 'distance') {
   if (!GOOGLE_MAPS_API_KEY) {
     throw new Error('GOOGLE_MAPS_API_KEY is not configured. Add it to your .env file.');
   }
+
+  const radiusMeters = Number(radius) || 10000;
+  const radiusKm = radiusMeters / 1000;
 
   const body = {
     textQuery: query,
@@ -17,11 +32,17 @@ async function placesTextSearch(query, lat, lng, radius = 10000) {
     maxResultCount: 20,
   };
 
-  if (lat && lng) {
-    body.locationBias = {
-      circle: {
-        center: { latitude: Number(lat), longitude: Number(lng) },
-        radius: Number(radius)
+  const centerLat = lat ? Number(lat) : null;
+  const centerLng = lng ? Number(lng) : null;
+
+  // Use locationRestriction with bounding rectangle for strict geographic bounds
+  if (centerLat && centerLng) {
+    const latDelta = radiusMeters / 111000;
+    const lngDelta = radiusMeters / (111000 * Math.cos(centerLat * Math.PI / 180));
+    body.locationRestriction = {
+      rectangle: {
+        low: { latitude: centerLat - latDelta, longitude: centerLng - lngDelta },
+        high: { latitude: centerLat + latDelta, longitude: centerLng + lngDelta }
       }
     };
   }
@@ -58,7 +79,36 @@ async function placesTextSearch(query, lat, lng, radius = 10000) {
   }
 
   const data = await res.json();
-  return (data.places || []).map(normalizePlaceResult);
+  let vendors = (data.places || []).map(normalizePlaceResult);
+
+  // Compute exact distance and filter strictly to chosen radius
+  if (centerLat && centerLng) {
+    vendors = vendors.map(v => {
+      const dist = (v.lat && v.lng) ? getHaversineKm(centerLat, centerLng, v.lat, v.lng) : null;
+      return {
+        ...v,
+        distanceKm: dist,
+        distanceText: dist !== null ? (dist < 1 ? `${Math.round(dist * 1000)} m away` : `${dist} km away`) : null
+      };
+    });
+
+    // Enforce that vendors returned are strictly within the requested radius (e.g. within 10km or 20km)
+    vendors = vendors.filter(v => v.distanceKm === null || v.distanceKm <= radiusKm);
+
+    // Sort accordingly
+    if (sortBy === 'rating') {
+      vendors.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else {
+      vendors.sort((a, b) => {
+        if (a.distanceKm === null && b.distanceKm === null) return 0;
+        if (a.distanceKm === null) return 1;
+        if (b.distanceKm === null) return -1;
+        return a.distanceKm - b.distanceKm;
+      });
+    }
+  }
+
+  return vendors;
 }
 
 async function placeDetails(placeId) {
@@ -178,7 +228,7 @@ async function getCategories(req, res) {
 
 async function searchVendors(req, res) {
   try {
-    const { category, lat, lng, radius, q } = req.query;
+    const { category, lat, lng, radius, q, sortBy } = req.query;
 
     // If a free-text query is given, use it directly
     let searchQuery = q || '';
@@ -193,7 +243,7 @@ async function searchVendors(req, res) {
       return res.status(400).json({ error: 'Provide category or q parameter' });
     }
 
-    const vendors = await placesTextSearch(searchQuery, lat, lng, radius || 10000);
+    const vendors = await placesTextSearch(searchQuery, lat, lng, radius || 10000, sortBy);
 
     // Cache results in local storage
     try {
@@ -337,15 +387,83 @@ async function requestQuote(req, res) {
   }
 }
 
+async function autocompleteLocations(req, res) {
+  try {
+    const { input } = req.query;
+    if (!input || input.trim().length < 2) {
+      return res.json([]);
+    }
+
+    if (!GOOGLE_MAPS_API_KEY) {
+      return res.status(500).json({ error: 'GOOGLE_MAPS_API_KEY is not configured.' });
+    }
+
+    const body = {
+      input: input.trim(),
+      languageCode: 'en'
+    };
+
+    const apiRes = await fetch(`${PLACES_BASE}/places:autocomplete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!apiRes.ok) {
+      const err = await apiRes.json().catch(() => ({}));
+      return res.status(apiRes.status).json({ error: err.error?.message || 'Autocomplete failed' });
+    }
+
+    const data = await apiRes.json();
+    const suggestions = (data.suggestions || []).map(s => {
+      const pred = s.placePrediction;
+      return {
+        placeId: pred?.placeId || '',
+        description: pred?.text?.text || '',
+        mainText: pred?.structuredFormat?.mainText?.text || pred?.text?.text || '',
+        secondaryText: pred?.structuredFormat?.secondaryText?.text || ''
+      };
+    }).filter(s => s.description);
+
+    res.json(suggestions);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
 async function saveLocation(req, res) {
   try {
-    const { location, lat, lng } = req.body;
+    const { location, lat, lng, placeId } = req.body;
     if (!location) return res.status(400).json({ error: 'Location required' });
 
-    // If lat/lng not provided, geocode the location
-    let finalLat = lat;
-    let finalLng = lng;
+    // If lat/lng not provided, attempt placeId lookup or geocode
+    let finalLat = lat ? Number(lat) : null;
+    let finalLng = lng ? Number(lng) : null;
     let formattedAddress = location;
+
+    if (placeId && (!finalLat || !finalLng) && GOOGLE_MAPS_API_KEY) {
+      try {
+        const placeRes = await fetch(`${PLACES_BASE}/places/${placeId}`, {
+          headers: {
+            'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
+            'X-Goog-FieldMask': 'id,displayName,formattedAddress,location'
+          }
+        });
+        if (placeRes.ok) {
+          const pData = await placeRes.json();
+          if (pData.location?.latitude && pData.location?.longitude) {
+            finalLat = pData.location.latitude;
+            finalLng = pData.location.longitude;
+            formattedAddress = pData.formattedAddress || pData.displayName?.text || location;
+          }
+        }
+      } catch (err) {
+        console.warn('PlaceId resolution warning:', err.message);
+      }
+    }
 
     if (!finalLat || !finalLng) {
       const geo = await geocodeLocation(location);
@@ -425,5 +543,6 @@ module.exports = {
   getVendorPhoto,
   requestQuote,
   saveLocation,
-  getLocation
+  getLocation,
+  autocompleteLocations
 };

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin, Search, ArrowLeft, Star, Phone, Globe, ExternalLink, Clock, X,
   Send, ChevronRight, Navigation, Mail, Users, Calendar, MessageSquare,
-  Loader2, AlertCircle, Store, Edit3, Filter, MapPinned
+  Loader2, AlertCircle, Store, Edit3, Filter, MapPinned, CheckCircle2,
+  ArrowUpDown
 } from 'lucide-react';
 import { api, fmt } from '../utils/api';
 
@@ -32,17 +33,83 @@ function StarRating({ rating, count }) {
   );
 }
 
-// ── Location Setup View ──────────────────────────────
+// ── Location Setup View with Exact Dropdown Suggestions ──────────────────────────────
 function LocationSetup({ onLocationSaved }) {
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const dropdownRef = useRef(null);
+  const debounceTimerRef = useRef(null);
 
-  const handleSave = async (locationName) => {
+  // Live autocomplete search with debounce
+  useEffect(() => {
+    if (!query || query.trim().length < 2) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const results = await api.autocompleteLocations(query.trim());
+        setSuggestions(results || []);
+        setShowDropdown(results && results.length > 0);
+        setSelectedIndex(-1);
+      } catch (err) {
+        console.warn('Autocomplete fetch error:', err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 250);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [query]);
+
+  // Click outside closes the dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectSuggestion = async (item) => {
+    setQuery(item.description);
+    setShowDropdown(false);
+    setSaving(true);
+    setError('');
+    try {
+      const result = await api.saveWeddingLocation({
+        location: item.description,
+        placeId: item.placeId
+      });
+      onLocationSaved(result);
+    } catch (e) {
+      setError(e.message);
+      setSaving(false);
+    }
+  };
+
+  const handleManualSave = async (locationName) => {
     const loc = locationName || query.trim();
     if (!loc) return;
     setSaving(true);
     setError('');
+    setShowDropdown(false);
     try {
       const result = await api.saveWeddingLocation({ location: loc });
       onLocationSaved(result);
@@ -50,6 +117,33 @@ function LocationSetup({ onLocationSaved }) {
       setError(e.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showDropdown || suggestions.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleManualSave();
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+        handleSelectSuggestion(suggestions[selectedIndex]);
+      } else {
+        handleManualSave();
+      }
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
     }
   };
 
@@ -64,27 +158,37 @@ function LocationSetup({ onLocationSaved }) {
           Where's Your Wedding?
         </h1>
         <p className="text-sm text-zinc-500 max-w-md mx-auto">
-          Set your wedding location to discover the best vendors — photographers, caterers, decorators, and more — near you.
+          Type your wedding city or exact area below to discover vendors with live Google Maps proximity.
         </p>
       </div>
 
-      {/* Search Input */}
-      <div className="relative mb-6">
+      {/* Search Input with Live Autocomplete Dropdown */}
+      <div className="relative mb-6" ref={dropdownRef}>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <MapPin size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSave()}
-              placeholder="Enter your city or area (e.g. Lucknow, Jaipur)"
-              className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#234c6a]/40 focus:border-[#234c6a] shadow-sm"
+              onChange={e => {
+                setQuery(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowDropdown(true);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Search location (e.g. Gomti Nagar, Lucknow or Bandra, Mumbai)"
+              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#234c6a]/40 focus:border-[#234c6a] shadow-sm"
               disabled={saving}
+              autoComplete="off"
             />
+            {loadingSuggestions && (
+              <Loader2 size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 animate-spin" />
+            )}
           </div>
           <button
-            onClick={() => handleSave()}
+            onClick={() => handleManualSave()}
             disabled={saving || !query.trim()}
             className="px-5 py-3.5 rounded-xl bg-[#234c6a] text-white font-semibold text-sm hover:bg-[#1b3c53] transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
@@ -92,6 +196,43 @@ function LocationSetup({ onLocationSaved }) {
             {saving ? 'Finding...' : 'Set Location'}
           </button>
         </div>
+
+        {/* Dropdown Suggestions List */}
+        {showDropdown && suggestions.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-zinc-200/90 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in-50 duration-150 divide-y divide-zinc-100">
+            <div className="px-3 py-1.5 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+              <span>Suggested Locations</span>
+              <span className="text-[10px] text-zinc-400 normal-case">Powered by Google Maps</span>
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              {suggestions.map((item, idx) => (
+                <button
+                  key={item.placeId || idx}
+                  type="button"
+                  onClick={() => handleSelectSuggestion(item)}
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors cursor-pointer ${
+                    selectedIndex === idx ? 'bg-blue-50/70 text-[#234c6a]' : 'hover:bg-zinc-50'
+                  }`}
+                >
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#234c6a] flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-zinc-900 truncate">
+                      {item.mainText}
+                    </div>
+                    {item.secondaryText && (
+                      <div className="text-xs text-zinc-500 truncate mt-0.5">
+                        {item.secondaryText}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mt-3 flex items-center gap-2 text-rose-600 text-xs bg-rose-50 px-3 py-2 rounded-lg">
             <AlertCircle size={14} />
@@ -107,7 +248,7 @@ function LocationSetup({ onLocationSaved }) {
           {POPULAR_CITIES.map(city => (
             <button
               key={city}
-              onClick={() => { setQuery(city); handleSave(city); }}
+              onClick={() => { setQuery(city); handleManualSave(city); }}
               disabled={saving}
               className="px-3.5 py-2 rounded-lg bg-white border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-[#234c6a] hover:text-white hover:border-[#234c6a] transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
@@ -164,7 +305,7 @@ function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation
   );
 }
 
-// ── Vendor Card ──────────────────────────────────────
+// ── Vendor Card with Distance Indicator ──────────────────────────────────────
 function VendorCard({ vendor, onSelect, onQuote }) {
   const [imgError, setImgError] = useState(false);
 
@@ -174,7 +315,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
       onClick={() => onSelect(vendor)}
     >
       {/* Photo */}
-      <div className="relative h-40 bg-zinc-100 overflow-hidden">
+      <div className="relative h-44 bg-zinc-100 overflow-hidden">
         {vendor.photoUrl && !imgError ? (
           <img
             src={vendor.photoUrl}
@@ -196,6 +337,14 @@ function VendorCard({ vendor, onSelect, onQuote }) {
             {vendor.openNow ? 'Open Now' : 'Closed'}
           </div>
         )}
+
+        {/* Distance Badge over Image */}
+        {vendor.distanceText && (
+          <div className="absolute bottom-2 left-2 bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
+            <Navigation size={11} className="text-sky-400" />
+            <span>{vendor.distanceText}</span>
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -204,8 +353,10 @@ function VendorCard({ vendor, onSelect, onQuote }) {
           {vendor.name}
         </h3>
         <StarRating rating={vendor.rating} count={vendor.ratingCount} />
-        <p className="text-xs text-zinc-500 mt-2 line-clamp-2 flex-1">
-          <MapPin size={11} className="inline mr-1 text-zinc-400" />
+
+        {/* Distance & Address */}
+        <p className="text-xs text-zinc-500 mt-2.5 line-clamp-2 flex-1">
+          <MapPin size={11} className="inline mr-1 text-zinc-400 shrink-0" />
           {vendor.address}
         </p>
 
@@ -219,7 +370,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
               title="Call"
             >
               <Phone size={12} />
-              <span className="truncate max-w-[100px]">{vendor.phone}</span>
+              <span className="truncate max-w-[110px]">{vendor.phone}</span>
             </a>
           )}
           {vendor.website && (
@@ -271,17 +422,26 @@ function VendorCard({ vendor, onSelect, onQuote }) {
   );
 }
 
-// ── Vendor Marketplace View (per category) ───────────
+// ── Vendor Marketplace View (per category) with Radius Filters ───────────
 function VendorMarketplace({ category, location, onBack, onQuote }) {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [radius, setRadius] = useState(10000);
+  const [radius, setRadius] = useState(20000); // Default to 20 km
+  const [sortBy, setSortBy] = useState('distance'); // 'distance' | 'rating'
   const [selectedVendor, setSelectedVendor] = useState(null);
+
+  const RADIUS_OPTIONS = [
+    { meters: 5000, label: '5 km' },
+    { meters: 10000, label: '10 km' },
+    { meters: 20000, label: '20 km' },
+    { meters: 30000, label: '30 km' },
+    { meters: 50000, label: '50 km' }
+  ];
 
   useEffect(() => {
     fetchVendors();
-  }, [category, radius]);
+  }, [category, radius, sortBy]);
 
   const fetchVendors = async () => {
     setLoading(true);
@@ -291,15 +451,18 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
         category: category.id,
         lat: location.lat,
         lng: location.lng,
-        radius
+        radius,
+        sortBy
       });
-      setVendors(results);
+      setVendors(results || []);
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
   };
+
+  const radiusKm = radius / 1000;
 
   return (
     <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
@@ -311,42 +474,68 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
         >
           <ArrowLeft size={20} />
         </button>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-0.5">
             <button onClick={onBack} className="hover:text-[#234c6a] cursor-pointer">Vendors</button>
             <ChevronRight size={12} />
-            <span className="text-zinc-600 font-medium">{category.name}</span>
+            <span className="text-zinc-600 font-medium truncate">{category.name}</span>
           </div>
-          <h1 className="text-lg md:text-xl font-extrabold text-zinc-900">
+          <h1 className="text-lg md:text-xl font-extrabold text-zinc-900 truncate">
             {category.icon} {category.name}
           </h1>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex items-center gap-4 mb-6 p-3 bg-white rounded-xl border border-zinc-200 shadow-xs">
-        <div className="flex items-center gap-2 text-xs text-zinc-500">
-          <Filter size={14} />
-          <span className="font-medium">Radius:</span>
+      {/* Filter & Sort Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-3.5 bg-white rounded-2xl border border-zinc-200 shadow-xs">
+        {/* Radius Filter */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold mr-1">
+            <Filter size={14} className="text-[#234c6a]" />
+            <span>Radius:</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {RADIUS_OPTIONS.map(opt => (
+              <button
+                key={opt.meters}
+                onClick={() => setRadius(opt.meters)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  radius === opt.meters
+                    ? 'bg-[#234c6a] text-white shadow-xs'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-1.5">
-          {[5000, 10000, 25000, 50000].map(r => (
+
+        {/* Sort Controls & Proximity Location */}
+        <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-lg">
             <button
-              key={r}
-              onClick={() => setRadius(r)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                radius === r
-                  ? 'bg-[#234c6a] text-white'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              onClick={() => setSortBy('distance')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                sortBy === 'distance' ? 'bg-white text-[#234c6a] shadow-xs' : 'text-zinc-500 hover:text-zinc-800'
               }`}
             >
-              {r >= 1000 ? `${r / 1000} km` : `${r} m`}
+              📍 Nearest
             </button>
-          ))}
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 text-xs text-zinc-400">
-          <MapPin size={12} />
-          <span className="hidden sm:inline">{location.location}</span>
+            <button
+              onClick={() => setSortBy('rating')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
+                sortBy === 'rating' ? 'bg-white text-[#234c6a] shadow-xs' : 'text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              ⭐ Top Rated
+            </button>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-1 text-xs text-zinc-400">
+            <MapPin size={12} className="text-[#234c6a]" />
+            <span className="truncate max-w-[180px]" title={location.location}>{location.location}</span>
+          </div>
         </div>
       </div>
 
@@ -354,7 +543,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 size={32} className="text-[#234c6a] animate-spin mb-3" />
-          <p className="text-sm text-zinc-500">Searching for {category.name.toLowerCase()} near you...</p>
+          <p className="text-sm text-zinc-500">Searching for {category.name.toLowerCase()} within {radiusKm} km...</p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-20">
@@ -368,14 +557,44 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           </button>
         </div>
       ) : vendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20">
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-zinc-200 p-8 text-center">
           <Store size={40} className="text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-500 mb-1">No {category.name.toLowerCase()} found nearby</p>
-          <p className="text-xs text-zinc-400">Try increasing the search radius</p>
+          <h3 className="text-base font-bold text-zinc-800 mb-1">
+            No {category.name.toLowerCase()} found within {radiusKm} km
+          </h3>
+          <p className="text-xs text-zinc-400 max-w-sm mb-4">
+            Try expanding your search radius to 20 km or 50 km to find more vendors in surrounding areas.
+          </p>
+          <div className="flex gap-2">
+            {radius < 20000 && (
+              <button
+                onClick={() => setRadius(20000)}
+                className="px-4 py-2 rounded-lg bg-[#234c6a] text-white text-xs font-semibold cursor-pointer"
+              >
+                Expand to 20 km
+              </button>
+            )}
+            {radius < 50000 && (
+              <button
+                onClick={() => setRadius(50000)}
+                className="px-4 py-2 rounded-lg border border-zinc-200 text-zinc-700 text-xs font-semibold hover:bg-zinc-50 cursor-pointer"
+              >
+                Expand to 50 km
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <>
-          <p className="text-xs text-zinc-500 mb-4">{vendors.length} vendors found</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs text-zinc-600">
+              Showing <span className="font-bold text-zinc-900">{vendors.length}</span> {category.name.toLowerCase()} within <span className="font-bold text-[#234c6a]">{radiusKm} km</span> of {location.location}
+            </p>
+            <span className="text-[11px] text-zinc-400 font-medium">
+              {sortBy === 'distance' ? 'Sorted by proximity' : 'Sorted by rating'}
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {vendors.map(vendor => (
               <VendorCard
@@ -415,7 +634,12 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
     setLoading(true);
     try {
       const full = await api.getVendorDetails(vendor.placeId);
-      setDetails(full);
+      // Preserve computed distance
+      setDetails({
+        ...full,
+        distanceKm: vendor.distanceKm,
+        distanceText: vendor.distanceText
+      });
     } catch (_) {
       // Keep basic vendor data if detail fetch fails
     } finally {
@@ -432,7 +656,7 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors cursor-pointer"
+          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors cursor-pointer"
         >
           <X size={16} />
         </button>
@@ -454,9 +678,16 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
         )}
 
         <div className="p-5">
-          {/* Name & Rating */}
+          {/* Name, Rating & Distance */}
           <h2 className="text-lg font-extrabold text-zinc-900 mb-1">{details.name}</h2>
-          <StarRating rating={details.rating} count={details.ratingCount} />
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <StarRating rating={details.rating} count={details.ratingCount} />
+            {details.distanceText && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#234c6a] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
+                <Navigation size={10} /> {details.distanceText} away
+              </span>
+            )}
+          </div>
 
           {details.summary && (
             <p className="text-xs text-zinc-600 mt-2 leading-relaxed">{details.summary}</p>

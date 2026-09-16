@@ -175,6 +175,7 @@ export const api = {
   requestVendorQuote:   (data)   => fetchWithAuth('/api/vendors/quote', { method: 'POST', body: JSON.stringify(data) }),
   saveWeddingLocation:  (data)   => fetchWithAuth('/api/vendors/location', { method: 'POST', body: JSON.stringify(data) }),
   getWeddingLocation:   ()       => fetchWithAuth('/api/vendors/location'),
+  autocompleteLocations: (input) => fetchWithAuth(`/api/vendors/autocomplete?input=${encodeURIComponent(input)}`),
 };
 
 export const CHECKLIST_CATEGORIES = [
