@@ -33,6 +33,9 @@ app.get('/rsvp/:token', (req, res) => {
 
 // Single Page Application (SPA) catch-all fallback
 app.get('*', (req, res) => {
+  if (req.path.startsWith('/assets/') || req.path.startsWith('/icons/') || /\.[a-zA-Z0-9]+$/.test(req.path)) {
+    return res.status(404).send('Asset not found');
+  }
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });

@@ -248,7 +248,7 @@ export default function Savings() {
                   <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Added to Treasury
                   </span>
-                  <span className="font-mono">#{s.id?.slice(0, 6) || (i + 1)}</span>
+                  <span className="font-mono">#{String(s.id || '').slice(0, 6) || (i + 1)}</span>
                 </div>
               </div>
             ))}

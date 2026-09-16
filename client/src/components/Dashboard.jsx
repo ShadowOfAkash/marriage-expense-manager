@@ -155,13 +155,13 @@ export default function Dashboard() {
       ])
       
       setSummary(sum);
-      setExpenses(exp);
-      setSavings(sav);
-      setCategories(cats);
+      setExpenses(Array.isArray(exp) ? exp : (exp?.expenses || []));
+      setSavings(Array.isArray(sav) ? sav : (sav?.savings || []));
+      setCategories(Array.isArray(cats) ? cats : (cats?.categories || []));
       setGuestSummary(gSum);
       setWeddingProfile(profile);
-      setChecklistTasks(tasks);
-      setBookings(bks);
+      setChecklistTasks(Array.isArray(tasks) ? tasks : (tasks?.tasks || []));
+      setBookings(Array.isArray(bks) ? bks : (bks?.bookings || []));
 
       if (tgStatus.activeCode) setTelegramCode(tgStatus.activeCode);
       if (tgStatus.telegramId) setTelegramId(tgStatus.telegramId);
@@ -180,7 +180,10 @@ export default function Dashboard() {
   const handleToggleTask = async (taskId) => {
     try {
       await api.toggleChecklistTask(taskId);
-      setChecklistTasks(prev => prev.map(t => t.id === taskId || t.task_id === taskId ? { ...t, completed: t.completed ? 0 : 1 } : t));
+      setChecklistTasks(prev => {
+        const list = Array.isArray(prev) ? prev : (prev?.tasks || []);
+        return list.map(t => t.id === taskId || t.task_id === taskId ? { ...t, completed: t.completed ? 0 : 1 } : t);
+      });
       toast({ title: 'Task Updated', description: 'Great job staying on track!', status: 'success' });
     } catch (err) {
       toast({ title: 'Update failed', description: err.message, status: 'error' });
@@ -238,11 +241,13 @@ export default function Dashboard() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }, [weddingDateStr]);
 
-  const totalTasksCount = checklistTasks.length;
-  const completedTasksCount = checklistTasks.filter(t => t.completed).length;
+  const taskList = Array.isArray(checklistTasks) ? checklistTasks : (checklistTasks?.tasks || []);
+  const totalTasksCount = taskList.length;
+  const completedTasksCount = taskList.filter(t => t.completed).length;
   const checklistPercent = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
   const upcomingTasks = useMemo(() => {
-    return checklistTasks.filter(t => !t.completed).slice(0, 4);
+    const list = Array.isArray(checklistTasks) ? checklistTasks : (checklistTasks?.tasks || []);
+    return list.filter(t => !t.completed).slice(0, 4);
   }, [checklistTasks]);
 
   const totalSavings = Number(summary?.totalSavings || 0);

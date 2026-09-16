@@ -150,6 +150,11 @@ export default function Guests() {
     return guests.filter(g => (g.rsvp_status || '').toLowerCase() === 'confirmed');
   }, [guests]);
 
+  // Pending invitations subset
+  const pendingGuests = useMemo(() => {
+    return guests.filter(g => (g.rsvp_status || '').toLowerCase() !== 'confirmed');
+  }, [guests]);
+
   // Tab 2 Attending Metrics
   const attendingMetrics = useMemo(() => {
     const totalConfirmed = confirmedGuests.length;

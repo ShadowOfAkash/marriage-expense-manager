@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Receipt, PiggyBank, LogOut, 
   ChevronLeft, ChevronRight, CalendarCheck, 
-  X, Sparkles, AlertTriangle, Users, ListChecks, Store 
+  X, Sparkles, AlertTriangle, Users, ListChecks, Store, Heart 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
