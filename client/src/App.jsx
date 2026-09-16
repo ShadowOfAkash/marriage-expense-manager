@@ -66,7 +66,7 @@ function MainApp() {
     dashboard: 'Dashboard',
     checklist: 'Checklist',
     guests: 'Guests',
-    bookings: 'Vendors & Bookings',
+    bookings: 'Bookings',
     expenses: 'Payments',
     savings: 'Savings'
   }

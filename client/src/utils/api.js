@@ -55,23 +55,11 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 export const api = {
-  // VENDORS & BOOKINGS
-  getBookings:   (params = {}) => {
-    const q = new URLSearchParams(params).toString();
-    return fetchWithAuth(`/api/bookings${q ? `?${q}` : ''}`);
-  },
+  // BOOKINGS
+  getBookings:   ()       => fetchWithAuth('/api/bookings'),
   addBooking:    (data)   => fetchWithAuth('/api/bookings', { method: 'POST', body: JSON.stringify(data) }),
   updateBooking: (id, data) => fetchWithAuth(`/api/bookings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  updateBookingStage: (id, stage) => fetchWithAuth(`/api/bookings/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) }),
-  toggleBookingFavorite: (id) => fetchWithAuth(`/api/bookings/${id}/favorite`, { method: 'PATCH' }),
   deleteBooking: (id)     => fetchWithAuth(`/api/bookings/${id}`, { method: 'DELETE' }),
-  getVendorSummary: ()    => fetchWithAuth('/api/bookings/summary'),
-  getVendorCallSheet: ()  => fetchWithAuth('/api/bookings/call-sheet'),
-  getMarketplaceVendors: (params = {}) => {
-    const q = new URLSearchParams(params).toString();
-    return fetchWithAuth(`/api/bookings/marketplace${q ? `?${q}` : ''}`);
-  },
-  shortlistMarketplaceVendor: (vendorId, customQuote) => fetchWithAuth('/api/bookings/marketplace/shortlist', { method: 'POST', body: JSON.stringify({ vendorId, customQuote }) }),
 
   // Telegram
   generateTelegramCode: () => fetchWithAuth('/api/telegram/link-code', { method: 'POST' }),
@@ -268,26 +256,3 @@ export const COMMON_GUEST_TAGS = [
 export const STAY_PREFERENCES = [
   'Hotel', 'Home Stay', 'No need of stay'
 ];
-
-export const HIRING_STAGES = [
-  { key: 'Shortlisted', label: 'Shortlisted', color: 'rose' },
-  { key: 'Inquired', label: 'Inquired', color: 'amber' },
-  { key: 'Evaluating', label: 'Evaluating', color: 'blue' },
-  { key: 'Hired', label: 'Hired & Booked', color: 'emerald' },
-  { key: 'Declined', label: 'Declined', color: 'zinc' }
-];
-
-export const INDIAN_CITIES = [
-  'All Cities',
-  'Delhi NCR',
-  'Mumbai',
-  'Jaipur',
-  'Bengaluru',
-  'Udaipur',
-  'Lucknow',
-  'Hyderabad',
-  'Kolkata',
-  'Chandigarh',
-  'Goa'
-];
-
