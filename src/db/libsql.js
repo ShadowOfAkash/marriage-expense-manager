@@ -227,6 +227,26 @@ async function initLibSQL() {
           created_at    TEXT DEFAULT (datetime('now'))
         )
       `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS wedding_profiles (
+          user_id              TEXT PRIMARY KEY,
+          user_role            TEXT DEFAULT 'Groom',
+          groom_name           TEXT DEFAULT '',
+          bride_name           TEXT DEFAULT '',
+          wedding_date         TEXT DEFAULT '',
+          wedding_location     TEXT DEFAULT '',
+          wedding_lat          REAL DEFAULT 0,
+          wedding_lng          REAL DEFAULT 0,
+          planning_side        TEXT DEFAULT 'Both',
+          estimated_budget     REAL DEFAULT 0,
+          estimated_guests     INTEGER DEFAULT 0,
+          story_title          TEXT DEFAULT '',
+          cover_photo_url      TEXT DEFAULT '',
+          onboarding_completed INTEGER DEFAULT 0,
+          created_at           TEXT DEFAULT (datetime('now')),
+          updated_at           TEXT DEFAULT (datetime('now'))
+        )
+      `);
     } catch(e){}
 
     console.log('✅ Turso tables ready');

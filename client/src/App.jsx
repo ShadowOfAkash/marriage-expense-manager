@@ -11,9 +11,11 @@ import Guests    from './components/Guests'
 import GuestRsvpPortal from './components/GuestRsvpPortal'
 import Checklist from './components/Checklist'
 import VendorDiscovery from './components/VendorDiscovery'
+import OnboardingWizard from './components/OnboardingWizard'
+import { api } from './utils/api'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { Menu, Sparkles, Share, X } from 'lucide-react'
+import { Menu, Sparkles, Share, X, Heart } from 'lucide-react'
 
 function IosInstallBanner() {
   const [show, setShow] = useState(false)
@@ -61,7 +63,23 @@ function IosInstallBanner() {
 function MainApp() {
   const { currentUser } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [weddingProfile, setWeddingProfile] = useState(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const location = useLocation()
+
+  useEffect(() => {
+    if (!currentUser) return;
+    api.getWeddingProfile()
+      .then(prof => {
+        setWeddingProfile(prof);
+        if (!prof || !prof.onboarding_completed) {
+          setShowOnboarding(true);
+        }
+      })
+      .catch(err => console.warn('Wedding profile load warning:', err))
+      .finally(() => setProfileLoaded(true));
+  }, [currentUser]);
   
   const pageTitles = {
     dashboard: 'Dashboard',
@@ -78,36 +96,48 @@ function MainApp() {
   if (!currentUser) return <Login />
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 flex-col md:flex-row">
+    <div className="flex min-h-screen bg-[#FAF8F5] flex-col md:flex-row">
       <IosInstallBanner />
 
+      {/* Onboarding Wizard Modal */}
+      {showOnboarding && (
+        <OnboardingWizard
+          initialProfile={weddingProfile}
+          onComplete={(savedProfile) => {
+            setWeddingProfile(savedProfile);
+            setShowOnboarding(false);
+          }}
+          onDismiss={weddingProfile?.onboarding_completed ? () => setShowOnboarding(false) : null}
+        />
+      )}
+
       {/* Mobile Top Navigation Header with iOS Safe Area support */}
-      <header className="md:hidden sticky top-0 z-30 bg-zinc-950 text-white px-4 pt-safe pb-3 flex items-center justify-between border-b border-zinc-900 shadow-sm">
+      <header className="md:hidden sticky top-0 z-30 bg-white text-zinc-900 px-4 pt-safe pb-3 flex items-center justify-between border-b border-rose-100 shadow-xs">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-lg bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="p-2 rounded-xl bg-zinc-100 text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer"
           aria-label="Open Navigation Menu"
         >
           <Menu size={20} />
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#234c6a] flex items-center justify-center text-white">
-            <Sparkles size={14} />
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D97757] to-[#C86D51] flex items-center justify-center text-white shadow-2xs">
+            <Heart size={14} className="fill-white" />
           </div>
-          <span className="font-extrabold text-sm tracking-tight text-white">
-            {currentTitle}
+          <span className="font-extrabold text-sm tracking-tight text-zinc-900">
+            {weddingProfile?.story_title || currentTitle}
           </span>
         </div>
 
-        <div className="w-8 h-8 rounded-full bg-[#1b3c53] text-zinc-200 flex items-center justify-center text-xs font-bold border border-zinc-700">
+        <div className="w-8 h-8 rounded-full bg-[#D97757]/15 text-[#D97757] flex items-center justify-center text-xs font-bold border border-[#D97757]/30">
           {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
         </div>
       </header>
 
       {/* Sidebar with Desktop & Mobile Drawer */}
-      <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} weddingProfile={weddingProfile} />
 
       {/* Main Content View */}
       <main className="flex-1 min-w-0 overflow-y-auto pb-12">

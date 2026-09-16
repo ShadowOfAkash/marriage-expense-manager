@@ -176,6 +176,11 @@ export const api = {
   saveWeddingLocation:  (data)   => fetchWithAuth('/api/vendors/location', { method: 'POST', body: JSON.stringify(data) }),
   getWeddingLocation:   ()       => fetchWithAuth('/api/vendors/location'),
   autocompleteLocations: (input) => fetchWithAuth(`/api/vendors/autocomplete?input=${encodeURIComponent(input)}`),
+
+  // WEDDING PROFILE & ONBOARDING
+  getWeddingProfile:          ()     => fetchWithAuth('/api/wedding/profile'),
+  saveWeddingProfile:         (data) => fetchWithAuth('/api/wedding/profile', { method: 'POST', body: JSON.stringify(data) }),
+  completeWeddingOnboarding:  (data) => fetchWithAuth('/api/wedding/onboard', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const CHECKLIST_CATEGORIES = [

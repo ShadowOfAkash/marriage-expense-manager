@@ -7,7 +7,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function Sidebar({ mobileOpen, setMobileOpen }) {
+export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile }) {
   const navigate = useNavigate();
   const location = useLocation();
   const activeTab = location.pathname.split('/')[1] || 'dashboard';
@@ -66,6 +66,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     }
   };
 
+  const coupleDisplayName = (weddingProfile?.groom_name && weddingProfile?.bride_name)
+    ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}`
+    : (weddingProfile?.story_title || 'Marriage Manager');
+
   const navContent = (isMobileView = false) => (
     <div className="flex flex-col h-full overflow-visible">
       {/* Brand Header */}
@@ -73,21 +77,21 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         isMobileView || isExpanded ? 'justify-between' : 'justify-center'
       }`}>
         {!isMobileView && !isExpanded ? (
-          <div className="w-8 h-8 rounded-lg bg-[#234c6a] flex items-center justify-center text-white shadow-sm shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D97757] to-[#C86D51] flex items-center justify-center text-white shadow-sm shrink-0">
             <Sparkles size={16} />
           </div>
         ) : (
           <>
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-[#234c6a] flex items-center justify-center text-white shadow-sm shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D97757] to-[#C86D51] flex items-center justify-center text-white shadow-sm shrink-0">
                 <Sparkles size={16} />
               </div>
               <div className="min-w-0">
                 <div className="font-extrabold text-sm tracking-tight text-white leading-tight truncate">
-                  Marriage <span className="text-[#7492a8]">Manager</span>
+                  {coupleDisplayName}
                 </div>
-                <div className="text-[10px] text-zinc-400 font-medium tracking-wide uppercase truncate">
-                  Expense & Planning
+                <div className="text-[10px] text-rose-300 font-semibold tracking-wide uppercase truncate">
+                  💍 Wedding Suite
                 </div>
               </div>
             </div>
@@ -122,9 +126,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 type="button"
                 onClick={() => handleNav(item.id)}
                 title={!isExpanded ? item.label : undefined}
-                className={`w-full flex items-center px-3.5 py-2.5 rounded-lg cursor-pointer transition-all duration-150 text-left ${
+                className={`w-full flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-150 text-left ${
                   isActive
-                    ? 'bg-[#234c6a] text-white shadow-sm font-semibold'
+                    ? 'bg-gradient-to-r from-[#D97757] to-[#C86D51] text-white shadow-sm font-semibold'
                     : 'text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-100 font-medium'
                 } ${isMobileView || isExpanded ? 'justify-start' : 'justify-center'}`}
               >
