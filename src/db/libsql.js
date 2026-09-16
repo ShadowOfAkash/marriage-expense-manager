@@ -73,18 +73,30 @@ async function initLibSQL() {
       );
 
       CREATE TABLE IF NOT EXISTS bookings (
-        id           INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id      TEXT    NOT NULL DEFAULT 'legacy_user',
-        vendor       TEXT    NOT NULL,
-        service      TEXT    NOT NULL,
-        category     TEXT    DEFAULT 'Miscellaneous',
-        booking_date TEXT    DEFAULT '',
-        event_date   TEXT    DEFAULT '',
-        amount       REAL    DEFAULT 0,
-        advance      REAL    DEFAULT 0,
-        status       TEXT    DEFAULT 'Pending',
-        notes        TEXT    DEFAULT '',
-        created_at   TEXT    DEFAULT (datetime('now'))
+        id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id               TEXT    NOT NULL DEFAULT 'legacy_user',
+        vendor                TEXT    NOT NULL,
+        service               TEXT    NOT NULL,
+        category              TEXT    DEFAULT 'Miscellaneous',
+        booking_date          TEXT    DEFAULT '',
+        event_date            TEXT    DEFAULT '',
+        amount                REAL    DEFAULT 0,
+        advance               REAL    DEFAULT 0,
+        status                TEXT    DEFAULT 'Pending',
+        notes                 TEXT    DEFAULT '',
+        hiring_stage          TEXT    DEFAULT 'Hired',
+        contact_person        TEXT    DEFAULT '',
+        phone                 TEXT    DEFAULT '',
+        email                 TEXT    DEFAULT '',
+        city                  TEXT    DEFAULT '',
+        rating                REAL    DEFAULT 4.8,
+        deliverables          TEXT    DEFAULT '[]',
+        arrival_time          TEXT    DEFAULT '',
+        location_note         TEXT    DEFAULT '',
+        is_favorite           INTEGER DEFAULT 0,
+        website_or_portfolio  TEXT    DEFAULT '',
+        pros_cons             TEXT    DEFAULT '',
+        created_at            TEXT    DEFAULT (datetime('now'))
       );
 
       CREATE TABLE IF NOT EXISTS guests (
@@ -135,6 +147,19 @@ async function initLibSQL() {
     try { await db.execute("ALTER TABLE payments ADD COLUMN payment_type TEXT DEFAULT 'Normal'"); } catch(e){}
     try { await db.execute("ALTER TABLE payments ADD COLUMN booking_id INTEGER DEFAULT NULL"); } catch(e){}
     try { await db.execute("ALTER TABLE bookings ADD COLUMN category TEXT DEFAULT 'Miscellaneous'"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN hiring_stage TEXT DEFAULT 'Hired'"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN contact_person TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN phone TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN email TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN city TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN rating REAL DEFAULT 4.8"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN deliverables TEXT DEFAULT '[]'"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN arrival_time TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN location_note TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN is_favorite INTEGER DEFAULT 0"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN website_or_portfolio TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("ALTER TABLE bookings ADD COLUMN pros_cons TEXT DEFAULT ''"); } catch(e){}
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_bookings_user_stage ON bookings(user_id, hiring_stage)"); } catch(e){}
     try { await db.execute("ALTER TABLE savings ADD COLUMN user_id TEXT DEFAULT 'legacy_user'"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN dependents TEXT DEFAULT '[]'"); } catch(e){}
     try { await db.execute("ALTER TABLE guests ADD COLUMN invitation_sent_at TEXT DEFAULT NULL"); } catch(e){}

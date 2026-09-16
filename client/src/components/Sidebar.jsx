@@ -37,7 +37,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'checklist', label: 'Checklist', icon: ListChecks },
     { id: 'guests',    label: 'Guests',    icon: Users },
-    { id: 'bookings',  label: 'Bookings',  icon: CalendarCheck },
+    { id: 'bookings',  label: 'Vendors & Bookings', icon: CalendarCheck },
     { id: 'expenses',  label: 'Payments',  icon: Receipt },
     { id: 'savings',   label: 'Savings',   icon: PiggyBank },
   ];
