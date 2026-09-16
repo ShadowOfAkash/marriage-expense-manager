@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "@heroui/styles/css";
 @source "../node_modules/@heroui/react";
@@ -6,94 +6,151 @@
 @source "../node_modules/@heroui/styles";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-  --font-serif: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-  --font-mono: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* HeroUI Global Radius Overrides (remove pill-shape defaults) */
-  --heroui-radius-small: 0.25rem;
-  --heroui-radius-medium: 0.375rem;
-  --heroui-radius-large: 0.5rem;
+  /* HeroUI Global Radius Overrides */
+  --heroui-radius-small: 0.375rem;
+  --heroui-radius-medium: 0.5rem;
+  --heroui-radius-large: 0.75rem;
 
-  /* Brand colors (legacy) */
-  --color-brand-50: #f0f5ff;
-  --color-brand-100: #abd2fa;
-  --color-brand-200: #8ebaff;
-  --color-brand-300: #7692ff;
-  --color-brand-400: #4a6cf8;
-  --color-brand-500: #1b2cc1;
-  --color-brand-600: #1524a8;
-  --color-brand-700: #101a85;
-  --color-brand-800: #0c1566;
-  --color-brand-900: #091540;
+  /* Indian Wedding Festive Color Tokens */
+  --color-sindoor-50: #fff1f2;
+  --color-sindoor-100: #ffe4e6;
+  --color-sindoor-200: #fecdd3;
+  --color-sindoor-300: #fda4af;
+  --color-sindoor-400: #fb7185;
+  --color-sindoor-500: #f43f5e;
+  --color-sindoor-600: #e11d48;
+  --color-sindoor-700: #be123c;
+  --color-sindoor-800: #9f1239;
+  --color-sindoor-900: #881337;
 
-  /* Overriding Zinc with Color Hunt Palette: 1b3c53, 234c6a, 456882, d2c1b6 */
-  --color-zinc-50: #faf7f5;
-  --color-zinc-100: #f2ebe5;
-  --color-zinc-200: #d2c1b6;
-  --color-zinc-300: #b5a498;
-  --color-zinc-400: #7492a8;
-  --color-zinc-500: #456882;
-  --color-zinc-600: #35536b;
-  --color-zinc-700: #234c6a;
-  --color-zinc-800: #1c3e56;
-  --color-zinc-900: #1b3c53;
-  --color-zinc-950: #112838;
+  --color-marigold-50: #fffbeb;
+  --color-marigold-100: #fef3c7;
+  --color-marigold-200: #fde68a;
+  --color-marigold-300: #fcd34d;
+  --color-marigold-400: #fbbf24;
+  --color-marigold-500: #f59e0b;
+  --color-marigold-600: #d97706;
+  --color-marigold-700: #b45309;
+  --color-marigold-800: #92400e;
+  --color-marigold-900: #78350f;
+
+  --color-mehendi-50: #ecfdf5;
+  --color-mehendi-100: #d1fae5;
+  --color-mehendi-500: #10b981;
+  --color-mehendi-600: #059669;
+  --color-mehendi-700: #047857;
+  --color-mehendi-800: #065f46;
+
+  /* Warm Sand & Ivory Neutral Palette (Replaces cold industrial steel blue) */
+  --color-zinc-50: #FAF8F5;
+  --color-zinc-100: #F4EFEA;
+  --color-zinc-200: #E6DED5;
+  --color-zinc-300: #D3C5B7;
+  --color-zinc-400: #9C8978;
+  --color-zinc-500: #746355;
+  --color-zinc-600: #55463A;
+  --color-zinc-700: #3D3128;
+  --color-zinc-800: #2A211B;
+  --color-zinc-900: #1C1511;
+  --color-zinc-950: #0F0B09;
 }
 
-/* ── Universal Typography: Exact Same Font Throughout Whole Portal ───────── */
+/* ── Typography & Headings ────────────────────────────────────────────── */
 :root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
-}
-
-*,
-*::before,
-*::after,
-html,
-body,
-#root,
-button,
-input,
-optgroup,
-select,
-textarea,
-table,
-th,
-td,
-code,
-kbd,
-samp,
-pre,
-svg text,
-svg tspan,
-.recharts-text,
-.recharts-legend-item-text,
-[data-slot],
-[data-slot="input"],
-[data-slot="label"],
-[data-slot="button"],
-[data-slot="card"],
-[data-slot="modal"],
-[data-slot="popover"],
-[data-slot="tooltip"],
-[data-overlay-container],
-dialog {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif !important;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
 }
 
 body {
-  @apply bg-zinc-50 text-zinc-900 antialiased;
+  background-color: #FAF8F5;
+  color: #1C1511;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Modern Subtle Corner Radius System ─────────────────────────────────── */
-/* Overrides HeroUI's 24px pill-shaped defaults with clean, modern 8px corners */
+.font-serif,
+.font-serif *,
+h1.font-serif,
+h2.font-serif,
+h3.font-serif {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+/* ── Micro-Animations & Celebratory Accents ────────────────────────────── */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
+}
+
+@keyframes shimmer-gold {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-warm {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-float {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(217, 119, 6, 0) 0%, rgba(217, 119, 6, 0.12) 50%, rgba(217, 119, 6, 0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer-gold 2.5s infinite;
+}
+
+.animate-pulse-warm {
+  animation: pulse-warm 3s ease-in-out infinite;
+}
+
+/* Gold Gradient Text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-sindoor-gradient {
+  background: linear-gradient(135deg, #9f1239 0%, #be123c 50%, #e11d48 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Festive Card Polish */
+.festive-card {
+  background: #ffffff;
+  border: 1px solid rgba(230, 222, 213, 0.9);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px -2px rgba(61, 49, 40, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.festive-card:hover {
+  border-color: rgba(217, 119, 6, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.08), 0 4px 10px -2px rgba(61, 49, 40, 0.03);
+  transform: translateY(-2px);
+}
+
+/* Subtle Indian Wedding Gold Border */
+.border-gold-subtle {
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+/* Modern Subtle Corner Radius System */
 .button:not(.button--icon-only):not(.rounded-full),
 button.button:not(.button--icon-only):not(.rounded-full),
 .input,
 input.input,
 select,
 [data-slot="input-wrapper"]:not(.rounded-full) {
-  border-radius: 0.5rem !important;
+  border-radius: 0.625rem !important;
 }
 
 .button--icon-only,
@@ -101,7 +158,7 @@ select,
   border-radius: 9999px !important;
 }
 
-/* Subtle custom scrollbar */
+/* Subtle Festive Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -110,14 +167,14 @@ select,
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d2c1b6;
+  background: #d4c5b7;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7492a8;
+  background: #d97706;
 }
 
-/* ── iOS Safe Area & Standalone Mobile Experience ────────────────────────── */
+/* iOS Safe Area */
 :root {
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);

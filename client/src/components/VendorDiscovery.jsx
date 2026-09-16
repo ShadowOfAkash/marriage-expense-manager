@@ -266,19 +266,24 @@ function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation
   return (
     <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
       {/* Location Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-extrabold text-zinc-900 mb-1">
-            Vendor Categories
-          </h1>
-          <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-            <MapPin size={14} className="text-[#234c6a]" />
-            <span>Showing vendors near <span className="font-semibold text-zinc-700">{location.location}</span></span>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl md:text-3xl font-black text-zinc-900 font-serif tracking-tight">
+              Shaadi Vendor Bazaar
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-[10px] font-bold">
+              शुभ विवाह
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-zinc-500 mt-1">
+            <MapPin size={14} className="text-[#9b1c1c] shrink-0" />
+            <span>Handcrafted wedding services & verified artisans near <span className="font-bold text-zinc-800 underline decoration-amber-300">{location.location}</span></span>
             <button
               onClick={onChangeLocation}
-              className="ml-1 text-[#234c6a] hover:underline font-semibold cursor-pointer flex items-center gap-0.5"
+              className="ml-2 text-[#9b1c1c] hover:underline font-bold cursor-pointer inline-flex items-center gap-1 text-xs bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200/80 transition-all hover:bg-amber-100"
             >
-              <Edit3 size={12} /> Change
+              <Edit3 size={11} /> Change City
             </button>
           </div>
         </div>
@@ -290,14 +295,14 @@ function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation
           <button
             key={cat.id}
             onClick={() => onSelectCategory(cat)}
-            className={`group relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br ${cat.color} border ${cat.border} hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer`}
+            className={`group relative flex flex-col items-center text-center p-6 rounded-3xl bg-gradient-to-br ${cat.color} border ${cat.border} hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer shadow-2xs`}
           >
             <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
               {cat.icon}
             </div>
-            <h3 className="font-bold text-sm text-zinc-800 mb-1">{cat.name}</h3>
+            <h3 className="font-bold text-sm text-zinc-800 mb-1 font-serif">{cat.name}</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">{cat.description}</p>
-            <ChevronRight size={16} className="absolute top-3 right-3 text-zinc-300 group-hover:text-zinc-600 transition-colors" />
+            <ChevronRight size={16} className="absolute top-3 right-3 text-amber-300 group-hover:text-amber-700 transition-colors" />
           </button>
         ))}
       </div>
@@ -305,13 +310,27 @@ function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation
   );
 }
 
-// ── Vendor Card with Distance Indicator ──────────────────────────────────────
+// ── Vendor Card with WhatsApp Quick Inquiry & Distance Indicator ──────────────
 function VendorCard({ vendor, onSelect, onQuote }) {
   const [imgError, setImgError] = useState(false);
 
+  const handleWhatsAppInquiry = (e) => {
+    e.stopPropagation();
+    const phoneDigits = (vendor.phone || '').replace(/\D/g, '');
+    const targetPhone = phoneDigits ? (phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits) : '';
+    const msg = encodeURIComponent(
+      `Namaste! We are planning our wedding and saw "${vendor.name}" on Shaadi Manager.\nWe would love to check your wedding packages, availability, and pricing. Could you please share your brochure?`
+    );
+    if (targetPhone) {
+      window.open(`https://wa.me/${targetPhone}?text=${msg}`, '_blank');
+    } else {
+      onQuote(vendor);
+    }
+  };
+
   return (
     <div
-      className="bg-white rounded-2xl border border-zinc-200 overflow-hidden hover:shadow-lg hover:border-zinc-300 transition-all duration-200 group cursor-pointer flex flex-col"
+      className="bg-white rounded-3xl border border-amber-200/70 overflow-hidden hover:shadow-lg hover:border-amber-300 transition-all duration-200 group cursor-pointer flex flex-col shadow-xs"
       onClick={() => onSelect(vendor)}
     >
       {/* Photo */}
@@ -325,14 +344,14 @@ function VendorCard({ vendor, onSelect, onQuote }) {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
-            <Store size={40} className="text-zinc-300" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100/50">
+            <Store size={40} className="text-amber-300" />
           </div>
         )}
         {/* Open/Closed badge */}
         {vendor.openNow !== null && (
-          <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-            vendor.openNow ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-600'
+          <div className={`absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-xs ${
+            vendor.openNow ? 'bg-emerald-100/90 text-emerald-800 border border-emerald-200' : 'bg-zinc-200/90 text-zinc-700'
           }`}>
             {vendor.openNow ? 'Open Now' : 'Closed'}
           </div>
@@ -340,8 +359,8 @@ function VendorCard({ vendor, onSelect, onQuote }) {
 
         {/* Distance Badge over Image */}
         {vendor.distanceText && (
-          <div className="absolute bottom-2 left-2 bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
-            <Navigation size={11} className="text-sky-400" />
+          <div className="absolute bottom-2 left-2 bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-md">
+            <Navigation size={11} className="text-amber-300" />
             <span>{vendor.distanceText}</span>
           </div>
         )}
@@ -349,27 +368,27 @@ function VendorCard({ vendor, onSelect, onQuote }) {
 
       {/* Info */}
       <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-bold text-sm text-zinc-900 mb-1 line-clamp-1 group-hover:text-[#234c6a] transition-colors">
+        <h3 className="font-bold text-sm text-zinc-900 mb-1 line-clamp-1 group-hover:text-[#9b1c1c] transition-colors font-serif">
           {vendor.name}
         </h3>
         <StarRating rating={vendor.rating} count={vendor.ratingCount} />
 
         {/* Distance & Address */}
-        <p className="text-xs text-zinc-500 mt-2.5 line-clamp-2 flex-1">
-          <MapPin size={11} className="inline mr-1 text-zinc-400 shrink-0" />
+        <p className="text-xs text-zinc-500 mt-2 line-clamp-2 flex-1">
+          <MapPin size={11} className="inline mr-1 text-amber-600 shrink-0" />
           {vendor.address}
         </p>
 
         {/* Contact Row */}
-        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-zinc-100">
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-amber-100/60">
           {vendor.phone && (
             <a
               href={`tel:${vendor.phone}`}
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-600 hover:text-[#234c6a] transition-colors"
+              className="flex items-center gap-1 text-xs text-zinc-600 hover:text-[#9b1c1c] transition-colors"
               title="Call"
             >
-              <Phone size={12} />
+              <Phone size={12} className="text-amber-700" />
               <span className="truncate max-w-[110px]">{vendor.phone}</span>
             </a>
           )}
@@ -379,7 +398,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#234c6a] transition-colors ml-auto"
+              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors ml-auto"
               title="Visit Website"
             >
               <Globe size={12} />
@@ -391,7 +410,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#234c6a] transition-colors"
+              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors"
               title="Open in Google Maps"
             >
               <Navigation size={12} />
@@ -399,22 +418,30 @@ function VendorCard({ vendor, onSelect, onQuote }) {
           )}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: WhatsApp + Quote + Map */}
         <div className="flex gap-2 mt-3">
           <button
-            onClick={e => { e.stopPropagation(); onQuote(vendor); }}
-            className="flex-1 py-2 px-3 rounded-lg bg-[#234c6a] text-white text-xs font-semibold hover:bg-[#1b3c53] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            onClick={handleWhatsAppInquiry}
+            className="flex-1 py-2 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+            title="Inquire on WhatsApp"
           >
-            <Send size={12} /> Request Quote
+            <span>💬 WhatsApp</span>
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); onQuote(vendor); }}
+            className="flex-1 py-2 px-2 rounded-xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs border border-rose-900/40"
+          >
+            <Send size={11} className="text-amber-200" /> <span>Quote</span>
           </button>
           <a
             href={vendor.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className="py-2 px-3 rounded-lg border border-zinc-200 text-zinc-600 text-xs font-semibold hover:bg-zinc-50 transition-colors flex items-center gap-1.5"
+            className="py-2 px-2.5 rounded-xl border border-amber-200/80 text-zinc-600 hover:text-zinc-900 text-xs font-semibold hover:bg-amber-50/50 transition-colors flex items-center justify-center"
+            title="Open in Maps"
           >
-            <MapPinned size={12} /> Map
+            <MapPinned size={13} className="text-amber-700" />
           </a>
         </div>
       </div>
@@ -476,33 +503,33 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-0.5">
-            <button onClick={onBack} className="hover:text-[#234c6a] cursor-pointer">Vendors</button>
+            <button onClick={onBack} className="hover:text-[#9b1c1c] font-medium cursor-pointer">Vendors</button>
             <ChevronRight size={12} />
             <span className="text-zinc-600 font-medium truncate">{category.name}</span>
           </div>
-          <h1 className="text-lg md:text-xl font-extrabold text-zinc-900 truncate">
+          <h1 className="text-lg md:text-2xl font-black text-zinc-900 truncate font-serif">
             {category.icon} {category.name}
           </h1>
         </div>
       </div>
 
       {/* Filter & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-3.5 bg-white rounded-2xl border border-zinc-200 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 bg-white rounded-3xl border border-amber-200/70 shadow-xs">
         {/* Radius Filter */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold mr-1">
-            <Filter size={14} className="text-[#234c6a]" />
-            <span>Radius:</span>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-bold mr-1">
+            <Filter size={14} className="text-[#9b1c1c]" />
+            <span>Search Radius:</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {RADIUS_OPTIONS.map(opt => (
               <button
                 key={opt.meters}
                 onClick={() => setRadius(opt.meters)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   radius === opt.meters
-                    ? 'bg-[#234c6a] text-white shadow-xs'
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                    ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
+                    : 'bg-zinc-100 text-zinc-700 hover:bg-amber-50 hover:text-[#9b1c1c]'
                 }`}
               >
                 {opt.label}
@@ -513,19 +540,19 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
 
         {/* Sort Controls & Proximity Location */}
         <div className="flex items-center gap-3 ml-auto">
-          <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/60 p-1 rounded-2xl">
             <button
               onClick={() => setSortBy('distance')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
-                sortBy === 'distance' ? 'bg-white text-[#234c6a] shadow-xs' : 'text-zinc-500 hover:text-zinc-800'
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                sortBy === 'distance' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               📍 Nearest
             </button>
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer ${
-                sortBy === 'rating' ? 'bg-white text-[#234c6a] shadow-xs' : 'text-zinc-500 hover:text-zinc-800'
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                sortBy === 'rating' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               ⭐ Top Rated
@@ -533,7 +560,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           </div>
 
           <div className="hidden lg:flex items-center gap-1 text-xs text-zinc-400">
-            <MapPin size={12} className="text-[#234c6a]" />
+            <MapPin size={12} className="text-[#9b1c1c]" />
             <span className="truncate max-w-[180px]" title={location.location}>{location.location}</span>
           </div>
         </div>
@@ -788,20 +815,37 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 mt-5">
+          <div className="flex flex-wrap sm:flex-nowrap gap-2 mt-5">
+            <button
+              onClick={() => {
+                const phoneDigits = (details.phone || '').replace(/\D/g, '');
+                const targetPhone = phoneDigits ? (phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits) : '';
+                const msg = encodeURIComponent(
+                  `Namaste! We are planning our wedding and saw "${details.name}" on Shaadi Manager.\nWe would love to check your availability, wedding packages, and pricing. Could you please share your brochure/portfolio?`
+                );
+                if (targetPhone) {
+                  window.open(`https://wa.me/${targetPhone}?text=${msg}`, '_blank');
+                } else {
+                  onQuote(details);
+                }
+              }}
+              className="py-2.5 px-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+            >
+              <span>💬 WhatsApp</span>
+            </button>
             <button
               onClick={() => onQuote(details)}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-[#234c6a] text-white font-semibold text-sm hover:bg-[#1b3c53] transition-colors cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs border border-rose-900/40"
             >
-              <Send size={14} /> Request Quotation
+              <Send size={14} className="text-amber-200" /> <span>Request Quotation</span>
             </button>
             <a
               href={details.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-4 rounded-xl border border-zinc-200 text-zinc-700 font-semibold text-sm hover:bg-zinc-50 transition-colors flex items-center gap-2"
+              className="py-2.5 px-3.5 rounded-2xl border border-amber-200/80 text-zinc-700 font-semibold text-xs sm:text-sm hover:bg-amber-50/50 transition-colors flex items-center justify-center gap-1.5"
             >
-              <Navigation size={14} /> Directions
+              <Navigation size={14} className="text-amber-700" /> Directions
             </a>
           </div>
         </div>
@@ -859,7 +903,7 @@ function QuoteRequestModal({ vendor, onClose }) {
           </p>
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-[#234c6a] text-white font-semibold text-sm cursor-pointer"
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-sm cursor-pointer shadow-md"
           >
             Done
           </button>
@@ -1004,9 +1048,9 @@ function QuoteRequestModal({ vendor, onClose }) {
             <button
               type="submit"
               disabled={sending}
-              className="w-full py-3 rounded-xl bg-[#234c6a] text-white font-semibold text-sm hover:bg-[#1b3c53] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-md border border-rose-900/40"
             >
-              {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+              {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} className="text-amber-200" />}
               {sending ? 'Sending...' : 'Send Quotation Request'}
             </button>
           </form>

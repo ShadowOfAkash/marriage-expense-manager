@@ -6,7 +6,8 @@ import {
   RefreshCw, X, Mail, UserCheck, Minus, ArrowRight,
   User, Heart, Send, ExternalLink, FileText, Sparkles,
   AlertTriangle, Settings2, Building2, Home, Bed,
-  Copy, Check, Smartphone, MessageCircle, QrCode, Globe
+  Copy, Check, Smartphone, MessageCircle, QrCode, Globe,
+  Eye, Pencil
 } from 'lucide-react';
 import { api, formatDate, WEDDING_EVENTS, RSVP_STATUSES, RELATIONSHIP_CATEGORIES, STAY_PREFERENCES } from '../utils/api';
 import { useToast } from '../contexts/ToastContext';
@@ -24,6 +25,10 @@ export default function Guests() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // View mode: 'cards' (Festive cards view) or 'table' (Detailed ledger)
+  const [viewMode, setViewMode] = useState('cards');
+  const [weddingProfile, setWeddingProfile] = useState(null);
+
   // Active Tab: 'invitations' (All Guests / Invitations) or 'confirmed' (Confirmed & Attending)
   const [activeTab, setActiveTab] = useState('invitations');
 
@@ -37,7 +42,7 @@ export default function Guests() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
 
   // Selection
   const [selectedIds, setSelectedIds] = useState([]);
@@ -78,15 +83,19 @@ export default function Guests() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [guestList, summaryData, emailConf] = await Promise.all([
+      const [guestList, summaryData, emailConf, profData] = await Promise.all([
         api.getGuests(),
         api.getGuestSummary(),
-        api.getEmailSettings().catch(() => null)
+        api.getEmailSettings().catch(() => null),
+        api.getWeddingProfile().catch(() => null)
       ]);
       setGuests(guestList || []);
       setSummary(summaryData || null);
       if (emailConf) {
         setEmailSettings(emailConf);
+      }
+      if (profData) {
+        setWeddingProfile(profData);
       }
     } catch (err) {
       toast({ title: 'Failed to load guests', description: err.message, status: 'error' });
@@ -414,6 +423,23 @@ export default function Guests() {
     setTimeout(() => setCopiedTelegram(false), 2000);
   };
 
+  const handleQuickWhatsApp = (g) => {
+    const rsvpUrl = `${window.location.origin}/rsvp/${g.rsvp_token || ''}`;
+    const coupleText = (weddingProfile?.groom_name && weddingProfile?.bride_name) 
+      ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}` 
+      : (weddingProfile?.story_title || 'Shubh Vivah');
+    const msg = `Namaste ${g.name} ji! 🙏✨\n\nWith great joy and warm blessings, we cordially invite you and your family to celebrate the auspicious wedding of ${coupleText}! 💍🎉\n\nPlease find your personalized wedding invitation details and RSVP here:\n🔗 ${rsvpUrl}\n\nWe eagerly await celebrating with you!\nWarm regards,\n${coupleText} & Family`;
+
+    const cleanDigits = (g.phone || '').replace(/\D/g, '');
+    const phoneWithCode = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+    const targetUrl = phoneWithCode
+      ? `https://api.whatsapp.com/send?phone=${phoneWithCode}&text=${encodeURIComponent(msg)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    toast({ title: 'Opening WhatsApp...', description: `Pre-filled wedding invitation for ${g.name}.`, status: 'success' });
+  };
+
   // Submit Send Single Invitation
   const handleSendInviteSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -731,13 +757,18 @@ export default function Guests() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen flex flex-col">
       
-      {/* 1. Page Header (Clean, uncluttered, matching Bookings and Payments) */}
+      {/* 1. Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shrink-0">
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 tracking-tight flex items-center gap-2">
-            <Users size={24} className="text-zinc-900" /> Guests
+          <h1 className="font-serif text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
+            <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-xs">
+              <Users size={20} />
+            </span>
+            <span>Mehmaan & Digital Invites</span>
           </h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage wedding invitations, families, and confirmed guest attendance</p>
+          <p className="text-zinc-500 text-xs md:text-sm mt-1">
+            Manage Ladkewale & Ladkiwale invitations, WhatsApp digital invites, bhojan & stay
+          </p>
         </div>
 
         {/* Action Controls Toolbar - Clean single-row layout without awkward wrapping */}
@@ -798,84 +829,72 @@ export default function Guests() {
           <Button
             radius="sm"
             onClick={() => setIsAddOpen(true)}
-            className="bg-zinc-900 text-white hover:bg-zinc-950 shadow-sm font-bold text-xs px-3.5 py-2 inline-flex items-center gap-1.5"
+            className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
           >
-            <Plus size={16} />
-            <span>Add Guest</span>
+            <Plus size={16} /> Add Mehmaan
           </Button>
         </div>
       </div>
 
-      {/* 2. Core Statistics Cards (Aligned with Bookings, Savings, and Dashboard design language) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 shrink-0">
-        
-        {/* Card 1: Total Directory */}
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
+      {/* 2. Top Summary Metrics Cards (Matching Bookings & Payments 3-card stats) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6 shrink-0">
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#1b3c53] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-11 h-11 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
               <Users size={20} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Guests</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
-                {summary?.totalGuests || guests.length}
-              </div>
-              <div className="text-xs text-zinc-500 font-medium">
-                {summary?.invited || 0} invites sent ({summary?.noResponse || 0} pending)
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Card 2: Confirmed Guests */}
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#234c6a] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <UserCheck size={20} />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Confirmed Guests</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
-                {summary?.confirmed || 0}
-              </div>
-              <div className="text-xs text-zinc-500 font-medium">
-                {summary?.maybe || 0} maybe · {summary?.declined || 0} declined
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Total Mehmaan</div>
+              <div className="text-2xl font-black text-zinc-900 tracking-tight">
+                {summary?.total_guests || guests.length}
+                <span className="text-xs font-semibold text-zinc-500 ml-1.5">
+                  ({summary?.total_expected_attendees || guests.reduce((s, g) => s + (g.expected_attendees || 1), 0)} souls)
+                </span>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Card 3: Expected Headcount */}
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#325a77] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <CalendarCheck size={20} />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Expected Headcount</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
-                {summary?.expectedAttendance || 0}
-              </div>
-              <div className="text-xs text-zinc-500 font-medium">
-                Expected attendees
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Card 4: Actually Attended */}
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#456882] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-11 h-11 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
               <CheckCircle2 size={20} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Actually Attended</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
-                {summary?.actuallyAttended || 0}
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Confirmed RSVPs</div>
+              <div className="text-2xl font-black text-emerald-700 tracking-tight">
+                {confirmedGuests.length}
+                <span className="text-xs font-semibold text-emerald-600 ml-1.5">
+                  ({summary?.total_guests > 0 ? Math.round((confirmedGuests.length / summary.total_guests) * 100) : 0}%)
+                </span>
               </div>
-              <div className="text-xs text-zinc-500 font-medium">
-                Attended wedding
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <Mail size={20} />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Pending Invitations</div>
+              <div className="text-2xl font-black text-amber-700 tracking-tight">
+                {pendingGuests.length}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 bg-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <Building2 size={20} />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Hotel Rooms Needed</div>
+              <div className="text-2xl font-black text-zinc-900 tracking-tight">
+                {summary?.by_stay?.['Hotel'] || 0}
               </div>
             </div>
           </div>
@@ -883,20 +902,20 @@ export default function Guests() {
       </div>
 
       {/* 3. Sleek Two-Tab Switcher */}
-      <div className="flex items-center gap-2 mb-4 border-b border-zinc-200/80 shrink-0">
+      <div className="flex items-center gap-2 mb-4 border-b border-amber-200/70 shrink-0">
         <button
           type="button"
           onClick={() => handleTabChange('invitations')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'invitations'
-              ? 'border-zinc-900 text-zinc-900'
+              ? 'border-rose-600 text-rose-800'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
           <Mail size={16} />
-          <span>All Guests & Invitations</span>
+          <span>All Mehmaan & Invitations</span>
           <span className={`px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
-            activeTab === 'invitations' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
+            activeTab === 'invitations' ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {guests.length}
           </span>
@@ -907,7 +926,7 @@ export default function Guests() {
           onClick={() => handleTabChange('confirmed')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'confirmed'
-              ? 'border-zinc-900 text-zinc-900'
+              ? 'border-emerald-600 text-emerald-800'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
@@ -923,9 +942,9 @@ export default function Guests() {
 
       {/* Tab 2: Attendance Tracking Quick Bar */}
       {activeTab === 'confirmed' && (
-        <div className="mb-4 p-3 rounded-xl bg-[#1b3c53]/5 border border-[#1b3c53]/15 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
-          <div className="flex items-center gap-2 text-[#1b3c53] font-medium">
-            <CheckCircle2 size={16} className="text-[#1b3c53] shrink-0" />
+        <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-300/40 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+          <div className="flex items-center gap-2 text-amber-900 font-medium">
+            <CheckCircle2 size={16} className="text-emerald-700 shrink-0" />
             <span>
               <strong>Attendance Tracking:</strong> Mark whether confirmed guests attended the wedding and record actual attendees.
             </span>
@@ -953,11 +972,11 @@ export default function Guests() {
         </div>
       )}
 
-      {/* 4. Search and Filters Toolbar (Matching Bookings & Payments) */}
-      <div className="mb-4 bg-white border border-zinc-200/80 rounded-xl p-2.5 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shrink-0">
+      {/* 4. Search and Filters Toolbar */}
+      <div className="mb-4 bg-white border border-amber-200/70 rounded-2xl p-3 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shrink-0">
         
         {/* Search Input Box */}
-        <div className="flex-1 flex items-center gap-2.5 bg-zinc-50 border border-zinc-200/60 rounded-lg px-3 py-1.5 focus-within:border-zinc-400 focus-within:bg-white transition-all">
+        <div className="flex-1 flex items-center gap-2.5 bg-zinc-50 border border-zinc-200/60 rounded-xl px-3 py-1.5 focus-within:border-amber-400 focus-within:bg-white transition-all">
           <Search size={16} className="text-zinc-400 shrink-0" />
           <input
             type="text"
@@ -991,12 +1010,38 @@ export default function Guests() {
             <select
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value); setCurrentPage(1); }}
-              className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+              className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-semibold text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
             >
               <option value="All">All Relations</option>
               {RELATIONSHIP_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          </div>
+
+          {/* View Mode Switcher: Cards vs Table */}
+          <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200 shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'cards'
+                  ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                  : 'text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              <span>🎴 Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'table'
+                  ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                  : 'text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              <span>📄 Table</span>
+            </button>
           </div>
 
           {/* RSVP Filter (Tab 1) */}
@@ -1197,9 +1242,160 @@ export default function Guests() {
         </div>
       )}
 
-      {/* 6. Primary Table Container */}
-      <div className="shadow-sm border border-zinc-200/80 flex-1 flex flex-col overflow-hidden rounded-xl bg-white">
-        <div className="overflow-x-auto flex-1 w-full relative">
+      {/* 6. Primary Content Container */}
+      <div className="shadow-xs border border-amber-200/70 flex-1 flex flex-col overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xs">
+        {viewMode === 'cards' ? (
+          <div className="p-4 md:p-6 overflow-y-auto flex-1">
+            {paginatedGuests.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-14 h-14 rounded-2xl bg-amber-100/70 text-amber-700 flex items-center justify-center mx-auto mb-3">
+                  <Users size={24} />
+                </div>
+                <h3 className="font-serif font-bold text-lg text-zinc-800">No Mehmaan Found</h3>
+                <p className="text-zinc-500 text-xs mt-1">Try adjusting your search query or ceremony filter.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedGuests.map((g) => {
+                  const isSelected = selectedIds.includes(g.id);
+                  const isAttended = g.actual_attendance === 'Attended' || g.check_in_status;
+                  const isGroomSide = g.relationship_category === 'Groom Family' || g.relationship_category === 'Groom Friend';
+                  const isBrideSide = g.relationship_category === 'Bride Family' || g.relationship_category === 'Bride Friend';
+                  const sideText = isGroomSide ? 'Ladkewale 🎩' : isBrideSide ? 'Ladkiwale 👰' : (weddingProfile?.planning_side === 'Groom' ? 'Ladkewale 🎩' : weddingProfile?.planning_side === 'Bride' ? 'Ladkiwale 👰' : 'Mehmaan 🌸');
+                  const rsvp = (g.rsvp_status === 'Not Responded' || !g.rsvp_status) ? 'Pending Invitation' : g.rsvp_status;
+                  const rsvpColor = rsvp === 'Confirmed' || rsvp === 'Attending'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : rsvp === 'Declined'
+                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                    : 'bg-amber-100 text-amber-800 border-amber-300';
+                  const foodIcon = g.food_preference === 'Jain' ? '🥕 Jain' : g.food_preference === 'Non-Veg' ? '🍗 Non-Veg' : '🌿 Pure Veg';
+                  const stayText = g.stay_preference === 'Hotel' ? '🏨 Hotel Room' : g.stay_preference === 'Home' ? '🏡 Guest House' : '🚗 Local';
+
+                  return (
+                    <div 
+                      key={g.id} 
+                      className={`festive-card p-5 relative overflow-hidden transition-all duration-200 flex flex-col justify-between ${
+                        isSelected ? 'border-amber-400 ring-2 ring-amber-300/50 bg-amber-50/20' : 'bg-white border-amber-200/70'
+                      }`}
+                    >
+                      <div>
+                        {/* Top: Selection, Side, RSVP */}
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSelectRow(g.id)}
+                              className="rounded border-zinc-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                            />
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                              {sideText}
+                            </span>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${rsvpColor}`}>
+                            {rsvp}
+                          </span>
+                        </div>
+
+                        {/* Guest Header with Avatar */}
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs ring-1 ring-amber-200">
+                            {g.name ? g.name.charAt(0).toUpperCase() : 'M'}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-serif font-bold text-base text-zinc-900 tracking-tight leading-snug truncate">
+                              {g.name}
+                            </h3>
+                            <p className="text-xs text-zinc-500 font-medium truncate">
+                              {g.relationship_detail || g.relationship_category || 'Family Guest'}
+                              {g.household_name && ` • ${g.household_name}`}
+                            </p>
+                            {g.phone && (
+                              <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                                📞 {g.phone}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Attributes Pills */}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80 inline-flex items-center gap-1">
+                            👥 {g.expected_attendees || 1} Mehmaan
+                          </span>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80">
+                            {foodIcon}
+                          </span>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80">
+                            {stayText}
+                          </span>
+                        </div>
+
+                        {/* Ceremonies Invited */}
+                        {Array.isArray(g.events) && g.events.length > 0 && (
+                          <div className="mb-3">
+                            <div className="flex flex-wrap gap-1">
+                              {g.events.map(ev => (
+                                <span key={ev} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
+                                  🪔 {ev}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Bottom Actions */}
+                      <div className="pt-3 border-t border-zinc-100 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickWhatsApp(g)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <MessageCircle size={14} />
+                          <span>WhatsApp Invite</span>
+                        </button>
+
+                        {activeTab === 'confirmed' && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCheckIn(g)}
+                            className={`py-2 px-3 rounded-xl font-bold text-xs border transition-colors cursor-pointer ${
+                              isAttended 
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'
+                            }`}
+                            title={isAttended ? 'Mark Pending' : 'Mark Attended'}
+                          >
+                            {isAttended ? '✓ Attended' : 'Check-in'}
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setViewGuest(g)}
+                          className="p-2 rounded-xl bg-zinc-100 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="View Full Profile"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditGuest(g)}
+                          className="p-2 rounded-xl bg-zinc-100 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="Edit Guest"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto flex-1 w-full relative">
           
           {/* ======================= TAB 1: ALL GUESTS / INVITATIONS ======================= */}
           {activeTab === 'invitations' && (
@@ -1664,6 +1860,7 @@ export default function Guests() {
           )}
 
         </div>
+        )}
 
         {/* Table Pagination */}
         <TablePagination

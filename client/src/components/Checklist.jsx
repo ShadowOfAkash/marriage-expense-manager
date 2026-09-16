@@ -33,6 +33,7 @@ export default function Checklist() {
   // Filters & Search
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'completed' | 'overdue'
+  const [ceremonyFilter, setCeremonyFilter] = useState('all'); // 'all' | 'roka' | 'haldi' | 'mehendi' | 'sangeet' | 'vivah' | 'reception'
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
 
@@ -249,12 +250,27 @@ export default function Checklist() {
       // Category
       if (categoryFilter !== 'all' && t.category !== categoryFilter) return false;
 
+      // Ceremony Ritual Filter
+      if (ceremonyFilter !== 'all') {
+        const title = (t.title || '').toLowerCase();
+        const notes = (t.notes || '').toLowerCase();
+        const cat = (t.category || '').toLowerCase();
+        const text = `${title} ${notes} ${cat}`;
+        
+        if (ceremonyFilter === 'roka' && !text.includes('roka') && !text.includes('engagement') && !text.includes('sagai') && !text.includes('ring')) return false;
+        if (ceremonyFilter === 'haldi' && !text.includes('haldi') && !text.includes('chuda') && !text.includes('turmeric') && !text.includes('ubtan')) return false;
+        if (ceremonyFilter === 'mehendi' && !text.includes('mehendi') && !text.includes('henna') && !text.includes('mehndi')) return false;
+        if (ceremonyFilter === 'sangeet' && !text.includes('sangeet') && !text.includes('dj') && !text.includes('music') && !text.includes('dance') && !text.includes('choreograph')) return false;
+        if (ceremonyFilter === 'vivah' && !text.includes('vivah') && !text.includes('phera') && !text.includes('mandap') && !text.includes('baraat') && !text.includes('pandit') && !text.includes('wedding')) return false;
+        if (ceremonyFilter === 'reception' && !text.includes('reception') && !text.includes('vidai') && !text.includes('doli') && !text.includes('post-wedding')) return false;
+      }
+
       // Priority
       if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false;
 
       return true;
     });
-  }, [tasks, search, statusFilter, categoryFilter, priorityFilter, todayStr]);
+  }, [tasks, search, statusFilter, categoryFilter, ceremonyFilter, priorityFilter, todayStr]);
 
   // Group filtered tasks by Timeline Stage
   const tasksByStage = useMemo(() => {
@@ -293,23 +309,37 @@ export default function Checklist() {
 
   const allVisibleGroupKeys = viewMode === 'timeline' ? Object.keys(tasksByStage) : Object.keys(tasksByCategory);
 
+  const CEREMONY_RIBBON = [
+    { id: 'all', label: 'All Rituals', icon: '✨' },
+    { id: 'roka', label: 'Roka & Sagai', icon: '🌿' },
+    { id: 'haldi', label: 'Haldi Rasam', icon: '💛' },
+    { id: 'mehendi', label: 'Mehendi Magic', icon: '✨' },
+    { id: 'sangeet', label: 'Sangeet Night', icon: '🪕' },
+    { id: 'vivah', label: 'Baraat & Pheras', icon: '🔥' },
+    { id: 'reception', label: 'Reception & Vidai', icon: '🥂' }
+  ];
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       
       {/* 1. Header & Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1b3c53] to-[#234c6a] flex items-center justify-center text-[#f3e5ab] shadow-sm">
-              <CheckSquare size={20} />
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-[#b91c1c] to-[#d97706] flex items-center justify-center text-amber-100 shadow-md shadow-amber-900/10 shrink-0">
+              <CheckSquare size={22} className="text-amber-200" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-                Wedding Planning Checklist
-                <Sparkles size={18} className="text-[#c59b27]" />
-              </h1>
-              <p className="text-xs text-zinc-500">
-                10-stage curated Indian wedding roadmap • Stay organized from engagement to reception
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight font-serif flex items-center gap-2">
+                  Shaadi Roadmap & Milestones
+                </h1>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                  <Sparkles size={10} className="text-amber-600" /> शुभ विवाह
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                Curated Indian wedding journey • Track rituals, bookings & timelines from Sagai to Vidai
               </p>
             </div>
           </div>
@@ -321,10 +351,10 @@ export default function Checklist() {
             size="sm"
             variant="bordered"
             onClick={() => window.print()}
-            className="text-xs font-semibold bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 shadow-2xs"
+            className="text-xs font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs"
           >
             <Printer size={13} />
-            <span>Print Checklist</span>
+            <span>Print Roadmap</span>
           </Button>
 
           <Button
@@ -332,19 +362,19 @@ export default function Checklist() {
             size="sm"
             variant="bordered"
             onClick={() => setShowSeedConfirm(true)}
-            className="text-xs font-semibold bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 shadow-2xs"
+            className="text-xs font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs"
           >
             <RefreshCw size={13} />
-            <span>Reset Roadmap</span>
+            <span>Reset Defaults</span>
           </Button>
 
           <Button
             radius="sm"
             size="sm"
             onClick={() => openAddModal()}
-            className="text-xs font-bold bg-[#1b3c53] hover:bg-[#132e40] text-white shadow-sm inline-flex items-center gap-1.5"
+            className="text-xs font-bold bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white shadow-sm inline-flex items-center gap-1.5 cursor-pointer border border-rose-900/40"
           >
-            <Plus size={14} className="text-[#f3e5ab]" />
+            <Plus size={14} className="text-amber-200" />
             <span>Add Custom Task</span>
           </Button>
         </div>
@@ -353,121 +383,144 @@ export default function Checklist() {
       {/* 2. Progress & Motivation Hero Card */}
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
-          {/* Main Progress Gauge */}
-          <div className="md:col-span-2 p-4 bg-gradient-to-br from-[#1b3c53] to-[#0f2331] text-white rounded-2xl shadow-md flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#f3e5ab]">
-                Planning Progress
+          {/* Main Progress Gauge - Royal Sindoor & Gold Theme */}
+          <div className="md:col-span-2 p-5 bg-gradient-to-br from-[#7c1717] via-[#9b1c1c] to-[#450a0a] text-white rounded-3xl shadow-lg shadow-rose-950/10 flex flex-col justify-between border border-amber-500/30 relative overflow-hidden">
+            <div className="absolute -top-12 -right-12 w-36 h-36 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-200 flex items-center gap-1.5">
+                <Sparkles size={12} className="text-amber-300 animate-pulse" />
+                Royal Wedding Roadmap Progress
               </span>
-              <span className="text-xs font-mono font-bold text-zinc-300">
-                {summary.completed} of {summary.total} Completed
+              <span className="text-xs font-mono font-bold text-amber-100/80 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                {summary.completed} / {summary.total} Done
               </span>
             </div>
             
-            <div className="my-3">
-              <div className="flex items-baseline justify-between mb-1.5">
-                <span className="text-3xl font-black tracking-tight text-white">
+            <div className="my-3 relative z-10">
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-3xl md:text-4xl font-black tracking-tight text-white font-serif">
                   {summary.percentage}%
                 </span>
-                <span className="text-xs font-medium text-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 size={13} />
+                <span className="text-xs font-semibold text-amber-200 flex items-center gap-1 bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-300/30">
+                  <CheckCircle2 size={13} className="text-amber-300" />
                   <span>{summary.pending} Tasks Pending</span>
                 </span>
               </div>
-              <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
+              <div className="w-full h-3 bg-black/30 rounded-full overflow-hidden p-0.5 border border-white/10">
                 <div 
-                  className="h-full bg-gradient-to-r from-amber-300 via-emerald-400 to-teal-300 rounded-full transition-all duration-500 ease-out"
+                  className="h-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 rounded-full transition-all duration-500 ease-out shadow-xs"
                   style={{ width: `${summary.percentage}%` }}
                 />
               </div>
             </div>
 
-            <p className="text-[11px] text-zinc-300/90 leading-tight">
+            <p className="text-[12px] text-amber-100/90 leading-snug relative z-10 font-medium">
               {summary.percentage >= 80 
-                ? '🌟 Incredible work! You are in the final stretch for the royal wedding!' 
+                ? '🌟 Shubh Aarambh! Incredible devotion — you are in the majestic final stretch of wedding preparations!' 
                 : summary.percentage >= 40 
-                ? '👍 Steady progress! Core venues, vendors, and invitations are coming together nicely.' 
-                : '🌸 Off to an auspicious start! Check off your monthly milestones step-by-step.'}
+                ? '👍 Auspicious progress! Core venues, vendors, and invitations are harmoniously coming together.' 
+                : '🌸 Shubh Shuruwat! Embark upon your auspicious wedding milestones step-by-step.'}
             </p>
           </div>
 
           {/* Quick Metrics */}
-          <div className="p-4 bg-white border border-zinc-200 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="p-5 bg-white border border-amber-200/70 rounded-3xl shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between text-xs text-zinc-500 font-semibold">
-              <span>Task Breakdown</span>
-              <ListFilter size={14} className="text-zinc-400" />
+              <span className="font-bold text-zinc-700">Milestone Status</span>
+              <ListFilter size={14} className="text-amber-600" />
             </div>
             <div className="grid grid-cols-2 gap-2 my-2">
-              <div className="p-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                <span className="text-[10px] uppercase font-bold text-emerald-700 block">Done</span>
-                <span className="text-xl font-black text-emerald-950">{summary.completed}</span>
+              <div className="p-2.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/60">
+                <span className="text-[10px] uppercase font-bold text-emerald-800 block">Accomplished</span>
+                <span className="text-2xl font-black text-emerald-950 font-serif">{summary.completed}</span>
               </div>
-              <div className="p-2 bg-amber-50 rounded-xl border border-amber-100">
-                <span className="text-[10px] uppercase font-bold text-amber-700 block">Pending</span>
-                <span className="text-xl font-black text-amber-950">{summary.pending}</span>
+              <div className="p-2.5 bg-amber-50/80 rounded-2xl border border-amber-200/60">
+                <span className="text-[10px] uppercase font-bold text-amber-800 block">Upcoming</span>
+                <span className="text-2xl font-black text-amber-950 font-serif">{summary.pending}</span>
               </div>
             </div>
-            <div className="text-[11px] text-zinc-500 flex items-center justify-between">
-              <span>Overdue Tasks:</span>
+            <div className="text-[11px] text-zinc-500 flex items-center justify-between pt-1 border-t border-zinc-100">
+              <span>Attention Needed:</span>
               <span className={`font-bold ${summary.overdue > 0 ? 'text-rose-600' : 'text-zinc-700'}`}>
-                {summary.overdue}
+                {summary.overdue > 0 ? `${summary.overdue} Overdue` : 'All on Track ✨'}
               </span>
             </div>
           </div>
 
           {/* Cross-Module Quick Link Card */}
-          <div className="p-4 bg-gradient-to-br from-amber-50/80 to-amber-100/40 border border-amber-200/80 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="p-5 bg-gradient-to-br from-amber-50/90 to-amber-100/40 border border-amber-200/80 rounded-3xl shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950 mb-1">
                 <Sparkles size={14} className="text-amber-600" />
-                <span>Wedding Hub Integration</span>
+                <span>Royal Shaadi Suite</span>
               </div>
               <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                Checklist tasks connect directly with your real expenses, bookings, and guests.
+                Connect your checklist tasks directly with your real expenses, bookings, and guests.
               </p>
             </div>
             <div className="flex items-center gap-1.5 pt-2">
               <button
                 type="button"
                 onClick={() => navigate('/expenses')}
-                className="flex-1 py-1 px-2 bg-white/90 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-lg border border-amber-200/80 transition-colors shadow-2xs flex items-center justify-center gap-1"
+                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
               >
                 <Receipt size={12} className="text-emerald-600" />
-                <span>Payments</span>
+                <span>Kharcha</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/bookings')}
-                className="flex-1 py-1 px-2 bg-white/90 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-lg border border-amber-200/80 transition-colors shadow-2xs flex items-center justify-center gap-1"
+                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
               >
-                <CalendarCheck size={12} className="text-[#1b3c53]" />
+                <CalendarCheck size={12} className="text-[#9b1c1c]" />
                 <span>Vendors</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/guests')}
-                className="flex-1 py-1 px-2 bg-white/90 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-lg border border-amber-200/80 transition-colors shadow-2xs flex items-center justify-center gap-1"
+                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
               >
                 <Users size={12} className="text-rose-600" />
-                <span>Guests</span>
+                <span>Mehmaan</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. Control & Filter Toolbar */}
-      <div className="p-3.5 bg-white border border-zinc-200 rounded-2xl shadow-2xs space-y-3">
+      {/* 3. Ceremony Ritual Ribbon */}
+      <div className="overflow-x-auto pb-1 -mb-2">
+        <div className="flex items-center gap-1.5 min-w-max p-1.5 bg-white/90 border border-amber-200/70 rounded-2xl shadow-2xs">
+          {CEREMONY_RIBBON.map(ribbon => (
+            <button
+              key={ribbon.id}
+              type="button"
+              onClick={() => setCeremonyFilter(ribbon.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                ceremonyFilter === ribbon.id
+                  ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
+              }`}
+            >
+              <span>{ribbon.icon}</span>
+              <span>{ribbon.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Control & Filter Toolbar */}
+      <div className="p-4 bg-white border border-amber-200/70 rounded-3xl shadow-xs space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           
           {/* View Mode Switcher */}
-          <div className="inline-flex p-1 bg-zinc-100 rounded-xl">
+          <div className="inline-flex p-1 bg-amber-50/60 border border-amber-200/50 rounded-2xl">
             <button
               type="button"
               onClick={() => setViewMode('timeline')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'timeline'
-                  ? 'bg-white text-[#1b3c53] shadow-xs'
+                  ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40 font-serif'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -477,9 +530,9 @@ export default function Checklist() {
             <button
               type="button"
               onClick={() => setViewMode('category')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'category'
-                  ? 'bg-white text-[#1b3c53] shadow-xs'
+                  ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40 font-serif'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -493,10 +546,10 @@ export default function Checklist() {
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
-              placeholder="Search tasks, notes, assignees, or categories..."
+              placeholder="Search rituals, tasks, notes, assignees..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-[#1b3c53] outline-none transition-colors"
+              className="w-full pl-9 pr-3 py-2 bg-[#FAF7F2] border border-amber-200/70 rounded-2xl text-xs text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-[#9b1c1c] outline-none transition-colors"
             />
           </div>
 
@@ -505,7 +558,7 @@ export default function Checklist() {
             <button
               type="button"
               onClick={expandAll}
-              className="text-[11px] font-semibold text-zinc-600 hover:text-[#1b3c53] underline cursor-pointer"
+              className="text-[11px] font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
             >
               Expand All
             </button>
@@ -513,7 +566,7 @@ export default function Checklist() {
             <button
               type="button"
               onClick={() => collapseAll(allVisibleGroupKeys)}
-              className="text-[11px] font-semibold text-zinc-600 hover:text-[#1b3c53] underline cursor-pointer"
+              className="text-[11px] font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
             >
               Collapse All
             </button>
@@ -521,7 +574,7 @@ export default function Checklist() {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-100">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-amber-100">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-[11px] font-bold text-zinc-500 mr-1">Status:</span>
             {[
@@ -534,9 +587,9 @@ export default function Checklist() {
                 key={pill.id}
                 type="button"
                 onClick={() => setStatusFilter(pill.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   statusFilter === pill.id
-                    ? 'bg-[#1b3c53] text-white shadow-2xs'
+                    ? 'bg-[#9b1c1c] text-white shadow-2xs font-bold'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
                 }`}
               >
@@ -550,7 +603,7 @@ export default function Checklist() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-2.5 py-1 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-700 outline-none focus:border-[#1b3c53]"
+              className="px-2.5 py-1.5 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
             >
               <option value="all">All Categories</option>
               {CHECKLIST_CATEGORIES.map(c => (
@@ -561,7 +614,7 @@ export default function Checklist() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="px-2.5 py-1 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-700 outline-none focus:border-[#1b3c53]"
+              className="px-2.5 py-1.5 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
             >
               <option value="all">All Priorities</option>
               {TASK_PRIORITIES.map(p => (
@@ -615,20 +668,20 @@ export default function Checklist() {
             return (
               <div 
                 key={groupName}
-                className="bg-white border border-zinc-200 rounded-2xl shadow-2xs overflow-hidden transition-all"
+                className="bg-white border border-amber-200/70 rounded-3xl shadow-xs overflow-hidden transition-all hover:border-amber-300/80"
               >
                 {/* Accordion Group Header */}
                 <button
                   type="button"
                   onClick={() => toggleGroup(groupName)}
-                  className="w-full px-4 py-3.5 bg-zinc-50/70 hover:bg-zinc-100/80 transition-colors flex items-center justify-between gap-3 border-b border-zinc-100 cursor-pointer text-left"
+                  className="w-full px-4 py-3.5 bg-[#FAF7F2] hover:bg-[#F5ECE0]/80 transition-colors flex items-center justify-between gap-3 border-b border-amber-200/50 cursor-pointer text-left"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-zinc-400">
+                    <span className="text-amber-700/60">
                       {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-zinc-900 tracking-tight flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-zinc-900 tracking-tight font-serif flex items-center gap-2">
                         {groupName}
                         {pct === 100 && totalCount > 0 && (
                           <span className="text-xs text-emerald-600 font-semibold inline-flex items-center gap-1">
@@ -644,9 +697,9 @@ export default function Checklist() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="w-24 hidden sm:block">
-                      <div className="w-full bg-zinc-200 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-amber-100 rounded-full h-1.5 overflow-hidden">
                         <div 
-                          className={`h-full rounded-full transition-all duration-300 ${pct === 100 ? 'bg-emerald-500' : 'bg-[#234c6a]'}`}
+                          className={`h-full rounded-full transition-all duration-300 ${pct === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-400 to-[#9b1c1c]'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -660,7 +713,7 @@ export default function Checklist() {
                         if (viewMode === 'timeline') openAddModal(groupName, CHECKLIST_CATEGORIES[0]);
                         else openAddModal(TIMELINE_STAGES[0], groupName);
                       }}
-                      className="text-[11px] font-bold text-[#1b3c53] bg-zinc-200/70 hover:bg-zinc-200 h-7 px-2"
+                      className="text-[11px] font-bold text-[#9b1c1c] bg-amber-100/70 hover:bg-amber-200/60 h-7 px-2.5 border border-amber-200/80 rounded-lg"
                     >
                       <Plus size={12} />
                       <span className="hidden sm:inline">Add Task</span>
@@ -670,7 +723,7 @@ export default function Checklist() {
 
                 {/* Group Tasks List */}
                 {!isCollapsed && (
-                  <div className="divide-y divide-zinc-100">
+                  <div className="divide-y divide-amber-100/60">
                     {groupTasks.length === 0 ? (
                       <div className="p-4 text-center text-xs text-zinc-400 italic">
                         No tasks in this section. Click "+ Add Task" above to add one.
@@ -682,8 +735,8 @@ export default function Checklist() {
                           <div
                             key={task.id}
                             onClick={() => setViewingTask(task)}
-                            className={`p-3.5 sm:px-4 hover:bg-zinc-50/80 transition-colors flex items-start gap-3 group cursor-pointer ${
-                              task.completed ? 'bg-zinc-50/40' : ''
+                            className={`p-3.5 sm:px-4 hover:bg-amber-50/40 transition-colors flex items-start gap-3 group cursor-pointer ${
+                              task.completed ? 'bg-amber-50/20' : ''
                             }`}
                           >
                             {/* Checkbox */}
@@ -692,8 +745,8 @@ export default function Checklist() {
                               onClick={(e) => handleToggleTask(task, e)}
                               className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                 task.completed
-                                  ? 'bg-emerald-600 text-white shadow-2xs'
-                                  : 'border-2 border-zinc-300 hover:border-[#1b3c53] bg-white'
+                                  ? 'bg-[#9b1c1c] text-white shadow-2xs'
+                                  : 'border-2 border-amber-300 hover:border-[#9b1c1c] bg-white'
                               }`}
                             >
                               {task.completed && <CheckCircle2 size={13} className="stroke-[3]" />}

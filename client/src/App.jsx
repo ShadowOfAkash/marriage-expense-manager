@@ -112,32 +112,42 @@ function MainApp() {
       )}
 
       {/* Mobile Top Navigation Header with iOS Safe Area support */}
-      <header className="md:hidden sticky top-0 z-30 bg-white text-zinc-900 px-4 pt-safe pb-3 flex items-center justify-between border-b border-rose-100 shadow-xs">
+      <header className="md:hidden sticky top-0 z-30 bg-[#FAF7F2] text-zinc-900 px-4 pt-safe pb-3 flex items-center justify-between border-b border-amber-200/70 shadow-2xs">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-xl bg-zinc-100 text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer"
+          className="p-2 rounded-xl bg-white border border-amber-200 text-zinc-700 hover:text-rose-700 transition-colors cursor-pointer shadow-2xs"
           aria-label="Open Navigation Menu"
         >
           <Menu size={20} />
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D97757] to-[#C86D51] flex items-center justify-center text-white shadow-2xs">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-2xs">
             <Heart size={14} className="fill-white" />
           </div>
-          <span className="font-extrabold text-sm tracking-tight text-zinc-900">
-            {weddingProfile?.story_title || currentTitle}
+          <span className="font-serif font-bold text-sm tracking-tight text-zinc-900">
+            {weddingProfile?.story_title || (weddingProfile?.groom_name && weddingProfile?.bride_name ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}` : currentTitle)}
           </span>
         </div>
 
-        <div className="w-8 h-8 rounded-full bg-[#D97757]/15 text-[#D97757] flex items-center justify-center text-xs font-bold border border-[#D97757]/30">
-          {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowOnboarding(true)}
+          title="Customize Vivah Details"
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xs font-bold border border-amber-300 shadow-2xs cursor-pointer"
+        >
+          <Sparkles size={14} />
+        </button>
       </header>
 
       {/* Sidebar with Desktop & Mobile Drawer */}
-      <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} weddingProfile={weddingProfile} />
+      <Sidebar 
+        mobileOpen={mobileOpen} 
+        setMobileOpen={setMobileOpen} 
+        weddingProfile={weddingProfile}
+        onEditProfile={() => setShowOnboarding(true)}
+      />
 
       {/* Main Content View */}
       <main className="flex-1 min-w-0 overflow-y-auto pb-12">

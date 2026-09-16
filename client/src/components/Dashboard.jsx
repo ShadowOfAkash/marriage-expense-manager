@@ -25,18 +25,18 @@ import { useToast } from '../contexts/ToastContext'
 import { useAuth } from '../contexts/AuthContext'
 
 const CAT_COLORS = [
-  '#D97757', // Warm Rose Gold
-  '#2E6F5E', // Royal Emerald
-  '#D4AF37', // Champagne Gold
-  '#C86D51', // Terracotta
-  '#456882', // Slate
-  '#E9C46A', // Warm Amber
-  '#264653', // Deep Forest
-  '#9D816B', // Warm Taupe
-  '#B55F45', // Deep Rose
-  '#5B809D', // Soft Muted Blue
-  '#E76F51', // Coral Gold
-  '#816B5C'  // Mocha
+  '#9b1c1c', // Royal Sindoor
+  '#b45309', // Marigold Amber
+  '#047857', // Mehendi Emerald
+  '#d97706', // Warm Gold
+  '#be123c', // Festive Crimson
+  '#0e7490', // Royal Teal
+  '#4338ca', // Royal Indigo
+  '#a16207', // Mustard Gold
+  '#854d0e', // Warm Ochre
+  '#15803d', // Forest Leaf
+  '#b91c1c', // Crimson Red
+  '#92400e'  // Deep Sandalwood
 ]
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -276,38 +276,42 @@ export default function Dashboard() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
       {/* ── 1. Couple Hero Banner ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FAF7F2] via-[#FFFDFB] to-[#F5ECE0] border border-rose-200/70 p-6 md:p-8 mb-6 shadow-sm">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FAF7F2] via-[#FFFDFB] to-[#F5ECE0] border border-amber-200/80 p-6 md:p-8 mb-6 shadow-xs">
         {/* Subtle romantic accents */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 bg-rose-200/30 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-200/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -top-10 -right-10 w-48 h-48 bg-amber-200/30 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-rose-200/20 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 backdrop-blur-xs border border-rose-200/80 text-[#D97757] text-xs font-bold shadow-2xs">
-                <Heart size={12} className="fill-[#D97757]" />
+            <div className="flex flex-wrap items-center gap-2 mb-2.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-200/80 text-[#9b1c1c] text-xs font-bold shadow-2xs">
+                <Heart size={12} className="fill-[#9b1c1c]" />
                 <span>{sideLabel}</span>
               </span>
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs">
+                <Sparkles size={11} className="text-amber-600" />
+                <span>शुभ विवाह • Shubh Vivah</span>
+              </span>
               {weddingProfile?.wedding_location && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/80 backdrop-blur-xs border border-zinc-200/80 text-zinc-600 text-xs font-medium">
-                  <MapPin size={12} className="text-[#2E6F5E]" />
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-zinc-200/80 text-zinc-600 text-xs font-medium">
+                  <MapPin size={12} className="text-[#047857]" />
                   <span>{weddingProfile.wedding_location}</span>
                 </span>
               )}
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-black text-zinc-900 tracking-tight leading-tight mb-2">
+            <h1 className="text-2xl md:text-4xl font-black text-zinc-900 tracking-tight leading-tight mb-2 font-serif">
               {coupleTitle}
             </h1>
 
             <p className="text-sm text-zinc-600 font-medium flex items-center gap-2">
               {weddingDateStr ? (
                 <>
-                  <Calendar size={14} className="text-[#D97757]" />
+                  <Calendar size={14} className="text-[#9b1c1c]" />
                   <span>{new Date(weddingDateStr).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 </>
               ) : (
-                <span>Set your wedding date to unlock the countdown & personalized milestones</span>
+                <span>Set your wedding date to unlock the countdown & auspicious ceremony timeline</span>
               )}
             </p>
           </div>
@@ -315,17 +319,17 @@ export default function Dashboard() {
           {/* Right Hero Side: Live Countdown & Edit Profile */}
           <div className="flex flex-row md:flex-col items-end gap-3 w-full md:w-auto justify-between md:justify-end">
             {countdownDays !== null && (
-              <div className="bg-white/90 backdrop-blur-xs border border-rose-200/80 rounded-2xl px-5 py-3.5 shadow-sm text-center">
-                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-1">
-                  <Sparkles size={11} className="text-[#D97757]" /> The Big Day
+              <div className="bg-white/95 backdrop-blur-xs border border-amber-200/80 rounded-2xl px-5 py-3.5 shadow-xs text-center">
+                <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest flex items-center justify-center gap-1">
+                  <Sparkles size={11} className="text-amber-500" /> Auspicious Muhurat
                 </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900">
+                <div className="text-2xl md:text-3xl font-black text-zinc-900 font-serif">
                   {countdownDays > 0 ? (
                     <>
-                      {countdownDays} <span className="text-sm font-semibold text-[#D97757]">Days to Go! 🎉</span>
+                      {countdownDays} <span className="text-sm font-semibold text-[#9b1c1c]">Days to Go! 🎉</span>
                     </>
                   ) : countdownDays === 0 ? (
-                    <span className="text-xl text-[#D97757]">Today! 🎊</span>
+                    <span className="text-xl text-[#9b1c1c]">Today! 🎊</span>
                   ) : (
                     <span className="text-sm text-zinc-600">Celebrated ✨</span>
                   )}
@@ -335,7 +339,7 @@ export default function Dashboard() {
 
             <button
               onClick={() => setIsEditProfileOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200 hover:border-zinc-300 text-xs font-semibold text-zinc-700 hover:text-zinc-900 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white border border-amber-200 hover:border-amber-300 text-xs font-semibold text-zinc-700 hover:text-zinc-900 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Edit3 size={13} className="text-zinc-500" />
               <span>Edit Details</span>
@@ -345,24 +349,24 @@ export default function Dashboard() {
       </div>
 
       {/* ── 2. View Mode Tabs ── */}
-      <div className="flex items-center justify-between mb-6 pb-2 border-b border-zinc-200">
+      <div className="flex items-center justify-between mb-6 pb-2 border-b border-amber-100">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('suite')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'suite'
-                ? 'bg-[#D97757] text-white shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+                ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
+                : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
             }`}
           >
-            <span>🌸 Wedding Suite</span>
+            <span>🌸 Vivah Suite</span>
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'analytics'
-                ? 'bg-[#D97757] text-white shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+                ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
+                : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
             }`}
           >
             <span>📊 Financial Deep-Dive</span>
@@ -373,9 +377,9 @@ export default function Dashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => setIsAddExpOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border border-rose-900/40"
           >
-            <Plus size={14} /> Add Payment
+            <Plus size={14} className="text-amber-200" /> Add Payment
           </button>
         </div>
       </div>
@@ -383,26 +387,71 @@ export default function Dashboard() {
       {/* ── 3. B2C Wedding Suite View ── */}
       {activeTab === 'suite' && (
         <div className="space-y-6 animate-in fade-in-50 duration-200">
+          
+          {/* Sacred Ceremony Journey Ribbon */}
+          <div className="bg-white rounded-3xl border border-amber-200/70 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-3.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-amber-500" /> Sacred Ceremonies & Rituals
+                </span>
+              </div>
+              <button
+                onClick={() => navigate('/checklist')}
+                className="text-xs font-bold text-[#9b1c1c] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>View Ceremony Roadmap</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+              {[
+                { id: 'roka', name: 'Roka & Sagai', icon: '🌿', sub: 'Engagement' },
+                { id: 'haldi', name: 'Haldi Rasam', icon: '💛', sub: 'Turmeric Glow' },
+                { id: 'mehendi', name: 'Mehendi Magic', icon: '✨', sub: 'Henna Day' },
+                { id: 'sangeet', name: 'Sangeet Night', icon: '🪕', sub: 'Music & Dance' },
+                { id: 'vivah', name: 'Baraat & Vivah', icon: '🔥', sub: 'Sacred Pheras' },
+                { id: 'reception', name: 'Grand Reception', icon: '🥂', sub: 'Vidai & Feast' }
+              ].map((ceremony, idx) => (
+                <div
+                  key={ceremony.id}
+                  onClick={() => navigate('/checklist')}
+                  className="p-3.5 rounded-2xl bg-[#FAF7F2] hover:bg-[#F5ECE0] border border-amber-200/60 hover:border-amber-300 transition-all cursor-pointer group text-center flex flex-col justify-between shadow-2xs"
+                >
+                  <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">{ceremony.icon}</div>
+                  <div>
+                    <div className="text-xs font-bold text-zinc-900 group-hover:text-[#9b1c1c] transition-colors">{ceremony.name}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">{ceremony.sub}</div>
+                  </div>
+                  <div className="mt-2 text-[10px] font-semibold text-amber-800/80 flex items-center justify-center gap-0.5">
+                    <span>Ritual {idx + 1}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* 4 Planning Pulse Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Countdown / Milestone */}
             <div 
               onClick={() => navigate('/checklist')}
-              className="bg-white p-5 rounded-2xl border border-rose-100/90 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+              className="bg-white p-5 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Countdown</span>
-                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                   <Clock size={16} />
                 </div>
               </div>
-              <div className="text-2xl font-black text-zinc-900 mb-1">
+              <div className="text-2xl font-black text-zinc-900 mb-1 font-serif">
                 {countdownDays !== null ? `${countdownDays} Days` : 'Set Date'}
               </div>
               <p className="text-xs text-zinc-500 line-clamp-1">
                 {countdownDays > 0 ? `~${Math.round(countdownDays / 30)} months to prepare` : 'Wedding timeline'}
               </p>
-              <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#D97757] group-hover:translate-x-0.5 transition-transform">
+              <div className="mt-3 flex items-center gap-1 text-xs font-bold text-[#9b1c1c] group-hover:translate-x-0.5 transition-transform">
                 <span>View Timeline</span> <ChevronRight size={14} />
               </div>
             </div>
@@ -410,76 +459,76 @@ export default function Dashboard() {
             {/* Checklist Progress */}
             <div 
               onClick={() => navigate('/checklist')}
-              className="bg-white p-5 rounded-2xl border border-rose-100/90 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+              className="bg-white p-5 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Checklist Pulse</span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                   <ListChecks size={16} />
                 </div>
               </div>
-              <div className="text-2xl font-black text-zinc-900 mb-1">
+              <div className="text-2xl font-black text-zinc-900 mb-1 font-serif">
                 {completedTasksCount} <span className="text-sm font-medium text-zinc-400">/ {totalTasksCount || 51} done</span>
               </div>
               {/* Progress bar */}
               <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden mt-2 mb-1">
                 <div 
-                  className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                  className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" 
                   style={{ width: `${checklistPercent}%` }} 
                 />
               </div>
               <div className="flex justify-between text-[11px] text-zinc-400 font-medium">
                 <span>{checklistPercent}% Complete</span>
-                <span className="text-[#D97757] font-semibold flex items-center gap-0.5">Tasks <ChevronRight size={12} /></span>
+                <span className="text-[#9b1c1c] font-semibold flex items-center gap-0.5">Tasks <ChevronRight size={12} /></span>
               </div>
             </div>
 
             {/* Guest RSVP Pulse */}
             <div 
               onClick={() => navigate('/guests')}
-              className="bg-white p-5 rounded-2xl border border-rose-100/90 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+              className="bg-white p-5 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Guest RSVPs</span>
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Mehmaan RSVPs</span>
+                <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#9b1c1c] flex items-center justify-center">
                   <Users size={16} />
                 </div>
               </div>
-              <div className="text-2xl font-black text-zinc-900 mb-1">
+              <div className="text-2xl font-black text-zinc-900 mb-1 font-serif">
                 {guestSummary?.confirmed || 0} <span className="text-sm font-medium text-zinc-400">Confirmed</span>
               </div>
               <p className="text-xs text-zinc-500 line-clamp-1">
                 {guestSummary?.total || 0} total invited ({guestSummary?.pending || 0} awaiting RSVP)
               </p>
-              <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#2E6F5E] group-hover:translate-x-0.5 transition-transform">
-                <span>Guest Manager</span> <ChevronRight size={14} />
+              <div className="mt-3 flex items-center gap-1 text-xs font-bold text-[#047857] group-hover:translate-x-0.5 transition-transform">
+                <span>Dispatch Invites</span> <ChevronRight size={14} />
               </div>
             </div>
 
             {/* Budget Snapshot */}
             <div 
               onClick={() => navigate('/expenses')}
-              className="bg-white p-5 rounded-2xl border border-rose-100/90 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+              className="bg-white p-5 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Budget Health</span>
-                <div className="w-8 h-8 rounded-xl bg-rose-50 text-[#D97757] flex items-center justify-center">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Kharcha & Budget</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-[#9b1c1c] flex items-center justify-center">
                   <IndianRupee size={16} />
                 </div>
               </div>
-              <div className="text-2xl font-black text-zinc-900 mb-1">
+              <div className="text-2xl font-black text-zinc-900 mb-1 font-serif">
                 {fmt(totalExpenses)}
               </div>
               {/* Progress bar */}
               <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden mt-2 mb-1">
                 <div 
-                  className="bg-gradient-to-r from-[#D97757] to-[#C86D51] h-full rounded-full transition-all duration-500" 
+                  className="bg-gradient-to-r from-amber-400 to-[#9b1c1c] h-full rounded-full transition-all duration-500" 
                   style={{ width: `${Math.min(100, budgetUtilization)}%` }} 
                 />
               </div>
               <div className="flex justify-between text-[11px] text-zinc-400 font-medium">
                 <span>{budgetUtilization}% of {fmt(budgetTotal)}</span>
-                <span className="text-[#D97757] font-semibold flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
+                <span className="text-[#9b1c1c] font-semibold flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
               </div>
             </div>
           </div>
@@ -487,21 +536,21 @@ export default function Dashboard() {
           {/* ── Upcoming Tasks & Quick Actions 2-Column ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Next Milestones (2 Cols) */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-rose-100/90 p-6 shadow-xs">
+            <div className="lg:col-span-2 bg-white rounded-3xl border border-amber-200/70 p-6 shadow-xs">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#D97757] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 text-[#9b1c1c] flex items-center justify-center">
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-base text-zinc-900">Next Upcoming Milestones</h3>
-                    <p className="text-xs text-zinc-500">Check off tasks as you complete them</p>
+                    <h3 className="font-extrabold text-base text-zinc-900 font-serif">Next Upcoming Milestones</h3>
+                    <p className="text-xs text-zinc-500">Check off tasks as rituals approach</p>
                   </div>
                 </div>
 
                 <button
                   onClick={() => navigate('/checklist')}
-                  className="text-xs font-bold text-[#D97757] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#9b1c1c] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>All Tasks ({totalTasksCount})</span>
                   <ChevronRight size={14} />
@@ -515,28 +564,28 @@ export default function Dashboard() {
                   <p className="text-xs text-zinc-400 mt-1">Add more custom tasks in your checklist.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-100">
+                <div className="divide-y divide-amber-100/60">
                   {upcomingTasks.map(task => (
                     <div key={task.id || task.task_id} className="py-3 flex items-center justify-between gap-3 group">
                       <div className="flex items-center gap-3 min-w-0">
                         <button
                           onClick={() => handleToggleTask(task.id || task.task_id)}
-                          className="w-6 h-6 rounded-full border border-zinc-300 hover:border-emerald-500 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                          className="w-6 h-6 rounded-lg border-2 border-amber-300 hover:border-[#9b1c1c] flex items-center justify-center transition-colors cursor-pointer shrink-0"
                           title="Mark complete"
                         >
-                          <Check size={12} className="text-transparent group-hover:text-emerald-500" />
+                          <Check size={12} className="text-transparent group-hover:text-[#9b1c1c]" />
                         </button>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-zinc-800 truncate">{task.title}</p>
                           <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-0.5">
-                            <span className="px-2 py-0.5 rounded-md bg-zinc-100 font-medium text-zinc-600">{task.category || 'General'}</span>
+                            <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200/60 font-medium text-amber-900">{task.category || 'General'}</span>
                             {task.timeline_stage && <span>• {task.timeline_stage}</span>}
                           </div>
                         </div>
                       </div>
 
                       {task.estimated_cost > 0 && (
-                        <span className="text-xs font-bold text-zinc-600 shrink-0">
+                        <span className="text-xs font-bold text-zinc-700 shrink-0 font-serif">
                           ~{fmt(task.estimated_cost)}
                         </span>
                       )}
@@ -549,38 +598,38 @@ export default function Dashboard() {
             {/* Quick Actions & Vendor Shortcuts (1 Col) */}
             <div className="space-y-4">
               {/* Quick Action Buttons */}
-              <div className="bg-white rounded-3xl border border-rose-100/90 p-6 shadow-xs">
-                <h3 className="font-extrabold text-sm text-zinc-900 mb-3">Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="bg-white rounded-3xl border border-amber-200/70 p-6 shadow-xs">
+                <h3 className="font-extrabold text-sm text-zinc-900 mb-3 font-serif">Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-2.5">
                   <button
-                    onClick={() => navigate('/vendors')}
-                    className="p-3 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-100 text-[#234c6a] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between"
+                    onClick={() => navigate('/guests')}
+                    className="p-3.5 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
                   >
-                    <Store size={18} className="mb-2" />
-                    <span>Find Vendors</span>
+                    <Users size={18} className="mb-2 text-emerald-700" />
+                    <span>WhatsApp Invites</span>
                   </button>
 
                   <button
-                    onClick={() => navigate('/guests')}
-                    className="p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-100 text-[#2E6F5E] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between"
+                    onClick={() => navigate('/vendors')}
+                    className="p-3.5 rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200 text-amber-900 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
                   >
-                    <Users size={18} className="mb-2" />
-                    <span>Invite Guests</span>
+                    <Store size={18} className="mb-2 text-amber-700" />
+                    <span>Vendor Bazaar</span>
                   </button>
 
                   <button
                     onClick={() => setIsAddExpOpen(true)}
-                    className="p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-100 text-[#D97757] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between"
+                    className="p-3.5 rounded-2xl bg-rose-50/80 hover:bg-rose-100/80 border border-rose-200 text-[#9b1c1c] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
                   >
-                    <Receipt size={18} className="mb-2" />
-                    <span>Add Expense</span>
+                    <Receipt size={18} className="mb-2 text-[#9b1c1c]" />
+                    <span>Log Kharcha</span>
                   </button>
 
                   <button
                     onClick={() => setIsTelegramModalOpen(true)}
-                    className="p-3 rounded-xl bg-sky-50/70 hover:bg-sky-100/70 border border-sky-100 text-sky-700 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between"
+                    className="p-3.5 rounded-2xl bg-sky-50/80 hover:bg-sky-100/80 border border-sky-200 text-sky-800 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
                   >
-                    <Send size={18} className="mb-2" />
+                    <Send size={18} className="mb-2 text-sky-700" />
                     <span>Telegram Bot</span>
                   </button>
                 </div>
@@ -589,18 +638,18 @@ export default function Dashboard() {
               {/* Vendor Category Hub Banner */}
               <div 
                 onClick={() => navigate('/vendors')}
-                className="bg-gradient-to-br from-[#FAF7F2] to-[#F5ECE0] border border-rose-200/80 rounded-3xl p-5 shadow-xs cursor-pointer hover:shadow-md transition-all group"
+                className="bg-gradient-to-br from-[#FAF7F2] to-[#F5ECE0] border border-amber-200/80 rounded-3xl p-5 shadow-xs cursor-pointer hover:shadow-md transition-all group"
               >
-                <div className="flex items-center gap-2 text-xs font-bold text-[#D97757] uppercase tracking-wider mb-1">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#9b1c1c] uppercase tracking-wider mb-1">
                   <Store size={14} /> Vendor Discovery
                 </div>
-                <h4 className="font-extrabold text-base text-zinc-900 mb-1">
+                <h4 className="font-extrabold text-base text-zinc-900 mb-1 font-serif">
                   Explore 12 Wedding Categories
                 </h4>
                 <p className="text-xs text-zinc-500 mb-3">
                   Find photographers, banquet venues, decorators, and caterers near {weddingProfile?.wedding_location || 'you'}.
                 </p>
-                <span className="text-xs font-bold text-[#D97757] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span className="text-xs font-bold text-[#9b1c1c] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   Explore Marketplace <ChevronRight size={14} />
                 </span>
               </div>
@@ -620,7 +669,7 @@ export default function Dashboard() {
               Icon={Receipt}
               helpText={`${budgetUtilization}% of budget`}
               isAlert={budgetUtilization > 100}
-              baseColor="#D97757"
+              baseColor="#9b1c1c"
               onClick={() => navigate('/expenses')}
             />
             <StatCard
@@ -629,7 +678,7 @@ export default function Dashboard() {
               Icon={Wallet}
               helpText={budgetUtilization > 100 ? 'Budget exceeded' : 'Available to spend'}
               isAlert={budgetUtilization > 100}
-              baseColor="#2E6F5E"
+              baseColor="#047857"
               onClick={() => navigate('/expenses')}
             />
             <StatCard
@@ -637,7 +686,7 @@ export default function Dashboard() {
               value={fmt(totalSavings)}
               Icon={TrendingUp}
               helpText="Accumulated funds"
-              baseColor="#D4AF37"
+              baseColor="#d97706"
               onClick={() => navigate('/savings')}
             />
             <StatCard
@@ -646,37 +695,37 @@ export default function Dashboard() {
               Icon={IndianRupee}
               helpText={totalSavings >= totalExpenses ? 'Fully funded' : 'Savings deficit'}
               isAlert={totalSavings < totalExpenses}
-              baseColor="#234c6a"
+              baseColor="#b45309"
             />
           </div>
 
           {/* Recharts Analytics: Area + Bar */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Savings Accumulation Area Chart */}
-            <div className="bg-white p-6 rounded-3xl border border-rose-100 shadow-xs">
-              <h3 className="font-extrabold text-sm text-zinc-800 mb-4">Savings vs Cumulative Growth</h3>
+            <div className="bg-white p-6 rounded-3xl border border-amber-200/70 shadow-xs">
+              <h3 className="font-extrabold text-sm text-zinc-800 mb-4 font-serif">Savings vs Cumulative Growth</h3>
               <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={savingsTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="cumColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2E6F5E" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#2E6F5E" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#047857" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#047857" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                     <XAxis dataKey="name" stroke="#888" fontSize={11} tickLine={false} />
                     <YAxis stroke="#888" fontSize={11} tickLine={false} tickFormatter={fmtK} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="cumulative" name="Total Savings" stroke="#2E6F5E" strokeWidth={2} fillOpacity={1} fill="url(#cumColor)" />
+                    <Area type="monotone" dataKey="cumulative" name="Total Savings" stroke="#047857" strokeWidth={2} fillOpacity={1} fill="url(#cumColor)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Monthly Comparison Bar Chart */}
-            <div className="bg-white p-6 rounded-3xl border border-rose-100 shadow-xs">
-              <h3 className="font-extrabold text-sm text-zinc-800 mb-4">Monthly Expenses vs Savings</h3>
+            <div className="bg-white p-6 rounded-3xl border border-amber-200/70 shadow-xs">
+              <h3 className="font-extrabold text-sm text-zinc-800 mb-4 font-serif">Monthly Expenses vs Savings</h3>
               <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyComparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -685,8 +734,8 @@ export default function Dashboard() {
                     <YAxis stroke="#888" fontSize={11} tickLine={false} tickFormatter={fmtK} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                    <Bar dataKey="expenses" name="Expenses" fill="#D97757" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="savings" name="Savings" fill="#2E6F5E" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expenses" name="Expenses" fill="#9b1c1c" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="savings" name="Savings" fill="#047857" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

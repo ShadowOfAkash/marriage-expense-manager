@@ -4,7 +4,7 @@ import { Button, Card, Chip, Input, TextField, Label } from '@heroui/react';
 import { 
   Search, Plus, CalendarCheck, IndianRupee, AlignLeft, 
   Calendar, User, Briefcase, CreditCard, ChevronDown, 
-  Tag, ExternalLink 
+  Tag, ExternalLink, Pencil, Trash2 
 } from 'lucide-react';
 import { api, fmt, formatDate, CATEGORIES } from '../utils/api';
 import { TailwindModal } from './TailwindModal';
@@ -30,9 +30,10 @@ export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
   const toast = useToast();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -158,223 +159,356 @@ export default function Bookings() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen flex flex-col">
-      {/* Header */}
+      {/* 1. Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 tracking-tight flex items-center gap-2">
-            <CalendarCheck size={24} className="text-zinc-900" /> Bookings
+          <h1 className="font-serif text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
+            <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-xs">
+              <CalendarCheck size={20} />
+            </span>
+            <span>Vendor Contracts & Bookings</span>
           </h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage vendor bookings, advances, and payment milestones</p>
+          <p className="text-zinc-500 text-xs md:text-sm mt-1">
+            Track vendor milestone contracts, event dates, advances paid, and balances due
+          </p>
         </div>
-        <Button radius="sm" className="bg-zinc-900 text-white hover:bg-zinc-950 shadow-md font-bold" onClick={openAdd}>
-          <Plus size={18} /> Create Booking
+        <Button 
+          radius="sm" 
+          className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5" 
+          onClick={openAdd}
+        >
+          <Plus size={16} /> Create Booking / Contract
         </Button>
       </div>
 
-      {/* Booking Statistics Cards (identical design to Savings page) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 shrink-0">
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
+      {/* 2. Booking Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6 shrink-0">
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#1b3c53] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-11 h-11 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
               <CalendarCheck size={20} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Booked Value</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(totalBooked)}</div>
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Total Booked Value</div>
+              <div className="text-2xl font-black text-zinc-900 tracking-tight">{fmt(totalBooked)}</div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#234c6a] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-11 h-11 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
               <CreditCard size={20} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Paid</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">
-                {fmt(totalPaid)} <span className="text-xs font-semibold text-[#234c6a] ml-1">({totalBooked > 0 ? Math.round((totalPaid / totalBooked) * 100) : 0}%)</span>
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Total Paid / Advances</div>
+              <div className="text-2xl font-black text-emerald-700 tracking-tight">
+                {fmt(totalPaid)} <span className="text-xs font-semibold text-emerald-600 ml-1">({totalBooked > 0 ? Math.round((totalPaid / totalBooked) * 100) : 0}%)</span>
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
+        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#456882] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-11 h-11 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
               <IndianRupee size={20} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Remaining Balance</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(totalRemaining)}</div>
+              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Remaining Balance Due</div>
+              <div className="text-2xl font-black text-amber-700 tracking-tight">{fmt(totalRemaining)}</div>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Search Toolbar */}
-      <div className="mb-4 bg-white border border-zinc-200/80 rounded-xl p-2.5 shadow-xs flex items-center gap-3 shrink-0">
-        <Search size={18} className="text-zinc-400 ml-2 shrink-0" />
-        <input
-          type="text"
-          placeholder="Search by vendor, service, category, or ID (e.g. BK-1234)..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-900 placeholder:text-zinc-400 py-1"
-        />
-        {filtered.length > 0 && (
-          <span className="text-xs text-zinc-400 font-medium mr-2 whitespace-nowrap">
-            {filtered.length} {filtered.length === 1 ? 'booking' : 'bookings'}
-          </span>
-        )}
+      {/* 3. Search and View Switcher Toolbar */}
+      <div className="mb-4 bg-white border border-amber-200/70 rounded-2xl p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+        <div className="flex-1 flex items-center gap-2 bg-zinc-50 border border-zinc-200/60 rounded-xl px-3 py-1.5 focus-within:border-amber-400 focus-within:bg-white transition-all">
+          <Search size={16} className="text-zinc-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="Search by vendor, service, category, or ID (e.g. BK-1234)..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-900 placeholder:text-zinc-400 py-1"
+          />
+          {filtered.length > 0 && (
+            <span className="text-xs text-zinc-400 font-medium mr-2 whitespace-nowrap">
+              {filtered.length} {filtered.length === 1 ? 'contract' : 'contracts'}
+            </span>
+          )}
+        </div>
+
+        {/* View Mode Switcher */}
+        <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200 shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode('cards')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'cards'
+                ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                : 'text-zinc-500 hover:text-zinc-800'
+            }`}
+          >
+            <span>🎴 Cards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('table')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'table'
+                ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                : 'text-zinc-500 hover:text-zinc-800'
+            }`}
+          >
+            <span>📄 Table</span>
+          </button>
+        </div>
       </div>
 
-      {/* Table Container */}
-      <div className="shadow-sm border border-zinc-200/80 flex-1 flex flex-col overflow-hidden rounded-xl bg-white">
+      {/* 4. Primary Content Container */}
+      <div className="shadow-xs border border-amber-200/70 flex-1 flex flex-col overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xs">
         {filtered.length > 0 ? (
           <>
-            <div className="overflow-auto flex-1 w-full relative">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
-                  <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
-                    <th className="py-3.5 px-4 whitespace-nowrap">BOOKING ID</th>
-                    <th className="py-3.5 px-4 whitespace-nowrap">VENDOR</th>
-                    <th className="py-3.5 px-4 whitespace-nowrap">SERVICE</th>
-                    <th className="py-3.5 px-4 whitespace-nowrap">CATEGORY</th>
-                    <th className="py-3.5 px-4 whitespace-nowrap">EVENT DATE</th>
-                    <th className="py-3.5 px-4 min-w-[220px]">PAYMENT PROGRESS</th>
-                    <th className="py-3.5 px-4 text-right whitespace-nowrap">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((b) => {
+            {viewMode === 'cards' ? (
+              <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-1">
+                {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((b) => {
                   const tAmt = Number(b.amount) || 0;
                   const advAmt = Number(b.advance) || 0;
                   const linked = expenses.filter(e => String(e.booking_id) === String(b.id));
                   const expPaid = linked.reduce((s, e) => s + (Number(e.amount) || 0), 0);
                   const paid = expPaid > 0 ? expPaid : advAmt;
                   const pct = tAmt > 0 ? Math.min(100, Math.round((paid / tAmt) * 100)) : 0;
+                  const remaining = Math.max(0, tAmt - paid);
 
                   return (
-                    <tr key={b.id} className="hover:bg-[#1b3c53]/[0.04] transition-colors">
-                      {/* 1. Booking ID (linked to detail page - same font as row) */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <Link 
-                          to={`/bookings/${b.id}`} 
-                          className="text-sm font-semibold text-[#234c6a] hover:text-[#1b3c53] hover:underline"
-                        >
-                          #BK-{String(b.id).slice(-4)}
-                        </Link>
-                      </td>
-
-                      {/* 2. Vendor */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <Link 
-                          to={`/bookings/${b.id}`} 
-                          className="text-sm font-semibold text-zinc-900 hover:text-[#234c6a] hover:underline"
-                        >
-                          {b.vendor}
-                        </Link>
-                      </td>
-
-                      {/* 3. Service */}
-                      <td className="py-3.5 px-4 whitespace-nowrap text-sm text-zinc-600">
-                        {b.service}
-                      </td>
-
-                      {/* 4. Category */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200/80">
-                          {b.category || 'Miscellaneous'}
-                        </span>
-                      </td>
-
-                      {/* 5. Event Date */}
-                      <td className="py-3.5 px-4 whitespace-nowrap text-sm text-zinc-600">
-                        {b.event_date ? (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar size={14} className="text-zinc-400 shrink-0" />
-                            {formatDate(b.event_date)}
+                    <div key={b.id} className="festive-card p-5 relative overflow-hidden bg-white border border-amber-200/70 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                      <div>
+                        {/* Top Header */}
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono">
+                            #BK-{String(b.id).slice(-4)}
                           </span>
-                        ) : (
-                          <span className="text-zinc-300">—</span>
-                        )}
-                      </td>
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                            {b.category || 'Vendor'}
+                          </span>
+                        </div>
 
-                      {/* 6. Payment & Progress (Intuitive, Uncluttered Horizontal Bar) */}
-                      <td className="py-3 px-4 min-w-[220px]">
-                        <div className="flex flex-col gap-1.5">
-                          {/* Top: Paid / Total & Status */}
-                          <div className="flex items-baseline justify-between text-sm">
-                            <span className="font-semibold text-zinc-900">
-                              {fmt(paid)}
-                              <span className="text-zinc-400 font-normal text-xs ml-1">of {fmt(tAmt)}</span>
-                            </span>
-                            <span className={`text-xs font-semibold ${pct >= 100 ? 'text-emerald-700' : 'text-zinc-600'}`}>
-                              {pct >= 100 ? 'Settled' : `${pct}%`}
-                            </span>
+                        {/* Vendor Name & Service */}
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs ring-1 ring-amber-200">
+                            {b.vendor ? b.vendor.charAt(0).toUpperCase() : 'V'}
                           </div>
-                          
-                          {/* Progress Track */}
-                          <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+                          <div className="min-w-0 flex-1">
+                            <Link to={`/bookings/${b.id}`} className="font-serif font-bold text-base text-zinc-900 hover:text-rose-700 transition-colors block truncate">
+                              {b.vendor}
+                            </Link>
+                            <p className="text-xs text-zinc-500 font-medium truncate mt-0.5">
+                              {b.service || 'Wedding Service'}
+                            </p>
+                            {b.event_date && (
+                              <p className="text-[11px] text-zinc-500 font-medium mt-1 flex items-center gap-1">
+                                <Calendar size={12} className="text-amber-600" />
+                                <span>Ceremony: {formatDate(b.event_date)}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Payment Progress Bar */}
+                        <div className="p-3 bg-amber-50/40 rounded-xl border border-amber-100 mb-4">
+                          <div className="flex items-baseline justify-between text-xs mb-1.5">
+                            <span className="font-bold text-zinc-900">{fmt(paid)} <span className="text-zinc-400 font-normal text-[10px]">paid</span></span>
+                            <span className="font-bold text-zinc-900">{fmt(tAmt)} <span className="text-zinc-400 font-normal text-[10px]">total</span></span>
+                          </div>
+                          <div className="w-full bg-zinc-200 rounded-full h-2 overflow-hidden mb-1.5">
                             <div 
                               className={`h-full rounded-full transition-all duration-500 ${
-                                pct >= 100 ? 'bg-emerald-600' : 'bg-[#234c6a]'
+                                pct >= 100 ? 'bg-emerald-600' : 'bg-gradient-to-r from-amber-500 to-rose-500'
                               }`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-
-                          {/* Bottom: Advance Breakdown & Remaining Due */}
-                          <div className="flex items-center justify-between text-xs text-zinc-500">
-                            <span>Adv: <span className="text-zinc-700 font-medium">{fmt(advAmt)}</span></span>
-                            {pct >= 100 ? (
-                              <span className="text-emerald-600 font-medium">Fully paid</span>
-                            ) : (
-                              <span>Due: <span className="text-zinc-700 font-medium">{fmt(Math.max(0, tAmt - paid))}</span></span>
-                            )}
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="font-semibold text-rose-700">Due: {fmt(remaining)}</span>
+                            <span className="font-bold text-zinc-600">{pct}% Complete</span>
                           </div>
                         </div>
-                      </td>
+                      </div>
 
-                      {/* 7. Actions: Only 3-dot icon button */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <BookingActionMenu
-                          onView={() => navigate(`/bookings/${b.id}`)}
-                          onAttachPayment={() => {
-                            setAttachBooking(b);
-                            setIsAttachOpen(true);
-                          }}
-                          onRecordPayment={() => openPay(b.id)}
-                          onDelete={() => confirmDelete(b.id)}
-                        />
-                      </td>
-                    </tr>
+                      {/* Card Actions */}
+                      <div className="pt-3 border-t border-zinc-100 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openPay(b.id)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <CreditCard size={14} /> Pay Installment
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/bookings/${b.id}`)}
+                          className="p-2 rounded-xl bg-zinc-100 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="View Contract"
+                        >
+                          <ExternalLink size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openEdit(b)}
+                          className="p-2 rounded-xl bg-zinc-100 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 transition-colors cursor-pointer"
+                          title="Edit Contract"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => confirmDelete(b.id)}
+                          className="p-2 rounded-xl bg-zinc-100 text-zinc-600 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Contract"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            ) : (
+              <div className="overflow-auto flex-1 w-full relative">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
+                    <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
+                      <th className="py-3.5 px-4 whitespace-nowrap">BOOKING ID</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">VENDOR</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">SERVICE</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">CATEGORY</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">EVENT DATE</th>
+                      <th className="py-3.5 px-4 min-w-[220px]">PAYMENT PROGRESS</th>
+                      <th className="py-3.5 px-4 text-right whitespace-nowrap">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((b) => {
+                    const tAmt = Number(b.amount) || 0;
+                    const advAmt = Number(b.advance) || 0;
+                    const linked = expenses.filter(e => String(e.booking_id) === String(b.id));
+                    const expPaid = linked.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+                    const paid = expPaid > 0 ? expPaid : advAmt;
+                    const pct = tAmt > 0 ? Math.min(100, Math.round((paid / tAmt) * 100)) : 0;
 
-          <TablePagination
-            currentPage={currentPage}
-            totalItems={filtered.length}
-            pageSize={pageSize}
-            pageSizeOptions={[5, 10, 20, 50, 100]}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
-        </>
-      ) : (
+                    return (
+                      <tr key={b.id} className="hover:bg-amber-50/40 transition-colors">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <Link 
+                            to={`/bookings/${b.id}`} 
+                            className="text-sm font-semibold text-rose-700 hover:text-rose-800 hover:underline"
+                          >
+                            #BK-{String(b.id).slice(-4)}
+                          </Link>
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <Link 
+                            to={`/bookings/${b.id}`} 
+                            className="text-sm font-semibold text-zinc-900 hover:text-rose-700 hover:underline"
+                          >
+                            {b.vendor}
+                          </Link>
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap text-sm text-zinc-600">
+                          {b.service}
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                            {b.category || 'Miscellaneous'}
+                          </span>
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap text-sm text-zinc-600">
+                          {b.event_date ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Calendar size={14} className="text-amber-600 shrink-0" />
+                              {formatDate(b.event_date)}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-300">—</span>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-4 min-w-[220px]">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-baseline justify-between text-sm">
+                              <span className="font-semibold text-zinc-900">
+                                {fmt(paid)}
+                                <span className="text-zinc-400 font-normal text-xs ml-1">of {fmt(tAmt)}</span>
+                              </span>
+                              <span className={`text-xs font-semibold ${pct >= 100 ? 'text-emerald-700' : 'text-zinc-600'}`}>
+                                {pct >= 100 ? 'Settled' : `${pct}%`}
+                              </span>
+                            </div>
+                            
+                            <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  pct >= 100 ? 'bg-emerald-600' : 'bg-gradient-to-r from-amber-500 to-rose-500'
+                                }`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-zinc-500">
+                              <span>Adv: <span className="text-zinc-700 font-medium">{fmt(advAmt)}</span></span>
+                              {pct >= 100 ? (
+                                <span className="text-emerald-600 font-medium">Fully paid</span>
+                              ) : (
+                                <span>Due: <span className="text-zinc-700 font-medium">{fmt(Math.max(0, tAmt - paid))}</span></span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <BookingActionMenu
+                            onView={() => navigate(`/bookings/${b.id}`)}
+                            onAttachPayment={() => {
+                              setAttachBooking(b);
+                              setIsAttachOpen(true);
+                            }}
+                            onRecordPayment={() => openPay(b.id)}
+                            onDelete={() => confirmDelete(b.id)}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            )}
+
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={filtered.length}
+              pageSize={pageSize}
+              pageSizeOptions={[6, 12, 24, 50]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
+        ) : (
           <div className="py-20 flex flex-col items-center justify-center flex-1">
-            <div className="w-14 h-14 rounded-2xl bg-zinc-50 flex items-center justify-center mb-3 text-zinc-300">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-3 text-amber-600">
               <CalendarCheck size={32} />
             </div>
-            <h3 className="text-zinc-700 font-bold text-base">No bookings found</h3>
-            <p className="text-zinc-400 text-xs mt-1">Get started by creating your first vendor booking.</p>
+            <h3 className="text-zinc-800 font-bold text-base">No bookings found</h3>
+            <p className="text-zinc-500 text-xs mt-1">Get started by creating your first vendor booking.</p>
           </div>
         )}
       </div>
