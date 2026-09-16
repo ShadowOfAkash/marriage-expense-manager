@@ -190,6 +190,45 @@ async function initLibSQL() {
       await db.execute("CREATE INDEX IF NOT EXISTS idx_checklist_stage ON checklist_tasks (user_id, timeline_stage)");
     } catch(e){}
 
+    // Vendor discovery tables
+    try {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS vendor_locations (
+          user_id   TEXT PRIMARY KEY,
+          location  TEXT NOT NULL DEFAULT '',
+          lat       REAL DEFAULT 0,
+          lng       REAL DEFAULT 0,
+          updated_at TEXT DEFAULT (datetime('now'))
+        )
+      `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS vendor_cache (
+          place_id  TEXT PRIMARY KEY,
+          category  TEXT DEFAULT '',
+          data      TEXT DEFAULT '{}',
+          cached_at TEXT DEFAULT (datetime('now'))
+        )
+      `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS vendor_quotes (
+          id            INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id       TEXT NOT NULL,
+          vendor_name   TEXT NOT NULL,
+          vendor_email  TEXT DEFAULT '',
+          vendor_phone  TEXT DEFAULT '',
+          user_name     TEXT DEFAULT '',
+          user_email    TEXT DEFAULT '',
+          user_phone    TEXT DEFAULT '',
+          event_date    TEXT DEFAULT '',
+          event_type    TEXT DEFAULT 'Wedding',
+          guest_count   TEXT DEFAULT '',
+          message       TEXT DEFAULT '',
+          status        TEXT DEFAULT 'sent',
+          created_at    TEXT DEFAULT (datetime('now'))
+        )
+      `);
+    } catch(e){}
+
     console.log('✅ Turso tables ready');
     return true;
   } catch (e) {

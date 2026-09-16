@@ -10,6 +10,7 @@ import BookingDetail from './components/BookingDetail'
 import Guests    from './components/Guests'
 import GuestRsvpPortal from './components/GuestRsvpPortal'
 import Checklist from './components/Checklist'
+import VendorDiscovery from './components/VendorDiscovery'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { Menu, Sparkles, Share, X } from 'lucide-react'
@@ -65,6 +66,7 @@ function MainApp() {
   const pageTitles = {
     dashboard: 'Dashboard',
     checklist: 'Checklist',
+    vendors: 'Vendors',
     guests: 'Guests',
     bookings: 'Bookings',
     expenses: 'Payments',
@@ -113,6 +115,7 @@ function MainApp() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/checklist" element={<Checklist />} />
+          <Route path="/vendors" element={<VendorDiscovery />} />
           <Route path="/guests" element={<Guests />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/bookings" element={<Bookings />} />

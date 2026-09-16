@@ -165,7 +165,16 @@ export const api = {
   toggleChecklistTask:      (id)       => fetchWithAuth(`/api/checklist/${id}/toggle`, { method: 'PATCH' }),
   deleteChecklistTask:      (id)       => fetchWithAuth(`/api/checklist/${id}`, { method: 'DELETE' }),
   seedChecklistTasks:       (data)     => fetchWithAuth('/api/checklist/seed', { method: 'POST', body: JSON.stringify(data || {}) }),
-  bulkUpdateChecklistTasks: (data)     => fetchWithAuth('/api/checklist/bulk', { method: 'POST', body: JSON.stringify(data) })
+  bulkUpdateChecklistTasks: (data)     => fetchWithAuth('/api/checklist/bulk', { method: 'POST', body: JSON.stringify(data) }),
+
+  // VENDORS
+  getVendorCategories:  ()       => fetchWithAuth('/api/vendors/categories'),
+  searchVendors:        (params) => fetchWithAuth(`/api/vendors/search?${new URLSearchParams(params)}`),
+  getVendorDetails:     (placeId) => fetchWithAuth(`/api/vendors/${encodeURIComponent(placeId)}`),
+  getVendorPhotoUrl:    (name)   => `${getApiBaseUrl()}/api/vendors/photo?name=${encodeURIComponent(name)}`,
+  requestVendorQuote:   (data)   => fetchWithAuth('/api/vendors/quote', { method: 'POST', body: JSON.stringify(data) }),
+  saveWeddingLocation:  (data)   => fetchWithAuth('/api/vendors/location', { method: 'POST', body: JSON.stringify(data) }),
+  getWeddingLocation:   ()       => fetchWithAuth('/api/vendors/location'),
 };
 
 export const CHECKLIST_CATEGORIES = [

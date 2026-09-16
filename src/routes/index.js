@@ -12,6 +12,7 @@ const telegramRoutes = require('./telegramRoutes');
 const rsvpRoutes     = require('./rsvpRoutes');
 const whatsappRoutes = require('./whatsappRoutes');
 const checklistRoutes = require('./checklistRoutes');
+const vendorRoutes    = require('./vendorRoutes');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -25,5 +26,6 @@ router.use('/email', emailRoutes);
 router.use('/telegram', telegramRoutes);
 router.use('/public/rsvp', rsvpRoutes);
 router.use('/whatsapp', whatsappRoutes);
+router.use('/vendors', vendorRoutes);
 
 module.exports = router;

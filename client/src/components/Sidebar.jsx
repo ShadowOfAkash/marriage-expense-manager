@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   LayoutDashboard, Receipt, PiggyBank, LogOut, 
   ChevronLeft, ChevronRight, CalendarCheck, 
-  X, Sparkles, AlertTriangle, Users, ListChecks 
+  X, Sparkles, AlertTriangle, Users, ListChecks, Store 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -36,6 +36,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'checklist', label: 'Checklist', icon: ListChecks },
+    { id: 'vendors',   label: 'Vendors',   icon: Store },
     { id: 'guests',    label: 'Guests',    icon: Users },
     { id: 'bookings',  label: 'Bookings',  icon: CalendarCheck },
     { id: 'expenses',  label: 'Payments',  icon: Receipt },
