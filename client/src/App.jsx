@@ -12,6 +12,7 @@ import GuestRsvpPortal from './components/GuestRsvpPortal'
 import Checklist from './components/Checklist'
 import VendorDiscovery from './components/VendorDiscovery'
 import OnboardingWizard from './components/OnboardingWizard'
+import Profile from './components/Profile'
 import { api } from './utils/api'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
@@ -83,12 +84,13 @@ function MainApp() {
   
   const pageTitles = {
     dashboard: 'Dashboard',
+    profile: 'Couple Profile',
     checklist: 'Checklist',
     vendors: 'Vendors',
     guests: 'Guests',
     bookings: 'Bookings',
     expenses: 'Payments',
-    savings: 'Savings'
+    savings: 'Vivah Fund & Shagun'
   }
   const currentTab = location.pathname.split('/')[1] || 'dashboard'
   const currentTitle = pageTitles[currentTab] || 'Marriage Manager'
@@ -154,6 +156,7 @@ function MainApp() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile weddingProfile={weddingProfile} onProfileUpdated={setWeddingProfile} />} />
           <Route path="/checklist" element={<Checklist />} />
           <Route path="/vendors" element={<VendorDiscovery />} />
           <Route path="/guests" element={<Guests />} />
@@ -161,6 +164,9 @@ function MainApp() {
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/bookings/:id" element={<BookingDetail />} />
           <Route path="/savings" element={<Savings />} />
+          <Route path="/fund" element={<Savings />} />
+          <Route path="/vivah-fund" element={<Savings />} />
+          <Route path="/shagun" element={<Savings />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </main>

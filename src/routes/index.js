@@ -20,7 +20,7 @@ router.use('/auth', authRoutes);
 router.use('/', budgetRoutes);
 router.use('/', paymentsRoutes);
 router.use('/bookings', bookingsRoutes);
-router.use('/savings', savingsRoutes);
+router.use(['/savings', '/fund', '/shagun'], savingsRoutes);
 router.use('/guests', guestsRoutes);
 router.use('/checklist', checklistRoutes);
 router.use('/email', emailRoutes);

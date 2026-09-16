@@ -9,7 +9,8 @@ import {
   ChevronRight, IndianRupee,
   Smartphone, Users, Heart, Calendar, MapPin,
   Sparkles, CheckCircle2, Store, ListChecks,
-  ArrowRight, Edit3, Clock, Check, Send, Plus
+  ArrowRight, Edit3, Clock, Check, Send, Plus,
+  PiggyBank, Camera
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -250,6 +251,25 @@ export default function Dashboard() {
   const remainingBudget = Math.max(0, budgetTotal - totalExpenses);
   const budgetUtilization = budgetTotal > 0 ? Math.round((totalExpenses / budgetTotal) * 100) : 0;
 
+  // Profile Completeness Milestones
+  const profileMilestones = useMemo(() => [
+    { key: 'groom_name', label: 'Groom Name', done: Boolean(weddingProfile?.groom_name?.trim()), weight: 15 },
+    { key: 'bride_name', label: 'Bride Name', done: Boolean(weddingProfile?.bride_name?.trim()), weight: 15 },
+    { key: 'groom_photo', label: 'Groom Photo', done: Boolean(weddingProfile?.groom_photo_url), weight: 15 },
+    { key: 'bride_photo', label: 'Bride Photo', done: Boolean(weddingProfile?.bride_photo_url), weight: 15 },
+    { key: 'wedding_date', label: 'Muhurat Date', done: Boolean(weddingProfile?.wedding_date), weight: 15 },
+    { key: 'wedding_location', label: 'Destination City', done: Boolean(weddingProfile?.wedding_location?.trim()), weight: 15 },
+    { key: 'story_or_budget', label: 'Budget & Theme', done: Boolean((weddingProfile?.estimated_budget || 0) > 0 || weddingProfile?.cover_photo_url), weight: 10 },
+  ], [weddingProfile]);
+
+  const profileProgress = useMemo(() => {
+    return profileMilestones.reduce((acc, m) => acc + (m.done ? m.weight : 0), 0);
+  }, [profileMilestones]);
+
+  const pendingMilestones = useMemo(() => {
+    return profileMilestones.filter(m => !m.done);
+  }, [profileMilestones]);
+
   if (loading) {
     return (
       <div className="h-[70vh] flex items-center justify-center">
@@ -275,49 +295,163 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
+      {/* ── 0. Top Profile Progress Card ── */}
+      <div className="mb-6 bg-gradient-to-r from-[#FAF7F2] via-white to-[#FDF9F3] border border-amber-200/90 rounded-3xl p-5 shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-amber-200/20 via-rose-100/20 to-transparent rounded-full pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 flex-1 min-w-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-rose-600 to-amber-500 text-amber-100 flex items-center justify-center shrink-0 shadow-md shadow-rose-900/10 ring-2 ring-amber-200/60">
+              <Sparkles size={22} className="animate-pulse" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h3 className="font-serif font-black text-sm md:text-base text-zinc-900 tracking-tight">
+                  {profileProgress === 100 ? '✨ Shubh Vivah Profile Complete!' : 'Personalize Your Couple Wedding Vibe'}
+                </h3>
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                  {profileProgress}% Completed
+                </span>
+              </div>
+
+              <p className="text-xs text-zinc-500 line-clamp-1 mb-2">
+                {profileProgress === 100 
+                  ? 'Your couple portraits, Muhurat countdown, and wedding theme are active across the entire portal.' 
+                  : `Add ${pendingMilestones.slice(0, 2).map(m => m.label).join(' & ')} to give the portal your unique wedding vibe.`}
+              </p>
+
+              {/* Progress bar */}
+              <div className="w-full max-w-md bg-zinc-100 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-amber-400 via-rose-500 to-[#9b1c1c] h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${profileProgress}%` }} 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border border-rose-900/40"
+            >
+              <Heart size={14} className="fill-white/80" />
+              <span>{profileProgress === 100 ? 'View Couple Profile' : 'Upload Photos & Complete Profile'}</span>
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* ── 1. Couple Hero Banner ── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FAF7F2] via-[#FFFDFB] to-[#F5ECE0] border border-amber-200/80 p-6 md:p-8 mb-6 shadow-xs">
+        {/* Cover Photo Backdrop if Available */}
+        {weddingProfile?.cover_photo_url && (
+          <img 
+            src={weddingProfile.cover_photo_url} 
+            alt="Wedding Cover" 
+            className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" 
+          />
+        )}
         {/* Subtle romantic accents */}
         <div className="absolute -top-10 -right-10 w-48 h-48 bg-amber-200/30 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-rose-200/20 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-2.5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-200/80 text-[#9b1c1c] text-xs font-bold shadow-2xs">
-                <Heart size={12} className="fill-[#9b1c1c]" />
-                <span>{sideLabel}</span>
-              </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs">
-                <Sparkles size={11} className="text-amber-600" />
-                <span>शुभ विवाह • Shubh Vivah</span>
-              </span>
-              {weddingProfile?.wedding_location && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-zinc-200/80 text-zinc-600 text-xs font-medium">
-                  <MapPin size={12} className="text-[#047857]" />
-                  <span>{weddingProfile.wedding_location}</span>
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+          
+          {/* Left Hero Section: Portraits + Names */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left flex-1 min-w-0">
+            
+            {/* Ornate Circular Couple Portraits */}
+            <div 
+              onClick={() => navigate('/profile')}
+              className="flex items-center justify-center -space-x-4 cursor-pointer group shrink-0"
+              title="Click to manage bride & groom photos"
+            >
+              {/* Groom Avatar */}
+              <div className="relative">
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-amber-200 to-amber-500 shadow-md group-hover:scale-105 transition-transform">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-amber-200 font-serif font-black text-xl">
+                    {weddingProfile?.groom_photo_url ? (
+                      <img src={weddingProfile.groom_photo_url} alt="Groom" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="flex flex-col items-center justify-center text-[10px] font-bold text-amber-200">
+                        <span>🤵</span>
+                        <span className="text-[9px] text-amber-300/80">+ Photo</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-zinc-900/90 border border-amber-300 text-[9px] font-bold text-amber-200 whitespace-nowrap shadow-xs">
+                  {weddingProfile?.groom_name ? weddingProfile.groom_name.split(' ')[0] : 'वर (Groom)'}
                 </span>
-              )}
+              </div>
+
+              {/* Auspicious Center Heart Connector */}
+              <div className="relative z-10 w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-[#9b1c1c] border-2 border-amber-200 text-white flex items-center justify-center shadow-lg transform -translate-y-1">
+                <Heart size={13} className="fill-white animate-pulse" />
+              </div>
+
+              {/* Bride Avatar */}
+              <div className="relative">
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full p-1 bg-gradient-to-tr from-rose-400 via-amber-200 to-rose-500 shadow-md group-hover:scale-105 transition-transform">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-rose-200 font-serif font-black text-xl">
+                    {weddingProfile?.bride_photo_url ? (
+                      <img src={weddingProfile.bride_photo_url} alt="Bride" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="flex flex-col items-center justify-center text-[10px] font-bold text-rose-200">
+                        <span>👰</span>
+                        <span className="text-[9px] text-rose-300/80">+ Photo</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-zinc-900/90 border border-rose-300 text-[9px] font-bold text-rose-200 whitespace-nowrap shadow-xs">
+                  {weddingProfile?.bride_name ? weddingProfile.bride_name.split(' ')[0] : 'वधू (Bride)'}
+                </span>
+              </div>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-black text-zinc-900 tracking-tight leading-tight mb-2 font-serif">
-              {coupleTitle}
-            </h1>
+            {/* Couple Text & Details */}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-200/80 text-[#9b1c1c] text-xs font-bold shadow-2xs">
+                  <Heart size={12} className="fill-[#9b1c1c]" />
+                  <span>{sideLabel}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs">
+                  <Sparkles size={11} className="text-amber-600" />
+                  <span>शुभ विवाह • Shubh Vivah</span>
+                </span>
+                {weddingProfile?.wedding_location && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-zinc-200/80 text-zinc-600 text-xs font-medium">
+                    <MapPin size={12} className="text-[#047857]" />
+                    <span>{weddingProfile.wedding_location}</span>
+                  </span>
+                )}
+              </div>
 
-            <p className="text-sm text-zinc-600 font-medium flex items-center gap-2">
-              {weddingDateStr ? (
-                <>
-                  <Calendar size={14} className="text-[#9b1c1c]" />
-                  <span>{new Date(weddingDateStr).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </>
-              ) : (
-                <span>Set your wedding date to unlock the countdown & auspicious ceremony timeline</span>
-              )}
-            </p>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight leading-tight mb-1.5 font-serif">
+                {coupleTitle}
+              </h1>
+
+              <p className="text-xs sm:text-sm text-zinc-600 font-medium flex items-center justify-center sm:justify-start gap-2">
+                {weddingDateStr ? (
+                  <>
+                    <Calendar size={14} className="text-[#9b1c1c]" />
+                    <span>{new Date(weddingDateStr).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </>
+                ) : (
+                  <span>Set your wedding date to unlock the countdown & auspicious ceremony timeline</span>
+                )}
+              </p>
+            </div>
           </div>
 
           {/* Right Hero Side: Live Countdown & Edit Profile */}
-          <div className="flex flex-row md:flex-col items-end gap-3 w-full md:w-auto justify-between md:justify-end">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 w-full sm:w-auto justify-between sm:justify-end">
             {countdownDays !== null && (
               <div className="bg-white/95 backdrop-blur-xs border border-amber-200/80 rounded-2xl px-5 py-3.5 shadow-xs text-center">
                 <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest flex items-center justify-center gap-1">
@@ -338,11 +472,11 @@ export default function Dashboard() {
             )}
 
             <button
-              onClick={() => setIsEditProfileOpen(true)}
+              onClick={() => navigate('/profile')}
               className="px-3.5 py-2 rounded-xl bg-white border border-amber-200 hover:border-amber-300 text-xs font-semibold text-zinc-700 hover:text-zinc-900 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Edit3 size={13} className="text-zinc-500" />
-              <span>Edit Details</span>
+              <Heart size={13} className="text-rose-600 fill-rose-500/20" />
+              <span>Couple Profile</span>
             </button>
           </div>
         </div>
@@ -432,8 +566,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 4 Planning Pulse Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 5 Planning Pulse Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Countdown / Milestone */}
             <div 
               onClick={() => navigate('/checklist')}
@@ -531,6 +665,28 @@ export default function Dashboard() {
                 <span className="text-[#9b1c1c] font-semibold flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
               </div>
             </div>
+
+            {/* Vivah Fund & Shagun Pulse */}
+            <div 
+              onClick={() => navigate('/savings')}
+              className="bg-white p-5 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Vivah Fund</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <PiggyBank size={16} />
+                </div>
+              </div>
+              <div className="text-2xl font-black text-zinc-900 mb-1 font-serif text-[#9b1c1c]">
+                {fmt(totalSavings)}
+              </div>
+              <p className="text-xs text-zinc-500 line-clamp-1">
+                {savings.length} {savings.length === 1 ? 'deposit' : 'deposits'} & family blessings
+              </p>
+              <div className="mt-3 flex items-center gap-1 text-xs font-bold text-[#d97706] group-hover:translate-x-0.5 transition-transform">
+                <span>View Treasury</span> <ChevronRight size={14} />
+              </div>
+            </div>
           </div>
 
           {/* ── Upcoming Tasks & Quick Actions 2-Column ── */}
@@ -618,11 +774,27 @@ export default function Dashboard() {
                   </button>
 
                   <button
+                    onClick={() => navigate('/savings')}
+                    className="p-3.5 rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-300 text-amber-950 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
+                  >
+                    <PiggyBank size={18} className="mb-2 text-amber-700" />
+                    <span>Vivah Fund & Shagun</span>
+                  </button>
+
+                  <button
                     onClick={() => setIsAddExpOpen(true)}
                     className="p-3.5 rounded-2xl bg-rose-50/80 hover:bg-rose-100/80 border border-rose-200 text-[#9b1c1c] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
                   >
                     <Receipt size={18} className="mb-2 text-[#9b1c1c]" />
                     <span>Log Kharcha</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="p-3.5 rounded-2xl bg-pink-50/80 hover:bg-pink-100/80 border border-pink-200 text-pink-900 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
+                  >
+                    <Heart size={18} className="mb-2 text-rose-600 fill-rose-500/20" />
+                    <span>Couple Profile</span>
                   </button>
 
                   <button

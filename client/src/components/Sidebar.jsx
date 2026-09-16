@@ -35,12 +35,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
 
   const navItems = [
     { id: 'dashboard', label: 'Vivah Suite', sub: 'Overview & Muhurat', icon: LayoutDashboard },
+    { id: 'profile',   label: 'Couple Profile', sub: 'Photos & Muhurat', icon: Heart },
     { id: 'checklist', label: 'Shaadi Roadmap', sub: 'Checklist & To-Dos', icon: ListChecks },
     { id: 'vendors',   label: 'Vendor Bazaar', sub: 'Explore & Quotes', icon: Store },
     { id: 'guests',    label: 'Mehmaan & RSVPs', sub: 'Guest List & Invites', icon: Users },
     { id: 'bookings',  label: 'Vendor Contracts', sub: 'Bookings & Advances', icon: CalendarCheck },
     { id: 'expenses',  label: 'Shaadi Kharcha', sub: 'Payments & Bills', icon: Receipt },
-    { id: 'savings',   label: 'Shagun & Fund', sub: 'Treasury & Gifts', icon: PiggyBank },
+    { id: 'savings',   label: 'Vivah Fund & Shagun', sub: 'Treasury & Gifts', icon: PiggyBank },
   ];
 
   const handleNav = (id) => {
@@ -87,17 +88,58 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
         isMobileView || isExpanded ? 'justify-between' : 'justify-center'
       }`}>
         {!isMobileView && !isExpanded ? (
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0">
-            <Sparkles size={18} />
-          </div>
+          <button
+            type="button"
+            onClick={() => handleNav('profile')}
+            title={coupleDisplayName}
+            className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 cursor-pointer overflow-hidden ring-2 ring-amber-300/60"
+          >
+            {weddingProfile?.groom_photo_url || weddingProfile?.bride_photo_url ? (
+              <img 
+                src={weddingProfile.groom_photo_url || weddingProfile.bride_photo_url} 
+                alt="Couple" 
+                className="w-full h-full object-cover" 
+              />
+            ) : (
+              <Sparkles size={18} />
+            )}
+          </button>
         ) : (
           <>
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 ring-2 ring-amber-200/50">
-                <Sparkles size={20} className="animate-pulse" />
+            <button
+              type="button"
+              onClick={() => handleNav('profile')}
+              className="flex items-center gap-3 min-w-0 text-left cursor-pointer group"
+              title="View & Edit Couple Profile"
+            >
+              <div className="relative shrink-0">
+                {weddingProfile?.groom_photo_url && weddingProfile?.bride_photo_url ? (
+                  <div className="flex -space-x-3 items-center">
+                    <img 
+                      src={weddingProfile.groom_photo_url} 
+                      alt="Groom" 
+                      className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-300 shadow-sm" 
+                    />
+                    <img 
+                      src={weddingProfile.bride_photo_url} 
+                      alt="Bride" 
+                      className="w-8 h-8 rounded-full object-cover ring-2 ring-rose-400 shadow-sm" 
+                    />
+                  </div>
+                ) : weddingProfile?.groom_photo_url || weddingProfile?.bride_photo_url ? (
+                  <img 
+                    src={weddingProfile.groom_photo_url || weddingProfile.bride_photo_url} 
+                    alt="Couple" 
+                    className="w-11 h-11 rounded-2xl object-cover ring-2 ring-amber-300/80 shadow-md shadow-rose-500/10" 
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 ring-2 ring-amber-200/50 group-hover:scale-105 transition-transform">
+                    <Sparkles size={20} className="animate-pulse" />
+                  </div>
+                )}
               </div>
               <div className="min-w-0">
-                <div className="font-serif font-bold text-base tracking-tight text-zinc-900 leading-tight truncate">
+                <div className="font-serif font-bold text-base tracking-tight text-zinc-900 leading-tight truncate group-hover:text-rose-700 transition-colors">
                   {coupleDisplayName}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -111,7 +153,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
                   )}
                 </div>
               </div>
-            </div>
+            </button>
 
             {isMobileView && (
               <button
@@ -174,14 +216,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
 
       {/* User Info & Quick Actions Footer */}
       <div className="border-t border-amber-200/60 p-3 flex flex-col gap-2 bg-[#F4EFEA]/80 overflow-visible">
-        {(isMobileView || isExpanded) && onEditProfile && (
+        {(isMobileView || isExpanded) && (
           <button
             type="button"
-            onClick={onEditProfile}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white border border-amber-200 text-amber-900 hover:bg-amber-50 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+            onClick={() => handleNav('profile')}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white border border-amber-200 text-rose-950 hover:bg-amber-50 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
           >
-            <Sparkles size={13} className="text-amber-600" />
-            <span>Customize Vivah Details</span>
+            <Heart size={13} className="text-rose-600 fill-rose-500/20" />
+            <span>Couple Profile & Photos</span>
           </button>
         )}
 

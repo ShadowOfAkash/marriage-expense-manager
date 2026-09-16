@@ -180,6 +180,7 @@ export const api = {
   // WEDDING PROFILE & ONBOARDING
   getWeddingProfile:          ()     => fetchWithAuth('/api/wedding/profile'),
   saveWeddingProfile:         (data) => fetchWithAuth('/api/wedding/profile', { method: 'POST', body: JSON.stringify(data) }),
+  uploadWeddingPhoto:         (data) => fetchWithAuth('/api/wedding/upload-photo', { method: 'POST', body: JSON.stringify(data) }),
   completeWeddingOnboarding:  (data) => fetchWithAuth('/api/wedding/onboard', { method: 'POST', body: JSON.stringify(data) }),
 };
 

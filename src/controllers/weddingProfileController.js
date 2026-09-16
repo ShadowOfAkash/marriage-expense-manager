@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+const { UPLOADS_DIR } = require('../config/env');
 const { isLibSQL, dbGet, dbRun, readJSON, writeJSON } = require('../db');
 
 /**
@@ -42,6 +45,8 @@ async function saveProfile(req, res) {
       estimated_guests,
       story_title,
       cover_photo_url,
+      groom_photo_url,
+      bride_photo_url,
       onboarding_completed
     } = req.body;
 
@@ -64,6 +69,8 @@ async function saveProfile(req, res) {
             estimated_guests = COALESCE(?, estimated_guests),
             story_title = COALESCE(?, story_title),
             cover_photo_url = COALESCE(?, cover_photo_url),
+            groom_photo_url = COALESCE(?, groom_photo_url),
+            bride_photo_url = COALESCE(?, bride_photo_url),
             onboarding_completed = COALESCE(?, onboarding_completed),
             updated_at = ?
           WHERE user_id = ?`,
@@ -71,7 +78,8 @@ async function saveProfile(req, res) {
             user_role, groom_name, bride_name, wedding_date,
             wedding_location, wedding_lat, wedding_lng, planning_side,
             estimated_budget, estimated_guests, story_title,
-            cover_photo_url, onboarding_completed, now, userId
+            cover_photo_url, groom_photo_url, bride_photo_url,
+            onboarding_completed, now, userId
           ]
         );
       } else {
@@ -80,8 +88,9 @@ async function saveProfile(req, res) {
             user_id, user_role, groom_name, bride_name, wedding_date,
             wedding_location, wedding_lat, wedding_lng, planning_side,
             estimated_budget, estimated_guests, story_title, cover_photo_url,
+            groom_photo_url, bride_photo_url,
             onboarding_completed, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             userId,
             user_role || 'Groom',
@@ -96,6 +105,8 @@ async function saveProfile(req, res) {
             Number(estimated_guests) || 0,
             story_title || '',
             cover_photo_url || '',
+            groom_photo_url || '',
+            bride_photo_url || '',
             onboarding_completed ? 1 : 0,
             now,
             now
@@ -127,6 +138,8 @@ async function saveProfile(req, res) {
       estimated_guests: estimated_guests !== undefined ? Number(estimated_guests) : (prev.estimated_guests || 0),
       story_title: story_title !== undefined ? story_title : (prev.story_title || ''),
       cover_photo_url: cover_photo_url !== undefined ? cover_photo_url : (prev.cover_photo_url || ''),
+      groom_photo_url: groom_photo_url !== undefined ? groom_photo_url : (prev.groom_photo_url || ''),
+      bride_photo_url: bride_photo_url !== undefined ? bride_photo_url : (prev.bride_photo_url || ''),
       onboarding_completed: onboarding_completed !== undefined ? (onboarding_completed ? 1 : 0) : (prev.onboarding_completed || 0),
       updated_at: now,
       created_at: prev.created_at || now
@@ -264,8 +277,39 @@ async function completeOnboarding(req, res) {
   }
 }
 
+/**
+ * POST /api/wedding/upload-photo
+ * Handles base64 photo uploads for bride, groom, or wedding cover.
+ */
+async function uploadWeddingPhoto(req, res) {
+  try {
+    const { file, filename, type } = req.body;
+    if (!file) return res.status(400).json({ error: 'No image data provided' });
+
+    // Clean base64 string if data URL prefix is included
+    const base64Data = file.includes(',') ? file.split(',')[1] : file;
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const safeType = type === 'bride' ? 'bride' : type === 'groom' ? 'groom' : type === 'cover' ? 'cover' : 'photo';
+    const ext = filename && filename.includes('.') ? path.extname(filename) : '.jpg';
+    const finalName = `couple_${safeType}_${Date.now()}${ext}`;
+
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    }
+    fs.writeFileSync(path.join(UPLOADS_DIR, finalName), buffer);
+    const photoUrl = `/uploads/${finalName}`;
+
+    res.json({ success: true, url: photoUrl });
+  } catch (e) {
+    console.error('Photo upload error:', e);
+    res.status(500).json({ error: 'Failed to upload photo: ' + e.message });
+  }
+}
+
 module.exports = {
   getProfile,
   saveProfile,
-  completeOnboarding
+  completeOnboarding,
+  uploadWeddingPhoto
 };

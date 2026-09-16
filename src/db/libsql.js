@@ -242,11 +242,15 @@ async function initLibSQL() {
           estimated_guests     INTEGER DEFAULT 0,
           story_title          TEXT DEFAULT '',
           cover_photo_url      TEXT DEFAULT '',
+          groom_photo_url      TEXT DEFAULT '',
+          bride_photo_url      TEXT DEFAULT '',
           onboarding_completed INTEGER DEFAULT 0,
           created_at           TEXT DEFAULT (datetime('now')),
           updated_at           TEXT DEFAULT (datetime('now'))
         )
       `);
+      try { await db.execute("ALTER TABLE wedding_profiles ADD COLUMN groom_photo_url TEXT DEFAULT ''"); } catch(e){}
+      try { await db.execute("ALTER TABLE wedding_profiles ADD COLUMN bride_photo_url TEXT DEFAULT ''"); } catch(e){}
     } catch(e){}
 
     console.log('✅ Turso tables ready');

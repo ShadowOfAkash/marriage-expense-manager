@@ -5,6 +5,7 @@ const weddingProfileController = require('../controllers/weddingProfileControlle
 
 router.get('/profile', requireAuth, weddingProfileController.getProfile);
 router.post('/profile', requireAuth, weddingProfileController.saveProfile);
+router.post('/upload-photo', requireAuth, weddingProfileController.uploadWeddingPhoto);
 router.post('/onboard', requireAuth, weddingProfileController.completeOnboarding);
 
 module.exports = router;

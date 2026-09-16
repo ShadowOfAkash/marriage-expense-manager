@@ -23,21 +23,28 @@ export default function Savings() {
     setLoading(true);
     try { 
       const data = await api.getSavings();
-      data.sort((a, b) => {
-        if (b.year !== a.year) return b.year - a.year;
-        return MONTH_NAMES.indexOf(b.month) - MONTH_NAMES.indexOf(a.month);
+      const list = Array.isArray(data) ? [...data] : [];
+      list.sort((a, b) => {
+        const yA = Number(a?.year) || 0;
+        const yB = Number(b?.year) || 0;
+        if (yB !== yA) return yB - yA;
+        const mA = MONTH_NAMES.indexOf(a?.month);
+        const mB = MONTH_NAMES.indexOf(b?.month);
+        return mB - mA;
       });
-      setSavings(data || []);
+      setSavings(list);
     } catch (e) {
-      console.error(e);
+      console.error('Failed to load savings:', e);
+      setSavings([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => { loadData(); }, []);
 
-  const total = savings.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-  const avgContribution = savings.length > 0 ? Math.round(total / savings.length) : 0;
+  const total = Array.isArray(savings) ? savings.reduce((acc, curr) => acc + Number(curr?.amount || 0), 0) : 0;
+  const avgContribution = (Array.isArray(savings) && savings.length > 0) ? Math.round(total / savings.length) : 0;
 
   const confirmDelete = (id) => {
     setDelId(id);
@@ -72,10 +79,10 @@ export default function Savings() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight font-serif flex items-center gap-2">
-                  Shagun & Wedding Fund
+                  Vivah Fund & Shagun Treasury
                 </h1>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-[10px] font-bold">
-                  <Sparkles size={10} className="text-amber-600" /> शुभ बचत
+                  <Sparkles size={10} className="text-amber-600" /> शुभ बचत व शगुन
                 </span>
               </div>
               <p className="text-xs text-zinc-500 mt-0.5">
