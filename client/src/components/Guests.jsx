@@ -760,24 +760,24 @@ export default function Guests() {
   const isFiltersActive = search || filterCategory !== 'All' || (activeTab === 'invitations' && filterRsvp !== 'All') || filterAttendance !== 'All' || filterEvent !== 'All';
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen flex flex-col">
+    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
       
       {/* 1. Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shrink-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-amber-200/70 pb-6">
         <div>
-          <h1 className="font-serif text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
-            <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-xs">
-              <Users size={20} />
+          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight flex items-center gap-3">
+            <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-900/15 shrink-0">
+              <Users size={26} />
             </span>
             <span>Mehmaan & Digital Invites</span>
           </h1>
-          <p className="text-zinc-500 text-xs md:text-sm mt-1">
+          <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 max-w-xl leading-relaxed">
             Manage Ladkewale & Ladkiwale invitations, WhatsApp digital invites, bhojan & stay
           </p>
         </div>
 
-        {/* Action Controls Toolbar - Clean single-row layout without awkward wrapping */}
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap md:flex-nowrap w-full md:w-auto justify-start md:justify-end">
+        {/* Action Controls Toolbar */}
+        <div className="flex items-center gap-3 shrink-0 flex-wrap md:flex-nowrap w-full md:w-auto justify-start md:justify-end">
           {/* Email Delivery Status Pill */}
           <button
             type="button"
@@ -787,7 +787,7 @@ export default function Guests() {
                 ? `Email delivery active: ${emailSettings.smtp_user || 'Connected'}. Click to configure settings.`
                 : 'Email delivery not configured yet (Sandbox Mode). Click to connect Gmail or custom SMTP.'
             }
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs border ${
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs border ${
               emailSettings?.configured
                 ? 'bg-emerald-50/90 border-emerald-300 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400'
                 : 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100 hover:border-amber-400'
@@ -797,35 +797,35 @@ export default function Guests() {
               <>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                 <span>Email Live</span>
-                <Settings2 size={12} className="text-emerald-700 opacity-80 ml-0.5 shrink-0" />
+                <Settings2 size={13} className="text-emerald-700 opacity-80 ml-0.5 shrink-0" />
               </>
             ) : (
               <>
-                <AlertTriangle size={13} className="text-amber-600 shrink-0" />
+                <AlertTriangle size={14} className="text-amber-600 shrink-0" />
                 <span>Setup Email</span>
               </>
             )}
           </button>
 
           {/* Grouped CSV Import & Export Segmented Control */}
-          <div className="inline-flex items-center rounded-lg border border-zinc-200/90 bg-white p-0.5 shadow-2xs">
+          <div className="inline-flex items-center rounded-xl border border-zinc-200/90 bg-white p-1 shadow-2xs">
             <button
               type="button"
               onClick={() => setIsImportOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/90 rounded-md transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/90 rounded-lg transition-colors cursor-pointer"
               title="Import guests from a CSV spreadsheet"
             >
-              <Upload size={13} className="text-[#234c6a]" />
+              <Upload size={14} className="text-[#9b1c1c]" />
               <span>Import</span>
             </button>
-            <div className="h-4 w-[1px] bg-zinc-200 mx-0.5" />
+            <div className="h-4 w-[1px] bg-zinc-200 mx-1" />
             <button
               type="button"
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/90 rounded-md transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/90 rounded-lg transition-colors cursor-pointer"
               title="Export guest list to CSV spreadsheet"
             >
-              <Download size={13} className="text-[#234c6a]" />
+              <Download size={14} className="text-[#9b1c1c]" />
               <span>Export</span>
             </button>
           </div>
@@ -834,25 +834,25 @@ export default function Guests() {
           <Button
             radius="sm"
             onClick={() => setIsAddOpen(true)}
-            className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+            className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-2xl shadow-sm flex items-center gap-2 shrink-0 cursor-pointer"
           >
-            <Plus size={16} /> Add Mehmaan
+            <Plus size={17} /> Add Mehmaan
           </Button>
         </div>
       </div>
 
-      {/* 2. Top Summary Metrics Cards (Matching Bookings & Payments 3-card stats) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6 shrink-0">
-        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <Users size={20} />
+      {/* 2. Top Summary Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <Users size={26} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Total Mehmaan</div>
-              <div className="text-2xl font-black text-zinc-900 tracking-tight">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Mehmaan</div>
+              <div className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight font-serif">
                 {summary?.total_guests || guests.length}
-                <span className="text-xs font-semibold text-zinc-500 ml-1.5">
+                <span className="text-xs font-semibold text-zinc-500 ml-1.5 font-sans">
                   ({summary?.total_expected_attendees || guests.reduce((s, g) => s + (g.expected_attendees || 1), 0)} souls)
                 </span>
               </div>
@@ -860,16 +860,16 @@ export default function Guests() {
           </div>
         </Card>
 
-        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <CheckCircle2 size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <CheckCircle2 size={26} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Confirmed RSVPs</div>
-              <div className="text-2xl font-black text-emerald-700 tracking-tight">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Confirmed RSVPs</div>
+              <div className="text-2xl md:text-3xl font-black text-emerald-700 tracking-tight font-serif">
                 {confirmedGuests.length}
-                <span className="text-xs font-semibold text-emerald-600 ml-1.5">
+                <span className="text-xs font-semibold text-emerald-600 ml-1.5 font-sans">
                   ({summary?.total_guests > 0 ? Math.round((confirmedGuests.length / summary.total_guests) * 100) : 0}%)
                 </span>
               </div>
@@ -877,28 +877,28 @@ export default function Guests() {
           </div>
         </Card>
 
-        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <Mail size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <Mail size={26} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Pending Invitations</div>
-              <div className="text-2xl font-black text-amber-700 tracking-tight">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Pending Invitations</div>
+              <div className="text-2xl md:text-3xl font-black text-amber-700 tracking-tight font-serif">
                 {pendingGuests.length}
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 border border-amber-200/70 shadow-xs bg-white rounded-2xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <Building2 size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
+              <Building2 size={26} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Hotel Rooms Needed</div>
-              <div className="text-2xl font-black text-zinc-900 tracking-tight">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Hotel Rooms Needed</div>
+              <div className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight font-serif">
                 {summary?.by_stay?.['Hotel'] || 0}
               </div>
             </div>
@@ -907,19 +907,19 @@ export default function Guests() {
       </div>
 
       {/* 3. Sleek Two-Tab Switcher */}
-      <div className="flex items-center gap-2 mb-4 border-b border-amber-200/70 shrink-0">
+      <div className="flex items-center gap-3 border-b border-amber-200/70 pb-2 shrink-0">
         <button
           type="button"
           onClick={() => handleTabChange('invitations')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-sm md:text-base font-bold border-b-2 transition-all cursor-pointer rounded-t-2xl ${
             activeTab === 'invitations'
-              ? 'border-rose-600 text-rose-800'
+              ? 'border-rose-600 text-rose-800 bg-rose-50/40'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
-          <Mail size={16} />
+          <Mail size={17} />
           <span>All Mehmaan & Invitations</span>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
             activeTab === 'invitations' ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {guests.length}
@@ -929,15 +929,15 @@ export default function Guests() {
         <button
           type="button"
           onClick={() => handleTabChange('confirmed')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-sm md:text-base font-bold border-b-2 transition-all cursor-pointer rounded-t-2xl ${
             activeTab === 'confirmed'
-              ? 'border-emerald-600 text-emerald-800'
+              ? 'border-emerald-600 text-emerald-800 bg-emerald-50/40'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
-          <CheckCircle2 size={16} className={activeTab === 'confirmed' ? 'text-emerald-600' : ''} />
+          <CheckCircle2 size={17} className={activeTab === 'confirmed' ? 'text-emerald-600' : ''} />
           <span>Confirmed & Attending</span>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
             activeTab === 'confirmed' ? 'bg-emerald-700 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {confirmedGuests.length}
@@ -978,11 +978,11 @@ export default function Guests() {
       )}
 
       {/* 4. Search and Filters Toolbar */}
-      <div className="mb-4 bg-white border border-amber-200/70 rounded-2xl p-3 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shrink-0">
+      <div className="mb-6 bg-white border border-amber-200/70 rounded-3xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between shrink-0">
         
         {/* Search Input Box */}
-        <div className="flex-1 flex items-center gap-2.5 bg-zinc-50 border border-zinc-200/60 rounded-xl px-3 py-1.5 focus-within:border-amber-400 focus-within:bg-white transition-all">
-          <Search size={16} className="text-zinc-400 shrink-0" />
+        <div className="flex-1 flex items-center gap-3 bg-zinc-50 border border-zinc-200/60 rounded-2xl px-4 py-2 focus-within:border-amber-400 focus-within:bg-white transition-all">
+          <Search size={17} className="text-zinc-400 shrink-0" />
           <input
             type="text"
             placeholder={activeTab === 'invitations' ? "Search by name, phone, family, tag..." : "Search confirmed guests..."}
@@ -991,7 +991,7 @@ export default function Guests() {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-900 placeholder:text-zinc-400 py-1"
+            className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 py-1"
           />
           {search && (
             <button
@@ -1008,14 +1008,14 @@ export default function Guests() {
         </div>
 
         {/* Filter Selects & Count */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           
           {/* Relation Filter */}
           <div className="relative">
             <select
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value); setCurrentPage(1); }}
-              className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-semibold text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+              className="h-10 pl-3.5 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-semibold text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
             >
               <option value="All">All Relations</option>
               {RELATIONSHIP_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -1024,11 +1024,11 @@ export default function Guests() {
           </div>
 
           {/* View Mode Switcher: Cards vs Table */}
-          <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200 shrink-0">
+          <div className="flex items-center bg-zinc-100 p-1.5 rounded-2xl border border-zinc-200 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'cards'
                   ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
                   : 'text-zinc-500 hover:text-zinc-800'
@@ -1039,7 +1039,7 @@ export default function Guests() {
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'table'
                   ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
                   : 'text-zinc-500 hover:text-zinc-800'
@@ -1055,7 +1055,7 @@ export default function Guests() {
               <select
                 value={filterRsvp}
                 onChange={(e) => { setFilterRsvp(e.target.value); setCurrentPage(1); }}
-                className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+                className="h-10 pl-3.5 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 {RSVP_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -1070,7 +1070,7 @@ export default function Guests() {
               <select
                 value={filterAttendance}
                 onChange={(e) => { setFilterAttendance(e.target.value); setCurrentPage(1); }}
-                className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+                className="h-10 pl-3.5 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
               >
                 <option value="All">All Attendance</option>
                 <option value="Attended">Attended</option>
@@ -1087,7 +1087,7 @@ export default function Guests() {
               <select
                 value={filterStay}
                 onChange={(e) => { setFilterStay(e.target.value); setCurrentPage(1); }}
-                className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+                className="h-10 pl-3.5 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
               >
                 <option value="All">All Stays</option>
                 {STAY_PREFERENCES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -1102,7 +1102,7 @@ export default function Guests() {
               <select
                 value={filterEvent}
                 onChange={(e) => { setFilterEvent(e.target.value); setCurrentPage(1); }}
-                className="h-9.5 pl-3 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-lg text-sm font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
+                className="h-10 pl-3.5 pr-8 bg-zinc-50 hover:bg-zinc-100 transition-colors rounded-xl text-xs font-medium text-zinc-800 border border-zinc-200 outline-none appearance-none cursor-pointer"
               >
                 <option value="All">All Ceremonies</option>
                 {WEDDING_EVENTS.map(ev => <option key={ev} value={ev}>{ev}</option>)}
@@ -1111,16 +1111,12 @@ export default function Guests() {
             </div>
           )}
 
-          {/* Total Filtered Count Badge */}
-          <div className="hidden sm:flex items-center px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs font-semibold text-zinc-600 whitespace-nowrap">
-            {filteredGuests.length} {filteredGuests.length === 1 ? 'guest' : 'guests'}
-          </div>
-
+          {/* Clear Filters Button */}
           {isFiltersActive && (
             <button
               type="button"
               onClick={handleClearFilters}
-              className="text-xs font-semibold text-[#234c6a] hover:underline cursor-pointer"
+              className="h-10 px-3 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors cursor-pointer"
             >
               Reset
             </button>
@@ -1128,23 +1124,26 @@ export default function Guests() {
         </div>
       </div>
 
-      {/* 5. Floating / Sticky Bulk Action Bar */}
+      {/* 5. Bulk Selection Banner (when items selected) */}
       {selectedIds.length > 0 && (
-        <div className="sticky top-4 z-30 mb-4 p-3 bg-zinc-900 text-white rounded-xl shadow-xl flex items-center justify-between flex-wrap gap-3 animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold bg-zinc-800 text-zinc-200 px-3 py-1.5 rounded-lg">
-              {selectedIds.length} {selectedIds.length === 1 ? 'guest' : 'guests'} selected
+        <div className="mb-6 p-4 rounded-3xl bg-zinc-900 text-white flex flex-wrap items-center justify-between gap-4 shadow-lg shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-black">
+              {selectedIds.length}
+            </span>
+            <span className="text-xs font-bold">
+              {selectedIds.length === 1 ? '1 Mehmaan selected' : `${selectedIds.length} Mehmaan selected`}
             </span>
             <button
               type="button"
               onClick={() => setSelectedIds([])}
-              className="text-xs text-zinc-400 hover:text-white underline cursor-pointer"
+              className="text-xs text-zinc-400 hover:text-white underline cursor-pointer ml-1"
             >
               Deselect
             </button>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
             {/* Tab 1 Bulk RSVP */}
             {activeTab === 'invitations' && (
               <select
@@ -1155,7 +1154,7 @@ export default function Guests() {
                     e.target.value = '';
                   }
                 }}
-                className="h-8 px-2.5 text-xs bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-lg focus:outline-none cursor-pointer"
+                className="h-9 px-3 text-xs bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-xl focus:outline-none cursor-pointer"
               >
                 <option value="" disabled>Set Status...</option>
                 <option value="Pending Invitation">Mark Pending Invitation</option>
@@ -1168,27 +1167,27 @@ export default function Guests() {
 
             {/* Tab 2 Bulk Attendance Actions */}
             {activeTab === 'confirmed' && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleBulkAttendance('Attended')}
-                  className="h-8 px-2.5 text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1"
+                  className="h-9 px-3 text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <CheckCircle2 size={13} />
+                  <CheckCircle2 size={14} />
                   <span>Mark All Attended</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkAttendance('Did Not Attend')}
-                  className="h-8 px-2.5 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-rose-300 border border-zinc-700 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1"
+                  className="h-9 px-3 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-rose-300 border border-zinc-700 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <XCircle size={13} />
+                  <XCircle size={14} />
                   <span>Mark Absent</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkAttendance('Pending')}
-                  className="h-8 px-2.5 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-lg transition-colors cursor-pointer"
+                  className="h-9 px-3 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-xl transition-colors cursor-pointer"
                 >
                   Reset Pending
                 </button>
@@ -1205,7 +1204,7 @@ export default function Guests() {
                     e.target.value = '';
                   }
                 }}
-                className="h-8 px-2.5 text-xs bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-lg focus:outline-none cursor-pointer"
+                className="h-9 px-3 text-xs bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-xl focus:outline-none cursor-pointer"
               >
                 <option value="" disabled>Assign Ceremony...</option>
                 {WEDDING_EVENTS.map(ev => (
@@ -1219,9 +1218,9 @@ export default function Guests() {
               <button
                 type="button"
                 onClick={() => setBulkInviteOpen(true)}
-                className="h-8 px-3 text-xs font-bold bg-[#234c6a] hover:bg-[#1b3c53] text-white rounded-lg border border-[#325a77] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                className="h-9 px-3.5 text-xs font-bold bg-[#234c6a] hover:bg-[#1b3c53] text-white rounded-xl border border-[#325a77] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
               >
-                <Mail size={13} className="text-[#f3e5ab]" />
+                <Mail size={14} className="text-[#f3e5ab]" />
                 <span>Send Invitations ({selectedIds.length})</span>
               </button>
             )}
@@ -1230,7 +1229,7 @@ export default function Guests() {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="h-8 px-3 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg border border-zinc-700 transition-colors cursor-pointer"
+              className="h-9 px-3 text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl border border-zinc-700 transition-colors cursor-pointer"
             >
               Export ({selectedIds.length})
             </button>
@@ -1239,7 +1238,7 @@ export default function Guests() {
             <button
               type="button"
               onClick={() => setShowBulkDeleteConfirm(true)}
-              className="h-8 px-3 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors cursor-pointer"
+              className="h-9 px-3 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors cursor-pointer"
             >
               Delete
             </button>
@@ -1248,19 +1247,19 @@ export default function Guests() {
       )}
 
       {/* 6. Primary Content Container */}
-      <div className="shadow-xs border border-amber-200/70 flex-1 flex flex-col overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xs">
+      <div className="shadow-xs border border-amber-200/70 flex-1 flex flex-col overflow-hidden rounded-3xl bg-white/70 backdrop-blur-xs">
         {viewMode === 'cards' ? (
-          <div className="p-4 md:p-6 overflow-y-auto flex-1">
+          <div className="p-6 md:p-8 overflow-y-auto flex-1">
             {paginatedGuests.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-14 h-14 rounded-2xl bg-amber-100/70 text-amber-700 flex items-center justify-center mx-auto mb-3">
-                  <Users size={24} />
+              <div className="text-center py-20">
+                <div className="w-16 h-16 rounded-3xl bg-amber-100/70 text-amber-700 flex items-center justify-center mx-auto mb-4">
+                  <Users size={28} />
                 </div>
                 <h3 className="font-serif font-bold text-lg text-zinc-800">No Mehmaan Found</h3>
-                <p className="text-zinc-500 text-xs mt-1">Try adjusting your search query or ceremony filter.</p>
+                <p className="text-zinc-500 text-xs sm:text-sm mt-1">Try adjusting your search query or ceremony filter.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
                 {paginatedGuests.map((g) => {
                   const isSelected = selectedIds.includes(g.id);
                   const isAttended = g.actual_attendance === 'Attended' || g.check_in_status;
@@ -1279,7 +1278,7 @@ export default function Guests() {
                   return (
                     <div 
                       key={g.id} 
-                      className={`festive-card p-5 relative overflow-hidden transition-all duration-200 flex flex-col justify-between ${
+                      className={`festive-card p-6 md:p-7 rounded-3xl relative overflow-hidden transition-all duration-200 flex flex-col justify-between space-y-4 ${
                         isSelected ? 'border-amber-400 ring-2 ring-amber-300/50 bg-amber-50/20' : 'bg-white border-amber-200/70'
                       }`}
                     >

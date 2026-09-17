@@ -320,40 +320,40 @@ export default function Checklist() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
       
       {/* 1. Header & Quick Actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-amber-200/70 pb-6">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-[#b91c1c] to-[#d97706] flex items-center justify-center text-amber-100 shadow-md shadow-amber-900/10 shrink-0">
-              <CheckSquare size={22} className="text-amber-200" />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-[#b91c1c] to-[#d97706] flex items-center justify-center text-amber-100 shadow-md shadow-amber-900/15 shrink-0">
+              <CheckSquare size={26} className="text-amber-200" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight font-serif flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight font-serif flex items-center gap-2">
                   Shaadi Roadmap & Milestones
                 </h1>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-[10px] font-bold">
-                  <Sparkles size={10} className="text-amber-600" /> शुभ विवाह
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-xs font-bold">
+                  <Sparkles size={12} className="text-amber-600" /> शुभ विवाह
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-zinc-500 mt-1 max-w-xl leading-relaxed">
                 Curated Indian wedding journey • Track rituals, bookings & timelines from Sagai to Vidai
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             radius="sm"
             size="sm"
             variant="bordered"
             onClick={() => window.print()}
-            className="text-xs font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs"
+            className="text-xs sm:text-sm font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs py-2 px-3.5 rounded-xl"
           >
-            <Printer size={13} />
+            <Printer size={15} />
             <span>Print Roadmap</span>
           </Button>
 
@@ -362,9 +362,9 @@ export default function Checklist() {
             size="sm"
             variant="bordered"
             onClick={() => setShowSeedConfirm(true)}
-            className="text-xs font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs"
+            className="text-xs sm:text-sm font-semibold bg-white border-amber-200/80 text-zinc-700 hover:bg-amber-50/50 shadow-2xs py-2 px-3.5 rounded-xl"
           >
-            <RefreshCw size={13} />
+            <RefreshCw size={15} />
             <span>Reset Defaults</span>
           </Button>
 
@@ -372,9 +372,9 @@ export default function Checklist() {
             radius="sm"
             size="sm"
             onClick={() => openAddModal()}
-            className="text-xs font-bold bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white shadow-sm inline-flex items-center gap-1.5 cursor-pointer border border-rose-900/40"
+            className="text-xs sm:text-sm font-bold bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white shadow-sm inline-flex items-center gap-2 cursor-pointer border border-rose-900/40 py-2.5 px-4 rounded-xl"
           >
-            <Plus size={14} className="text-amber-200" />
+            <Plus size={16} className="text-amber-200" />
             <span>Add Custom Task</span>
           </Button>
         </div>
@@ -382,31 +382,31 @@ export default function Checklist() {
 
       {/* 2. Progress & Motivation Hero Card */}
       {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Main Progress Gauge - Royal Sindoor & Gold Theme */}
-          <div className="md:col-span-2 p-5 bg-gradient-to-br from-[#7c1717] via-[#9b1c1c] to-[#450a0a] text-white rounded-3xl shadow-lg shadow-rose-950/10 flex flex-col justify-between border border-amber-500/30 relative overflow-hidden">
+          <div className="md:col-span-2 p-7 md:p-8 bg-gradient-to-br from-[#7c1717] via-[#9b1c1c] to-[#450a0a] text-white rounded-3xl shadow-lg shadow-rose-950/10 flex flex-col justify-between border border-amber-500/30 relative overflow-hidden space-y-4">
             <div className="absolute -top-12 -right-12 w-36 h-36 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-200 flex items-center gap-1.5">
-                <Sparkles size={12} className="text-amber-300 animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-200 flex items-center gap-2">
+                <Sparkles size={14} className="text-amber-300 animate-pulse" />
                 Royal Wedding Roadmap Progress
               </span>
-              <span className="text-xs font-mono font-bold text-amber-100/80 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+              <span className="text-xs font-mono font-bold text-amber-100/90 bg-white/15 px-3 py-1 rounded-full border border-white/10">
                 {summary.completed} / {summary.total} Done
               </span>
             </div>
             
-            <div className="my-3 relative z-10">
-              <div className="flex items-baseline justify-between mb-2">
-                <span className="text-3xl md:text-4xl font-black tracking-tight text-white font-serif">
+            <div className="my-2 relative z-10 space-y-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-4xl md:text-5xl font-black tracking-tight text-white font-serif">
                   {summary.percentage}%
                 </span>
-                <span className="text-xs font-semibold text-amber-200 flex items-center gap-1 bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-300/30">
-                  <CheckCircle2 size={13} className="text-amber-300" />
+                <span className="text-xs sm:text-sm font-semibold text-amber-200 flex items-center gap-1.5 bg-amber-400/20 px-3 py-1 rounded-xl border border-amber-300/30">
+                  <CheckCircle2 size={15} className="text-amber-300" />
                   <span>{summary.pending} Tasks Pending</span>
                 </span>
               </div>
-              <div className="w-full h-3 bg-black/30 rounded-full overflow-hidden p-0.5 border border-white/10">
+              <div className="w-full h-3.5 bg-black/30 rounded-full overflow-hidden p-0.5 border border-white/10">
                 <div 
                   className="h-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 rounded-full transition-all duration-500 ease-out shadow-xs"
                   style={{ width: `${summary.percentage}%` }}
@@ -414,7 +414,7 @@ export default function Checklist() {
               </div>
             </div>
 
-            <p className="text-[12px] text-amber-100/90 leading-snug relative z-10 font-medium">
+            <p className="text-xs sm:text-sm text-amber-100/90 leading-relaxed relative z-10 font-medium">
               {summary.percentage >= 80 
                 ? '🌟 Shubh Aarambh! Incredible devotion — you are in the majestic final stretch of wedding preparations!' 
                 : summary.percentage >= 40 
@@ -424,22 +424,22 @@ export default function Checklist() {
           </div>
 
           {/* Quick Metrics */}
-          <div className="p-5 bg-white border border-amber-200/70 rounded-3xl shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between text-xs text-zinc-500 font-semibold">
+          <div className="p-7 md:p-8 bg-white border border-amber-200/70 rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between text-xs sm:text-sm text-zinc-500 font-semibold">
               <span className="font-bold text-zinc-700">Milestone Status</span>
-              <ListFilter size={14} className="text-amber-600" />
+              <ListFilter size={16} className="text-amber-600" />
             </div>
-            <div className="grid grid-cols-2 gap-2 my-2">
-              <div className="p-2.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/60">
-                <span className="text-[10px] uppercase font-bold text-emerald-800 block">Accomplished</span>
-                <span className="text-2xl font-black text-emerald-950 font-serif">{summary.completed}</span>
+            <div className="grid grid-cols-2 gap-3 my-1">
+              <div className="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/60 min-w-0">
+                <span className="text-[10px] uppercase font-bold text-emerald-800 block mb-0.5 truncate tracking-wider">Done</span>
+                <span className="text-2xl sm:text-3xl font-black text-emerald-950 font-serif">{summary.completed}</span>
               </div>
-              <div className="p-2.5 bg-amber-50/80 rounded-2xl border border-amber-200/60">
-                <span className="text-[10px] uppercase font-bold text-amber-800 block">Upcoming</span>
-                <span className="text-2xl font-black text-amber-950 font-serif">{summary.pending}</span>
+              <div className="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200/60 min-w-0">
+                <span className="text-[10px] uppercase font-bold text-amber-800 block mb-0.5 truncate tracking-wider">Pending</span>
+                <span className="text-2xl sm:text-3xl font-black text-amber-950 font-serif">{summary.pending}</span>
               </div>
             </div>
-            <div className="text-[11px] text-zinc-500 flex items-center justify-between pt-1 border-t border-zinc-100">
+            <div className="text-xs text-zinc-500 flex items-center justify-between pt-2 border-t border-zinc-100">
               <span>Attention Needed:</span>
               <span className={`font-bold ${summary.overdue > 0 ? 'text-rose-600' : 'text-zinc-700'}`}>
                 {summary.overdue > 0 ? `${summary.overdue} Overdue` : 'All on Track ✨'}
@@ -448,39 +448,39 @@ export default function Checklist() {
           </div>
 
           {/* Cross-Module Quick Link Card */}
-          <div className="p-5 bg-gradient-to-br from-amber-50/90 to-amber-100/40 border border-amber-200/80 rounded-3xl shadow-xs flex flex-col justify-between">
+          <div className="p-7 md:p-8 bg-gradient-to-br from-amber-50/90 to-amber-100/40 border border-amber-200/80 rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950 mb-1">
-                <Sparkles size={14} className="text-amber-600" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-950 mb-1.5">
+                <Sparkles size={16} className="text-amber-600" />
                 <span>Royal Shaadi Suite</span>
               </div>
-              <p className="text-[11px] text-amber-900/80 leading-relaxed">
+              <p className="text-xs text-amber-900/80 leading-relaxed">
                 Connect your checklist tasks directly with your real expenses, bookings, and guests.
               </p>
             </div>
-            <div className="flex items-center gap-1.5 pt-2">
+            <div className="flex items-center gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => navigate('/expenses')}
-                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                className="flex-1 py-2 px-2.5 bg-white/95 hover:bg-white text-xs font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Receipt size={12} className="text-emerald-600" />
+                <Receipt size={13} className="text-emerald-600" />
                 <span>Kharcha</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/bookings')}
-                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                className="flex-1 py-2 px-2.5 bg-white/95 hover:bg-white text-xs font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <CalendarCheck size={12} className="text-[#9b1c1c]" />
+                <CalendarCheck size={13} className="text-[#9b1c1c]" />
                 <span>Vendors</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/guests')}
-                className="flex-1 py-1.5 px-2 bg-white/95 hover:bg-white text-[11px] font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                className="flex-1 py-2 px-2.5 bg-white/95 hover:bg-white text-xs font-bold text-zinc-800 rounded-xl border border-amber-200 transition-colors shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Users size={12} className="text-rose-600" />
+                <Users size={13} className="text-rose-600" />
                 <span>Mehmaan</span>
               </button>
             </div>
@@ -489,14 +489,14 @@ export default function Checklist() {
       )}
 
       {/* 3. Ceremony Ritual Ribbon */}
-      <div className="overflow-x-auto pb-1 -mb-2">
-        <div className="flex items-center gap-1.5 min-w-max p-1.5 bg-white/90 border border-amber-200/70 rounded-2xl shadow-2xs">
+      <div className="overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 min-w-max p-2 bg-white/90 border border-amber-200/70 rounded-2xl shadow-2xs">
           {CEREMONY_RIBBON.map(ribbon => (
             <button
               key={ribbon.id}
               type="button"
               onClick={() => setCeremonyFilter(ribbon.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 ceremonyFilter === ribbon.id
                   ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
                   : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
@@ -510,55 +510,55 @@ export default function Checklist() {
       </div>
 
       {/* 4. Control & Filter Toolbar */}
-      <div className="p-4 bg-white border border-amber-200/70 rounded-3xl shadow-xs space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div className="p-6 md:p-7 bg-white border border-amber-200/70 rounded-3xl shadow-xs space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           
           {/* View Mode Switcher */}
-          <div className="inline-flex p-1 bg-amber-50/60 border border-amber-200/50 rounded-2xl">
+          <div className="inline-flex p-1.5 bg-amber-50/60 border border-amber-200/50 rounded-2xl">
             <button
               type="button"
               onClick={() => setViewMode('timeline')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'timeline'
                   ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40 font-serif'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              <Calendar size={13} />
+              <Calendar size={14} />
               <span>Timeline View (Months)</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('category')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'category'
                   ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40 font-serif'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              <Layers size={13} />
+              <Layers size={14} />
               <span>Category View (Function)</span>
             </button>
           </div>
 
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               placeholder="Search rituals, tasks, notes, assignees..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-[#FAF7F2] border border-amber-200/70 rounded-2xl text-xs text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-[#9b1c1c] outline-none transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#FAF7F2] border border-amber-200/70 rounded-2xl text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-[#9b1c1c] outline-none transition-colors"
             />
           </div>
 
           {/* Expand / Collapse All */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={expandAll}
-              className="text-[11px] font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
+              className="text-xs font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
             >
               Expand All
             </button>
@@ -566,7 +566,7 @@ export default function Checklist() {
             <button
               type="button"
               onClick={() => collapseAll(allVisibleGroupKeys)}
-              className="text-[11px] font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
+              className="text-xs font-semibold text-zinc-600 hover:text-[#9b1c1c] underline cursor-pointer"
             >
               Collapse All
             </button>
@@ -574,9 +574,9 @@ export default function Checklist() {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-amber-100">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-bold text-zinc-500 mr-1">Status:</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-amber-100">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-zinc-500 mr-1">Status:</span>
             {[
               { id: 'all', label: `All (${tasks.length})` },
               { id: 'pending', label: `Pending (${tasks.filter(t => !t.completed).length})` },
@@ -587,7 +587,7 @@ export default function Checklist() {
                 key={pill.id}
                 type="button"
                 onClick={() => setStatusFilter(pill.id)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   statusFilter === pill.id
                     ? 'bg-[#9b1c1c] text-white shadow-2xs font-bold'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
@@ -599,11 +599,11 @@ export default function Checklist() {
           </div>
 
           {/* Secondary Dropdowns */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
+              className="px-3 py-2 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
             >
               <option value="all">All Categories</option>
               {CHECKLIST_CATEGORIES.map(c => (
@@ -614,7 +614,7 @@ export default function Checklist() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
+              className="px-3 py-2 bg-[#FAF7F2] border border-amber-200/70 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
             >
               <option value="all">All Priorities</option>
               {TASK_PRIORITIES.map(p => (
@@ -627,30 +627,30 @@ export default function Checklist() {
 
       {/* 4. Task Groups (Timeline or Category) */}
       {loading ? (
-        <div className="p-12 text-center bg-white border border-zinc-200 rounded-2xl shadow-2xs">
-          <RefreshCw size={24} className="animate-spin text-[#1b3c53] mx-auto mb-2" />
-          <p className="text-xs font-semibold text-zinc-600">Loading your royal wedding checklist...</p>
+        <div className="p-16 text-center bg-white border border-amber-200/70 rounded-3xl shadow-xs">
+          <RefreshCw size={26} className="animate-spin text-[#9b1c1c] mx-auto mb-3" />
+          <p className="text-xs sm:text-sm font-semibold text-zinc-600">Loading your royal wedding checklist...</p>
         </div>
       ) : filteredTasks.length === 0 ? (
-        <div className="p-12 text-center bg-white border border-zinc-200 rounded-2xl shadow-2xs space-y-3">
-          <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400">
-            <CheckSquare size={24} />
+        <div className="p-16 text-center bg-white border border-amber-200/70 rounded-3xl shadow-xs space-y-4">
+          <div className="w-14 h-14 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400">
+            <CheckSquare size={28} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-zinc-800">No matching tasks found</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">Try clearing filters or search criteria, or add a custom task.</p>
+            <h3 className="text-base font-bold text-zinc-800">No matching tasks found</h3>
+            <p className="text-xs sm:text-sm text-zinc-500 mt-1">Try clearing filters or search criteria, or add a custom task.</p>
           </div>
           <Button
             radius="sm"
             size="sm"
             onClick={() => { setSearch(''); setStatusFilter('all'); setCategoryFilter('all'); setPriorityFilter('all'); }}
-            className="text-xs font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+            className="text-xs font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 px-4 py-2"
           >
             Clear Filters
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {(viewMode === 'timeline' ? TIMELINE_STAGES : CHECKLIST_CATEGORIES).map(groupName => {
             const groupTasks = viewMode === 'timeline' 
               ? (tasksByStage[groupName] || []) 
@@ -674,30 +674,30 @@ export default function Checklist() {
                 <button
                   type="button"
                   onClick={() => toggleGroup(groupName)}
-                  className="w-full px-4 py-3.5 bg-[#FAF7F2] hover:bg-[#F5ECE0]/80 transition-colors flex items-center justify-between gap-3 border-b border-amber-200/50 cursor-pointer text-left"
+                  className="w-full px-6 py-5 bg-[#FAF7F2] hover:bg-[#F5ECE0]/80 transition-colors flex items-center justify-between gap-4 border-b border-amber-200/50 cursor-pointer text-left"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-amber-700/60">
-                      {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-amber-700/70">
+                      {isCollapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-zinc-900 tracking-tight font-serif flex items-center gap-2">
+                      <h2 className="text-base font-bold text-zinc-900 tracking-tight font-serif flex items-center gap-2.5">
                         {groupName}
                         {pct === 100 && totalCount > 0 && (
                           <span className="text-xs text-emerald-600 font-semibold inline-flex items-center gap-1">
-                            <CheckCheck size={14} /> Completed
+                            <CheckCheck size={15} /> Completed
                           </span>
                         )}
                       </h2>
-                      <p className="text-[11px] text-zinc-500">
+                      <p className="text-xs text-zinc-500 mt-0.5">
                         {completedCount} of {totalCount} tasks completed ({pct}%)
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="w-24 hidden sm:block">
-                      <div className="w-full bg-amber-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="w-28 hidden sm:block">
+                      <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
                         <div 
                           className={`h-full rounded-full transition-all duration-300 ${pct === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-400 to-[#9b1c1c]'}`}
                           style={{ width: `${pct}%` }}
@@ -713,9 +713,9 @@ export default function Checklist() {
                         if (viewMode === 'timeline') openAddModal(groupName, CHECKLIST_CATEGORIES[0]);
                         else openAddModal(TIMELINE_STAGES[0], groupName);
                       }}
-                      className="text-[11px] font-bold text-[#9b1c1c] bg-amber-100/70 hover:bg-amber-200/60 h-7 px-2.5 border border-amber-200/80 rounded-lg"
+                      className="text-xs font-bold text-[#9b1c1c] bg-amber-100/70 hover:bg-amber-200/60 h-8 px-3 border border-amber-200/80 rounded-xl"
                     >
-                      <Plus size={12} />
+                      <Plus size={13} />
                       <span className="hidden sm:inline">Add Task</span>
                     </Button>
                   </div>
@@ -725,7 +725,7 @@ export default function Checklist() {
                 {!isCollapsed && (
                   <div className="divide-y divide-amber-100/60">
                     {groupTasks.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-zinc-400 italic">
+                      <div className="p-6 text-center text-xs sm:text-sm text-zinc-400 italic">
                         No tasks in this section. Click "+ Add Task" above to add one.
                       </div>
                     ) : (
@@ -735,7 +735,7 @@ export default function Checklist() {
                           <div
                             key={task.id}
                             onClick={() => setViewingTask(task)}
-                            className={`p-3.5 sm:px-4 hover:bg-amber-50/40 transition-colors flex items-start gap-3 group cursor-pointer ${
+                            className={`p-5 sm:px-6 hover:bg-amber-50/40 transition-colors flex items-start gap-4 group cursor-pointer ${
                               task.completed ? 'bg-amber-50/20' : ''
                             }`}
                           >
@@ -743,19 +743,19 @@ export default function Checklist() {
                             <button
                               type="button"
                               onClick={(e) => handleToggleTask(task, e)}
-                              className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                              className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                 task.completed
                                   ? 'bg-[#9b1c1c] text-white shadow-2xs'
                                   : 'border-2 border-amber-300 hover:border-[#9b1c1c] bg-white'
                               }`}
                             >
-                              {task.completed && <CheckCircle2 size={13} className="stroke-[3]" />}
+                              {task.completed && <CheckCircle2 size={15} className="stroke-[3]" />}
                             </button>
 
                             {/* Task Content */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                <span className={`text-xs font-semibold leading-snug transition-all ${
+                            <div className="flex-1 min-w-0 space-y-1.5">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`text-sm font-semibold leading-snug transition-all ${
                                   task.completed 
                                     ? 'line-through text-zinc-400' 
                                     : 'text-zinc-900'
@@ -764,38 +764,38 @@ export default function Checklist() {
                                 </span>
 
                                 {task.is_custom && (
-                                  <Chip size="sm" variant="flat" className="bg-purple-50 text-purple-700 border border-purple-200 text-[9px] font-bold h-4">
+                                  <Chip size="sm" variant="flat" className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold h-5">
                                     Custom
                                   </Chip>
                                 )}
                               </div>
 
                               {/* Task Metadata row */}
-                              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+                              <div className="flex flex-wrap items-center gap-2.5 text-xs text-zinc-500">
                                 {viewMode === 'timeline' ? (
-                                  <span className="inline-flex items-center gap-1 text-zinc-600 font-medium">
-                                    <Tag size={11} className="text-zinc-400" />
+                                  <span className="inline-flex items-center gap-1.5 text-zinc-600 font-medium">
+                                    <Tag size={12} className="text-zinc-400" />
                                     <span>{task.category}</span>
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 text-zinc-600 font-medium">
-                                    <Clock size={11} className="text-zinc-400" />
+                                  <span className="inline-flex items-center gap-1.5 text-zinc-600 font-medium">
+                                    <Clock size={12} className="text-zinc-400" />
                                     <span>{task.timeline_stage}</span>
                                   </span>
                                 )}
 
                                 {task.assigned_to && (
-                                  <span className="inline-flex items-center gap-1 text-zinc-600">
-                                    <User size={11} className="text-zinc-400" />
+                                  <span className="inline-flex items-center gap-1.5 text-zinc-600">
+                                    <User size={12} className="text-zinc-400" />
                                     <span>{task.assigned_to}</span>
                                   </span>
                                 )}
 
                                 {task.due_date && (
-                                  <span className={`inline-flex items-center gap-1 font-medium ${
+                                  <span className={`inline-flex items-center gap-1.5 font-medium ${
                                     isOverdue ? 'text-rose-600 font-bold' : 'text-zinc-600'
                                   }`}>
-                                    <Calendar size={11} />
+                                    <Calendar size={12} />
                                     <span>{task.due_date}</span>
                                     {isOverdue && <span>(Overdue)</span>}
                                   </span>
@@ -812,7 +812,7 @@ export default function Checklist() {
 
                               {/* Notes preview if any */}
                               {task.notes && (
-                                <p className="text-[11px] text-zinc-400 italic line-clamp-1 mt-1">
+                                <p className="text-xs text-zinc-400 italic line-clamp-1 pt-0.5">
                                   "{task.notes}"
                                 </p>
                               )}
@@ -824,9 +824,9 @@ export default function Checklist() {
                                 type="button"
                                 title="Edit Task"
                                 onClick={(e) => openEditModal(task, e)}
-                                className="p-1.5 text-zinc-400 hover:text-[#1b3c53] hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer"
+                                className="p-2 text-zinc-400 hover:text-[#9b1c1c] hover:bg-amber-50 rounded-xl transition-colors cursor-pointer"
                               >
-                                <Edit3 size={14} />
+                                <Edit3 size={15} />
                               </button>
                               <button
                                 type="button"

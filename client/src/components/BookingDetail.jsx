@@ -130,139 +130,140 @@ export default function BookingDetail() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
+    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
       {/* Back navigation & Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
         <div>
           <Link 
             to="/bookings" 
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors mb-2"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-rose-700 transition-colors mb-3 group"
           >
-            <ArrowLeft size={14} /> Back to All Bookings
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+            <span>Back to All Bookings</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-extrabold text-zinc-900 tracking-tight flex items-center gap-2">
+          <div className="flex items-center gap-3.5 flex-wrap">
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
               {booking.vendor}
             </h1>
-            <span className="text-xs font-semibold text-[#234c6a] bg-[#234c6a]/10 px-2 py-0.5 rounded-md border border-[#234c6a]/20">
+            <span className="text-xs font-bold font-mono text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
               #BK-{String(booking.id).slice(-4)}
             </span>
-            <Chip size="sm" variant="flat" className="bg-zinc-100 text-zinc-800 border border-zinc-200/80 font-medium text-xs">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
               {booking.category || 'Miscellaneous'}
-            </Chip>
+            </span>
           </div>
-          <p className="text-zinc-500 text-sm mt-0.5">{booking.service}</p>
+          <p className="text-zinc-500 text-sm md:text-base mt-2">{booking.service}</p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <Button 
             radius="sm" 
             variant="outline" 
-            className="border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-semibold text-xs h-9"
+            className="border-amber-200 text-zinc-700 hover:bg-amber-50 font-bold text-xs h-10 px-4 rounded-xl shadow-2xs transition-all cursor-pointer"
             onClick={() => setIsAttachOpen(true)}
           >
-            <Paperclip size={14} /> Attach Payment
+            <Paperclip size={15} /> Attach Payment
           </Button>
           <Button 
             radius="sm" 
-            className="bg-zinc-900 text-white hover:bg-zinc-950 font-semibold text-xs h-9 shadow-xs"
+            className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs h-10 px-4 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] transition-all"
             onClick={() => setIsPayOpen(true)}
           >
-            <CreditCard size={14} /> Record Payment
+            <CreditCard size={15} /> Record Payment
           </Button>
           <Button 
             radius="sm" 
             variant="outline"
-            className="border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-semibold text-xs h-9"
+            className="border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-bold text-xs h-10 px-3.5 rounded-xl cursor-pointer"
             onClick={() => setIsEditOpen(true)}
           >
-            <Pencil size={14} /> Edit
+            <Pencil size={15} /> Edit
           </Button>
           <Button 
             radius="sm" 
             variant="light"
-            className="text-rose-600 hover:bg-rose-50 font-semibold text-xs h-9"
+            className="text-rose-600 hover:bg-rose-50 font-bold text-xs h-10 px-3 rounded-xl cursor-pointer"
             onClick={() => setIsDelOpen(true)}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </Button>
         </div>
       </div>
 
       {/* Metrics Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#1b3c53] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <CalendarCheck size={20} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
+              <CalendarCheck size={24} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Booked Value</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(totalAmount)}</div>
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Booked Value</div>
+              <div className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight">{fmt(totalAmount)}</div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#234c6a] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <CreditCard size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
+              <CreditCard size={24} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Initial Advance</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(advanceAmount)}</div>
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Initial Advance</div>
+              <div className="text-2xl md:text-3xl font-black text-amber-700 tracking-tight">{fmt(advanceAmount)}</div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#456882] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <IndianRupee size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
+              <IndianRupee size={24} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Total Paid</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(totalPaid)}</div>
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Paid</div>
+              <div className="text-2xl md:text-3xl font-black text-emerald-700 tracking-tight">{fmt(totalPaid)}</div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 md:p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#1b3c53] text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <Clock size={20} />
+        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-rose-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
+              <Clock size={24} />
             </div>
             <div>
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Remaining Due</div>
-              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight">{fmt(remainingDue)}</div>
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Remaining Due</div>
+              <div className="text-2xl md:text-3xl font-black text-rose-700 tracking-tight">{fmt(remainingDue)}</div>
             </div>
           </div>
         </Card>
       </div>
 
       {/* Payment Settlement Progress Card */}
-      <Card className="p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl mb-6">
-        <div className="flex flex-col gap-3">
+      <Card className="p-6 md:p-8 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+        <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-zinc-900">Payment Progress</h3>
-              <p className="text-xs text-zinc-500">
+              <h3 className="text-base font-bold text-zinc-900">Payment Clearance Progress</h3>
+              <p className="text-xs md:text-sm text-zinc-500 mt-1">
                 {percentPaid >= 100 
-                  ? 'This booking is fully paid and settled.' 
-                  : `${fmt(remainingDue)} remaining to be cleared before event.`}
+                  ? '🎉 This booking is fully paid and settled.' 
+                  : `${fmt(remainingDue)} remaining to be cleared before the wedding ceremony.`}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-base font-extrabold text-zinc-900">{percentPaid}%</span>
-              <span className="text-xs text-zinc-500 ml-1.5 font-medium">({fmt(totalPaid)} / {fmt(totalAmount)})</span>
+              <span className="text-lg md:text-xl font-extrabold text-zinc-900">{percentPaid}%</span>
+              <span className="text-xs md:text-sm text-zinc-500 ml-2 font-medium">({fmt(totalPaid)} / {fmt(totalAmount)})</span>
             </div>
           </div>
 
           {/* Horizontal Progress Bar */}
-          <div className="w-full bg-zinc-100 rounded-full h-3 overflow-hidden p-0.5">
+          <div className="w-full bg-zinc-100 rounded-full h-3.5 overflow-hidden p-0.5">
             <div 
               className={`h-full rounded-full transition-all duration-700 ${
-                percentPaid >= 100 ? 'bg-emerald-600' : 'bg-[#234c6a]'
+                percentPaid >= 100 ? 'bg-emerald-600' : 'bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600'
               }`}
               style={{ width: `${percentPaid}%` }}
             />
@@ -271,53 +272,53 @@ export default function BookingDetail() {
       </Card>
 
       {/* Main Grid: Details & Payments List */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Booking Details Card */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <Card className="p-5 border border-zinc-200/80 shadow-xs bg-white rounded-xl">
-            <h3 className="text-sm font-bold text-zinc-900 mb-4 pb-3 border-b border-zinc-100 flex items-center gap-2">
-              <FileText size={16} className="text-zinc-600" /> Booking Information
+          <Card className="p-6 md:p-8 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
+            <h3 className="text-base font-bold text-zinc-900 mb-5 pb-3.5 border-b border-zinc-100 flex items-center gap-2.5">
+              <FileText size={18} className="text-amber-600" /> Booking Information
             </h3>
 
-            <div className="flex flex-col gap-4 text-sm">
+            <div className="flex flex-col gap-5 text-sm">
               <div>
-                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Vendor</span>
-                <span className="font-bold text-zinc-900">{booking.vendor}</span>
+                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1">Vendor</span>
+                <span className="font-bold text-base text-zinc-900">{booking.vendor}</span>
               </div>
 
               <div>
-                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Service</span>
+                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1">Service</span>
                 <span className="font-medium text-zinc-800">{booking.service}</span>
               </div>
 
               <div>
-                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Category</span>
-                <Chip size="sm" variant="flat" className="bg-zinc-100 text-zinc-800 border border-zinc-200/80 font-medium text-xs">
+                <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1">Category</span>
+                <span className="inline-block px-3 py-1 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                   {booking.category || 'Miscellaneous'}
-                </Chip>
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-zinc-100">
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-zinc-100">
                 <div>
-                  <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Booking Date</span>
+                  <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1">Booking Date</span>
                   <span className="font-medium text-zinc-700 text-xs flex items-center gap-1.5">
-                    <Calendar size={13} className="text-zinc-400" />
+                    <Calendar size={13} className="text-amber-600" />
                     {booking.booking_date ? formatDate(booking.booking_date) : '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Event Date</span>
+                  <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1">Event Date</span>
                   <span className="font-medium text-zinc-700 text-xs flex items-center gap-1.5">
-                    <Calendar size={13} className="text-zinc-400" />
+                    <Calendar size={13} className="text-amber-600" />
                     {booking.event_date ? formatDate(booking.event_date) : '—'}
                   </span>
                 </div>
               </div>
 
               {booking.notes && (
-                <div className="pt-2 border-t border-zinc-100">
-                  <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider block mb-1">Notes</span>
-                  <p className="text-xs text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-200/60 leading-relaxed">
+                <div className="pt-3 border-t border-zinc-100">
+                  <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider block mb-1.5">Notes</span>
+                  <p className="text-xs text-zinc-600 bg-amber-50/40 p-3.5 rounded-2xl border border-amber-100/80 leading-relaxed">
                     {booking.notes}
                   </p>
                 </div>
@@ -328,23 +329,23 @@ export default function BookingDetail() {
 
         {/* Right Column: Linked Payments Table */}
         <div className="lg:col-span-2">
-          <div className="border border-zinc-200/80 shadow-xs bg-white rounded-xl overflow-hidden">
-            <div className="p-4 md:p-5 border-b border-zinc-100 flex items-center justify-between">
+          <div className="border border-amber-200/70 shadow-xs bg-white rounded-3xl overflow-hidden">
+            <div className="p-6 md:p-7 border-b border-zinc-100 flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-                  <CreditCard size={16} className="text-zinc-600" /> Payment History
+                <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2.5">
+                  <CreditCard size={18} className="text-amber-600" /> Payment History
                 </h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <p className="text-xs md:text-sm text-zinc-500 mt-1">
                   {linkedExpenses.length} {linkedExpenses.length === 1 ? 'payment' : 'payments'} recorded for this booking
                 </p>
               </div>
               <Button 
                 radius="sm" 
                 size="sm" 
-                className="bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-semibold"
+                className="bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white text-xs font-bold h-9 px-4 rounded-xl shadow-2xs cursor-pointer flex items-center gap-1.5"
                 onClick={() => setIsPayOpen(true)}
               >
-                <Plus size={14} /> Add Payment
+                <Plus size={15} /> Add Payment
               </Button>
             </div>
 
@@ -354,57 +355,57 @@ export default function BookingDetail() {
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="sticky top-0 bg-zinc-100/90 backdrop-blur-xs z-10 border-b border-zinc-200/80">
                     <tr className="text-zinc-500 font-semibold text-xs tracking-wider">
-                      <th className="py-3 px-4 whitespace-nowrap">DATE</th>
-                      <th className="py-3 px-4 whitespace-nowrap">TYPE</th>
-                      <th className="py-3 px-4">DESCRIPTION</th>
-                      <th className="py-3 px-4 text-right whitespace-nowrap">AMOUNT</th>
-                      <th className="py-3 px-4 text-right whitespace-nowrap">RECEIPT</th>
-                      <th className="py-3 px-4 text-right whitespace-nowrap">ACTIONS</th>
+                      <th className="py-4 px-6 whitespace-nowrap">DATE</th>
+                      <th className="py-4 px-6 whitespace-nowrap">TYPE</th>
+                      <th className="py-4 px-6">DESCRIPTION</th>
+                      <th className="py-4 px-6 text-right whitespace-nowrap">AMOUNT</th>
+                      <th className="py-4 px-6 text-right whitespace-nowrap">RECEIPT</th>
+                      <th className="py-4 px-6 text-right whitespace-nowrap">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100">
                     {linkedExpenses.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((exp) => (
-                      <tr key={exp.id} className="hover:bg-[#1b3c53]/[0.04] transition-colors">
-                        <td className="py-3 px-4 whitespace-nowrap text-xs text-zinc-600 font-medium">
+                      <tr key={exp.id} className="hover:bg-amber-50/40 transition-colors">
+                        <td className="py-4 px-6 whitespace-nowrap text-xs text-zinc-600 font-medium">
                           {formatDate(exp.date)}
                         </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
+                        <td className="py-4 px-6 whitespace-nowrap">
                           {exp.payment_type === 'Advance' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-[#234c6a]/15 text-[#234c6a] border border-[#234c6a]/30">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
                               Advance
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
                               Normal
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-sm text-zinc-800 font-medium">
+                        <td className="py-4 px-6 text-sm text-zinc-800 font-medium">
                           {exp.description || <span className="text-zinc-300">—</span>}
                         </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap text-sm font-bold text-zinc-900">
+                        <td className="py-4 px-6 text-right whitespace-nowrap text-sm font-bold text-zinc-900">
                           {fmt(exp.amount)}
                         </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <td className="py-4 px-6 text-right whitespace-nowrap">
                           {exp.receipt_url ? (
                             <a 
                               href={exp.receipt_url} 
                               target="_blank" 
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-medium text-[#234c6a] hover:underline"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 hover:underline"
                             >
-                              <Paperclip size={13} /> View
+                              <Paperclip size={14} /> View
                             </a>
                           ) : (
                             <span className="text-zinc-300">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <td className="py-4 px-6 text-right whitespace-nowrap">
                           <Button
                             radius="sm"
                             size="sm"
                             variant="light"
-                            className="text-zinc-600 hover:text-rose-600 hover:bg-rose-50 text-xs font-semibold h-8 px-2.5 inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                            className="text-zinc-600 hover:text-rose-600 hover:bg-rose-50 text-xs font-semibold h-8 px-2.5 inline-flex items-center gap-1.5 cursor-pointer transition-colors rounded-lg"
                             onClick={() => confirmDetach(exp)}
                             title="Detach payment from this booking"
                           >
@@ -428,31 +429,33 @@ export default function BookingDetail() {
               />
             </>
           ) : (
-              <div className="py-14 text-center px-4">
-                <CreditCard size={32} className="mx-auto text-zinc-300 mb-2" />
-                <h4 className="text-sm font-bold text-zinc-700">No payment records yet</h4>
-                <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
+              <div className="py-16 text-center px-6">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto text-amber-600 mb-3">
+                  <CreditCard size={28} />
+                </div>
+                <h4 className="text-base font-bold text-zinc-800">No payment records yet</h4>
+                <p className="text-xs md:text-sm text-zinc-500 mt-1 max-w-sm mx-auto">
                   {advanceAmount > 0 
                     ? `An initial advance of ${fmt(advanceAmount)} was noted at booking. You can record payments to track transactions.` 
                     : 'Log payments as you make advances or installments to this vendor.'}
                 </p>
-                <div className="flex justify-center gap-3 mt-4">
+                <div className="flex justify-center gap-3 mt-5">
                   <Button 
                     radius="sm" 
                     size="sm" 
-                    className="bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-xs"
+                    className="bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs h-10 px-4 rounded-xl shadow-2xs"
                     onClick={() => setIsPayOpen(true)}
                   >
-                    <Plus size={14} /> Record Payment
+                    <Plus size={15} /> Record Payment
                   </Button>
                   <Button 
                     radius="sm" 
                     size="sm" 
                     variant="outline"
-                    className="border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-semibold text-xs"
+                    className="border-amber-200 text-zinc-700 hover:bg-amber-50 font-bold text-xs h-10 px-4 rounded-xl shadow-2xs"
                     onClick={() => setIsAttachOpen(true)}
                   >
-                    <Paperclip size={14} /> Attach Existing
+                    <Paperclip size={15} /> Attach Existing
                   </Button>
                 </div>
               </div>

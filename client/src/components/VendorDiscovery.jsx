@@ -264,45 +264,45 @@ function LocationSetup({ onLocationSaved }) {
 // ── Category Grid View ───────────────────────────────
 function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation }) {
   return (
-    <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
+    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
       {/* Location Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-amber-200/70 pb-6">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl md:text-3xl font-black text-zinc-900 font-serif tracking-tight">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 font-serif tracking-tight">
               Shaadi Vendor Bazaar
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-[10px] font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-xs font-bold">
               शुभ विवाह
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-zinc-500 mt-1">
-            <MapPin size={14} className="text-[#9b1c1c] shrink-0" />
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
+            <MapPin size={15} className="text-[#9b1c1c] shrink-0" />
             <span>Handcrafted wedding services & verified artisans near <span className="font-bold text-zinc-800 underline decoration-amber-300">{location.location}</span></span>
             <button
               onClick={onChangeLocation}
-              className="ml-2 text-[#9b1c1c] hover:underline font-bold cursor-pointer inline-flex items-center gap-1 text-xs bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200/80 transition-all hover:bg-amber-100"
+              className="ml-2 text-[#9b1c1c] hover:underline font-bold cursor-pointer inline-flex items-center gap-1.5 text-xs bg-amber-50 px-3 py-1 rounded-xl border border-amber-200/80 transition-all hover:bg-amber-100"
             >
-              <Edit3 size={11} /> Change City
+              <Edit3 size={12} /> Change City
             </button>
           </div>
         </div>
       </div>
 
       {/* Category Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-7">
         {categories.map(cat => (
           <button
             key={cat.id}
             onClick={() => onSelectCategory(cat)}
-            className={`group relative flex flex-col items-center text-center p-6 rounded-3xl bg-gradient-to-br ${cat.color} border ${cat.border} hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer shadow-2xs`}
+            className={`group relative flex flex-col items-center text-center p-7 md:p-8 rounded-3xl bg-gradient-to-br ${cat.color} border ${cat.border} hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer shadow-xs`}
           >
-            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
+            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
               {cat.icon}
             </div>
-            <h3 className="font-bold text-sm text-zinc-800 mb-1 font-serif">{cat.name}</h3>
-            <p className="text-xs text-zinc-500 leading-relaxed">{cat.description}</p>
-            <ChevronRight size={16} className="absolute top-3 right-3 text-amber-300 group-hover:text-amber-700 transition-colors" />
+            <h3 className="font-bold text-base text-zinc-800 mb-1.5 font-serif">{cat.name}</h3>
+            <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">{cat.description}</p>
+            <ChevronRight size={18} className="absolute top-4 right-4 text-amber-300 group-hover:text-amber-700 transition-colors" />
           </button>
         ))}
       </div>
@@ -334,7 +334,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
       onClick={() => onSelect(vendor)}
     >
       {/* Photo */}
-      <div className="relative h-44 bg-zinc-100 overflow-hidden">
+      <div className="relative h-48 md:h-52 bg-zinc-100 overflow-hidden">
         {vendor.photoUrl && !imgError ? (
           <img
             src={vendor.photoUrl}
@@ -345,12 +345,12 @@ function VendorCard({ vendor, onSelect, onQuote }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100/50">
-            <Store size={40} className="text-amber-300" />
+            <Store size={44} className="text-amber-300" />
           </div>
         )}
         {/* Open/Closed badge */}
         {vendor.openNow !== null && (
-          <div className={`absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-xs ${
+          <div className={`absolute top-2.5 right-2.5 px-3 py-1 rounded-full text-[10px] font-bold backdrop-blur-xs ${
             vendor.openNow ? 'bg-emerald-100/90 text-emerald-800 border border-emerald-200' : 'bg-zinc-200/90 text-zinc-700'
           }`}>
             {vendor.openNow ? 'Open Now' : 'Closed'}
@@ -359,90 +359,94 @@ function VendorCard({ vendor, onSelect, onQuote }) {
 
         {/* Distance Badge over Image */}
         {vendor.distanceText && (
-          <div className="absolute bottom-2 left-2 bg-zinc-950/80 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-md">
-            <Navigation size={11} className="text-amber-300" />
+          <div className="absolute bottom-2.5 left-2.5 bg-zinc-950/80 backdrop-blur-xs text-white text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md">
+            <Navigation size={12} className="text-amber-300" />
             <span>{vendor.distanceText}</span>
           </div>
         )}
       </div>
 
       {/* Info */}
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-bold text-sm text-zinc-900 mb-1 line-clamp-1 group-hover:text-[#9b1c1c] transition-colors font-serif">
-          {vendor.name}
-        </h3>
-        <StarRating rating={vendor.rating} count={vendor.ratingCount} />
+      <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
+        <div>
+          <h3 className="font-bold text-base text-zinc-900 mb-1.5 line-clamp-1 group-hover:text-[#9b1c1c] transition-colors font-serif">
+            {vendor.name}
+          </h3>
+          <StarRating rating={vendor.rating} count={vendor.ratingCount} />
 
-        {/* Distance & Address */}
-        <p className="text-xs text-zinc-500 mt-2 line-clamp-2 flex-1">
-          <MapPin size={11} className="inline mr-1 text-amber-600 shrink-0" />
-          {vendor.address}
-        </p>
+          {/* Distance & Address */}
+          <p className="text-xs sm:text-sm text-zinc-500 mt-2.5 line-clamp-2 leading-relaxed">
+            <MapPin size={13} className="inline mr-1 text-amber-600 shrink-0" />
+            {vendor.address}
+          </p>
+        </div>
 
-        {/* Contact Row */}
-        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-amber-100/60">
-          {vendor.phone && (
-            <a
-              href={`tel:${vendor.phone}`}
-              onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-600 hover:text-[#9b1c1c] transition-colors"
-              title="Call"
+        <div>
+          {/* Contact Row */}
+          <div className="flex items-center gap-3 pt-3.5 border-t border-amber-100/60">
+            {vendor.phone && (
+              <a
+                href={`tel:${vendor.phone}`}
+                onClick={e => e.stopPropagation()}
+                className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-[#9b1c1c] transition-colors"
+                title="Call"
+              >
+                <Phone size={13} className="text-amber-700" />
+                <span className="truncate max-w-[120px]">{vendor.phone}</span>
+              </a>
+            )}
+            {vendor.website && (
+              <a
+                href={vendor.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors ml-auto"
+                title="Visit Website"
+              >
+                <Globe size={14} />
+              </a>
+            )}
+            {vendor.mapsUrl && (
+              <a
+                href={vendor.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors"
+                title="Open in Google Maps"
+              >
+                <Navigation size={14} />
+              </a>
+            )}
+          </div>
+
+          {/* Action Buttons: WhatsApp + Quote + Map */}
+          <div className="flex gap-2.5 mt-3.5">
+            <button
+              onClick={handleWhatsAppInquiry}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+              title="Inquire on WhatsApp"
             >
-              <Phone size={12} className="text-amber-700" />
-              <span className="truncate max-w-[110px]">{vendor.phone}</span>
-            </a>
-          )}
-          {vendor.website && (
-            <a
-              href={vendor.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors ml-auto"
-              title="Visit Website"
+              <span>💬 WhatsApp</span>
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); onQuote(vendor); }}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs border border-rose-900/40"
             >
-              <Globe size={12} />
-            </a>
-          )}
-          {vendor.mapsUrl && (
+              <Send size={12} className="text-amber-200" /> <span>Quote</span>
+            </button>
             <a
               href={vendor.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors"
-              title="Open in Google Maps"
+              className="py-2.5 px-3 rounded-xl border border-amber-200/80 text-zinc-600 hover:text-zinc-900 text-xs font-semibold hover:bg-amber-50/50 transition-colors flex items-center justify-center"
+              title="Open in Maps"
             >
-              <Navigation size={12} />
+              <MapPinned size={15} className="text-amber-700" />
             </a>
-          )}
-        </div>
-
-        {/* Action Buttons: WhatsApp + Quote + Map */}
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={handleWhatsAppInquiry}
-            className="flex-1 py-2 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
-            title="Inquire on WhatsApp"
-          >
-            <span>💬 WhatsApp</span>
-          </button>
-          <button
-            onClick={e => { e.stopPropagation(); onQuote(vendor); }}
-            className="flex-1 py-2 px-2 rounded-xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs border border-rose-900/40"
-          >
-            <Send size={11} className="text-amber-200" /> <span>Quote</span>
-          </button>
-          <a
-            href={vendor.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="py-2 px-2.5 rounded-xl border border-amber-200/80 text-zinc-600 hover:text-zinc-900 text-xs font-semibold hover:bg-amber-50/50 transition-colors flex items-center justify-center"
-            title="Open in Maps"
-          >
-            <MapPinned size={13} className="text-amber-700" />
-          </a>
+          </div>
         </div>
       </div>
     </div>
@@ -492,41 +496,41 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
   const radiusKm = radius / 1000;
 
   return (
-    <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
+    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
       {/* Header with breadcrumb */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-4 border-b border-amber-200/70 pb-6">
         <button
           onClick={onBack}
-          className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700 transition-colors cursor-pointer"
+          className="p-2.5 rounded-xl hover:bg-amber-50 text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer border border-amber-200/70"
         >
           <ArrowLeft size={20} />
         </button>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-0.5">
+          <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
             <button onClick={onBack} className="hover:text-[#9b1c1c] font-medium cursor-pointer">Vendors</button>
-            <ChevronRight size={12} />
+            <ChevronRight size={13} />
             <span className="text-zinc-600 font-medium truncate">{category.name}</span>
           </div>
-          <h1 className="text-lg md:text-2xl font-black text-zinc-900 truncate font-serif">
+          <h1 className="text-2xl md:text-3xl font-black text-zinc-900 truncate font-serif">
             {category.icon} {category.name}
           </h1>
         </div>
       </div>
 
       {/* Filter & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 bg-white rounded-3xl border border-amber-200/70 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-6 md:p-7 bg-white rounded-3xl border border-amber-200/70 shadow-xs">
         {/* Radius Filter */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-bold mr-1">
-            <Filter size={14} className="text-[#9b1c1c]" />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 font-bold mr-1">
+            <Filter size={16} className="text-[#9b1c1c]" />
             <span>Search Radius:</span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {RADIUS_OPTIONS.map(opt => (
               <button
                 key={opt.meters}
                 onClick={() => setRadius(opt.meters)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   radius === opt.meters
                     ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
                     : 'bg-zinc-100 text-zinc-700 hover:bg-amber-50 hover:text-[#9b1c1c]'
@@ -539,11 +543,11 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
         </div>
 
         {/* Sort Controls & Proximity Location */}
-        <div className="flex items-center gap-3 ml-auto">
-          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/60 p-1 rounded-2xl">
+        <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/60 p-1.5 rounded-2xl">
             <button
               onClick={() => setSortBy('distance')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 sortBy === 'distance' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
@@ -551,7 +555,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             </button>
             <button
               onClick={() => setSortBy('rating')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 sortBy === 'rating' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
@@ -559,44 +563,44 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             </button>
           </div>
 
-          <div className="hidden lg:flex items-center gap-1 text-xs text-zinc-400">
-            <MapPin size={12} className="text-[#9b1c1c]" />
-            <span className="truncate max-w-[180px]" title={location.location}>{location.location}</span>
+          <div className="hidden lg:flex items-center gap-1.5 text-xs text-zinc-400">
+            <MapPin size={14} className="text-[#9b1c1c]" />
+            <span className="truncate max-w-[200px]" title={location.location}>{location.location}</span>
           </div>
         </div>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 size={32} className="text-[#234c6a] animate-spin mb-3" />
-          <p className="text-sm text-zinc-500">Searching for {category.name.toLowerCase()} within {radiusKm} km...</p>
+        <div className="flex flex-col items-center justify-center py-24">
+          <Loader2 size={36} className="text-[#9b1c1c] animate-spin mb-4" />
+          <p className="text-xs sm:text-sm text-zinc-500 font-semibold">Searching for {category.name.toLowerCase()} within {radiusKm} km...</p>
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <AlertCircle size={32} className="text-rose-400 mb-3" />
+        <div className="flex flex-col items-center justify-center py-24">
+          <AlertCircle size={36} className="text-rose-400 mb-3" />
           <p className="text-sm text-rose-600 mb-3">{error}</p>
           <button
             onClick={fetchVendors}
-            className="px-4 py-2 rounded-lg bg-[#234c6a] text-white text-xs font-semibold cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-semibold cursor-pointer"
           >
             Retry
           </button>
         </div>
       ) : vendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-zinc-200 p-8 text-center">
-          <Store size={40} className="text-zinc-300 mb-3" />
-          <h3 className="text-base font-bold text-zinc-800 mb-1">
+        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-amber-200/70 p-10 text-center shadow-xs space-y-3">
+          <Store size={44} className="text-zinc-300 mx-auto" />
+          <h3 className="text-lg font-bold text-zinc-800 font-serif">
             No {category.name.toLowerCase()} found within {radiusKm} km
           </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mb-4">
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
             Try expanding your search radius to 20 km or 50 km to find more vendors in surrounding areas.
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-3 pt-2 justify-center">
             {radius < 20000 && (
               <button
                 onClick={() => setRadius(20000)}
-                className="px-4 py-2 rounded-lg bg-[#234c6a] text-white text-xs font-semibold cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-bold cursor-pointer shadow-xs"
               >
                 Expand to 20 km
               </button>
@@ -604,7 +608,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             {radius < 50000 && (
               <button
                 onClick={() => setRadius(50000)}
-                className="px-4 py-2 rounded-lg border border-zinc-200 text-zinc-700 text-xs font-semibold hover:bg-zinc-50 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl border border-amber-200/80 text-zinc-700 text-xs font-bold hover:bg-amber-50 cursor-pointer"
               >
                 Expand to 50 km
               </button>
@@ -612,17 +616,17 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           </div>
         </div>
       ) : (
-        <>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-zinc-600">
-              Showing <span className="font-bold text-zinc-900">{vendors.length}</span> {category.name.toLowerCase()} within <span className="font-bold text-[#234c6a]">{radiusKm} km</span> of {location.location}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-xs sm:text-sm text-zinc-600">
+              Showing <span className="font-bold text-zinc-900">{vendors.length}</span> {category.name.toLowerCase()} within <span className="font-bold text-[#9b1c1c]">{radiusKm} km</span> of {location.location}
             </p>
-            <span className="text-[11px] text-zinc-400 font-medium">
+            <span className="text-xs text-zinc-400 font-medium">
               {sortBy === 'distance' ? 'Sorted by proximity' : 'Sorted by rating'}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
             {vendors.map(vendor => (
               <VendorCard
                 key={vendor.placeId}
@@ -632,7 +636,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
               />
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {/* Vendor Detail Modal */}

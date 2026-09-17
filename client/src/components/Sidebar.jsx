@@ -83,8 +83,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
 
   const navContent = (isMobileView = false) => (
     <div className="flex flex-col h-full overflow-visible bg-[#FAF7F2]">
-      {/* Brand Header */}
-      <div className={`flex items-center px-4 h-20 border-b border-amber-200/60 bg-gradient-to-r from-amber-500/5 via-rose-500/5 to-transparent ${
+      {/* Brand Header with breathing space */}
+      <div className={`flex items-center px-5 h-24 border-b border-amber-200/60 bg-gradient-to-r from-amber-500/5 via-rose-500/5 to-transparent ${
         isMobileView || isExpanded ? 'justify-between' : 'justify-center'
       }`}>
         {!isMobileView && !isExpanded ? (
@@ -92,7 +92,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
             type="button"
             onClick={() => handleNav('profile')}
             title={coupleDisplayName}
-            className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 cursor-pointer overflow-hidden ring-2 ring-amber-300/60"
+            className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 cursor-pointer overflow-hidden ring-2 ring-amber-300/60"
           >
             {weddingProfile?.groom_photo_url || weddingProfile?.bride_photo_url ? (
               <img 
@@ -109,7 +109,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
             <button
               type="button"
               onClick={() => handleNav('profile')}
-              className="flex items-center gap-3 min-w-0 text-left cursor-pointer group"
+              className="flex items-center gap-3.5 min-w-0 text-left cursor-pointer group"
               title="View & Edit Couple Profile"
             >
               <div className="relative shrink-0">
@@ -118,23 +118,23 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
                     <img 
                       src={weddingProfile.groom_photo_url} 
                       alt="Groom" 
-                      className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-300 shadow-sm" 
+                      className="w-9 h-9 rounded-full object-cover ring-2 ring-amber-300 shadow-sm" 
                     />
                     <img 
                       src={weddingProfile.bride_photo_url} 
                       alt="Bride" 
-                      className="w-8 h-8 rounded-full object-cover ring-2 ring-rose-400 shadow-sm" 
+                      className="w-9 h-9 rounded-full object-cover ring-2 ring-rose-400 shadow-sm" 
                     />
                   </div>
                 ) : weddingProfile?.groom_photo_url || weddingProfile?.bride_photo_url ? (
                   <img 
                     src={weddingProfile.groom_photo_url || weddingProfile.bride_photo_url} 
                     alt="Couple" 
-                    className="w-11 h-11 rounded-2xl object-cover ring-2 ring-amber-300/80 shadow-md shadow-rose-500/10" 
+                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-amber-300/80 shadow-md shadow-rose-500/10" 
                   />
                 ) : (
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 ring-2 ring-amber-200/50 group-hover:scale-105 transition-transform">
-                    <Sparkles size={20} className="animate-pulse" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0 ring-2 ring-amber-200/50 group-hover:scale-105 transition-transform">
+                    <Sparkles size={22} className="animate-pulse" />
                   </div>
                 )}
               </div>
@@ -142,12 +142,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
                 <div className="font-serif font-bold text-base tracking-tight text-zinc-900 leading-tight truncate group-hover:text-rose-700 transition-colors">
                   {coupleDisplayName}
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-bold text-rose-700 bg-rose-100/70 border border-rose-200 px-2 py-0.5 rounded-full tracking-wide truncate">
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[10px] font-bold text-rose-700 bg-rose-100/70 border border-rose-200 px-2.5 py-0.5 rounded-full tracking-wide truncate">
                     {sideLabel}
                   </span>
                   {daysToGo !== null && (
-                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-100/70 border border-amber-200 px-2 py-0.5 rounded-full tracking-wide">
+                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-100/70 border border-amber-200 px-2.5 py-0.5 rounded-full tracking-wide">
                       {daysToGo === 0 ? 'Today! 🎉' : `${daysToGo}d to go`}
                     </span>
                   )}
@@ -159,7 +159,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="p-1.5 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-amber-100/60 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-amber-100/60 transition-colors cursor-pointer"
                 aria-label="Close Navigation Menu"
               >
                 <X size={20} />
@@ -169,9 +169,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
         )}
       </div>
 
-      {/* Nav Links */}
-      <div className={`flex-1 flex flex-col gap-1.5 p-3.5 ${isExpanded ? 'overflow-y-auto' : 'overflow-visible'}`}>
-        <div className={`text-[10px] font-bold text-amber-800/60 uppercase tracking-widest px-3 mb-1 ${
+      {/* Nav Links with airy spacing */}
+      <div className={`flex-1 flex flex-col gap-2.5 px-4 py-4 ${isExpanded ? 'overflow-y-auto' : 'overflow-visible'}`}>
+        <div className={`text-[10px] font-extrabold text-amber-800/70 uppercase tracking-widest px-3.5 mb-1 ${
           !isMobileView && !isExpanded ? 'hidden' : 'block'
         }`}>
           Vivah Planner
@@ -185,17 +185,17 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
                 type="button"
                 onClick={() => handleNav(item.id)}
                 title={!isExpanded ? item.label : undefined}
-                className={`w-full flex items-center px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 text-left ${
+                className={`w-full flex items-center px-4 py-3 rounded-2xl cursor-pointer transition-all duration-200 text-left ${
                   isActive
                     ? 'bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/5 text-rose-800 font-bold border-l-4 border-rose-600 shadow-xs'
                     : 'text-zinc-600 hover:text-rose-700 hover:bg-amber-100/40 font-medium'
                 } ${isMobileView || isExpanded ? 'justify-start' : 'justify-center'}`}
               >
-                <Icon size={19} className={isActive ? 'text-rose-600 shrink-0' : 'text-zinc-400 group-hover/menu:text-rose-500 shrink-0 transition-colors'} />
+                <Icon size={20} className={isActive ? 'text-rose-600 shrink-0' : 'text-zinc-400 group-hover/menu:text-rose-500 shrink-0 transition-colors'} />
                 {(isMobileView || isExpanded) && (
-                  <div className="ml-3 min-w-0">
-                    <span className="text-sm block leading-tight truncate">{item.label}</span>
-                    <span className="text-[10px] text-zinc-400 block leading-tight truncate">{item.sub}</span>
+                  <div className="ml-3.5 min-w-0">
+                    <span className="text-[13px] md:text-sm font-semibold block leading-snug truncate">{item.label}</span>
+                    <span className="text-[11px] text-zinc-400 block leading-tight truncate mt-0.5">{item.sub}</span>
                   </div>
                 )}
               </button>
@@ -214,21 +214,21 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
         })}
       </div>
 
-      {/* User Info & Quick Actions Footer */}
-      <div className="border-t border-amber-200/60 p-3 flex flex-col gap-2 bg-[#F4EFEA]/80 overflow-visible">
+      {/* User Info & Quick Actions Footer with comfortable room */}
+      <div className="border-t border-amber-200/60 p-4 md:p-5 flex flex-col gap-3 bg-[#F4EFEA]/90 overflow-visible">
         {(isMobileView || isExpanded) && (
           <button
             type="button"
             onClick={() => handleNav('profile')}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white border border-amber-200 text-rose-950 hover:bg-amber-50 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white border border-amber-200 text-rose-950 hover:bg-amber-50 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
           >
-            <Heart size={13} className="text-rose-600 fill-rose-500/20" />
+            <Heart size={14} className="text-rose-600 fill-rose-500/20" />
             <span>Couple Profile & Photos</span>
           </button>
         )}
 
         {(isMobileView || isExpanded) && currentUser && (
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-amber-100">
+          <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white/80 border border-amber-200/60">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
               {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
             </div>
@@ -236,7 +236,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
               <div className="text-xs font-semibold text-zinc-800 truncate">
                 {currentUser.displayName || currentUser.email.split('@')[0]}
               </div>
-              <div className="text-[10px] text-zinc-500 truncate">
+              <div className="text-[10px] text-zinc-500 truncate mt-0.5">
                 {currentUser.email}
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
             type="button"
             onClick={triggerSignOut}
             title={!isExpanded ? "Sign Out" : undefined}
-            className={`w-full flex items-center px-3.5 py-2 rounded-xl cursor-pointer text-zinc-500 hover:bg-rose-100/60 hover:text-rose-700 transition-colors text-left ${
+            className={`w-full flex items-center px-4 py-2.5 rounded-xl cursor-pointer text-zinc-500 hover:bg-rose-100/60 hover:text-rose-700 transition-colors text-left ${
               isMobileView || isExpanded ? 'justify-start' : 'justify-center'
             }`}
           >

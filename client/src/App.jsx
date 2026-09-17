@@ -114,21 +114,21 @@ function MainApp() {
       )}
 
       {/* Mobile Top Navigation Header with iOS Safe Area support */}
-      <header className="md:hidden sticky top-0 z-30 bg-[#FAF7F2] text-zinc-900 px-4 pt-safe pb-3 flex items-center justify-between border-b border-amber-200/70 shadow-2xs">
+      <header className="md:hidden sticky top-0 z-30 bg-[#FAF7F2] text-zinc-900 px-5 pt-safe py-3.5 flex items-center justify-between border-b border-amber-200/70 shadow-2xs">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="p-2 rounded-xl bg-white border border-amber-200 text-zinc-700 hover:text-rose-700 transition-colors cursor-pointer shadow-2xs"
+          className="p-2.5 rounded-xl bg-white border border-amber-200 text-zinc-700 hover:text-rose-700 transition-colors cursor-pointer shadow-2xs"
           aria-label="Open Navigation Menu"
         >
           <Menu size={20} />
         </button>
 
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-2xs">
-            <Heart size={14} className="fill-white" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-2xs">
+            <Heart size={15} className="fill-white" />
           </div>
-          <span className="font-serif font-bold text-sm tracking-tight text-zinc-900">
+          <span className="font-serif font-bold text-sm md:text-base tracking-tight text-zinc-900">
             {weddingProfile?.story_title || (weddingProfile?.groom_name && weddingProfile?.bride_name ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}` : currentTitle)}
           </span>
         </div>
@@ -137,9 +137,9 @@ function MainApp() {
           type="button"
           onClick={() => setShowOnboarding(true)}
           title="Customize Vivah Details"
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xs font-bold border border-amber-300 shadow-2xs cursor-pointer"
+          className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center text-xs font-bold border border-amber-300 shadow-2xs cursor-pointer"
         >
-          <Sparkles size={14} />
+          <Sparkles size={15} />
         </button>
       </header>
 
@@ -151,8 +151,8 @@ function MainApp() {
         onEditProfile={() => setShowOnboarding(true)}
       />
 
-      {/* Main Content View */}
-      <main className="flex-1 min-w-0 overflow-y-auto pb-12">
+      {/* Main Content View with generous bottom breathing room */}
+      <main className="flex-1 min-w-0 overflow-y-auto pb-24 md:pb-32">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
