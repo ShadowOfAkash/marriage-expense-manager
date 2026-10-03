@@ -142,7 +142,7 @@ export default function BookingDetail() {
             <span>Back to All Bookings</span>
           </Link>
           <div className="flex items-center gap-3.5 flex-wrap">
-            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
               {booking.vendor}
             </h1>
             <span className="text-xs font-bold font-mono text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
@@ -569,8 +569,8 @@ export default function BookingDetail() {
           <div className="flex justify-end gap-2">
             <Button radius="sm" variant="light" onClick={() => setDetachTarget(null)}>Cancel</Button>
             <Button 
-              radius="sm" 
-              className="bg-[#234c6a] text-white hover:bg-[#1b3c53] font-semibold text-xs" 
+              radius="full" 
+              className="bg-zinc-900 text-white hover:bg-black font-semibold text-xs rounded-full" 
               onPress={handleDetach}
               onClick={handleDetach}
               isLoading={detaching}

@@ -231,7 +231,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
               {sideBadgeText}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 font-serif tracking-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight">
             Couple Profile & Wedding Vibe
           </h1>
           <p className="text-xs md:text-sm text-zinc-500 mt-1 max-w-2xl leading-relaxed">
@@ -243,9 +243,9 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] via-[#b91c1c] to-[#d97706] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2.5 cursor-pointer disabled:opacity-50 self-stretch sm:self-auto justify-center"
+          className="px-6 py-3 rounded-full bg-zinc-900 hover:bg-black text-white font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 self-stretch sm:self-auto justify-center"
         >
-          <Save size={16} className="text-amber-200" />
+          <Save size={16} />
           <span>{saving ? 'Saving Profile...' : 'Save & Apply Live'}</span>
         </button>
       </div>
@@ -284,7 +284,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                 {/* Groom Avatar */}
                 <div className="relative group">
                   <div className="w-22 h-22 sm:w-26 sm:h-26 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-amber-200 to-amber-500 shadow-xl">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-amber-200 font-serif font-black text-2xl sm:text-3xl">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-amber-200 font-black text-2xl sm:text-3xl">
                       {formData.groom_photo_url ? (
                         <img src={formData.groom_photo_url} alt="Groom" className="w-full h-full object-cover" />
                       ) : (
@@ -305,7 +305,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                 {/* Bride Avatar */}
                 <div className="relative group">
                   <div className="w-22 h-22 sm:w-26 sm:h-26 rounded-full p-1 bg-gradient-to-tr from-rose-400 via-amber-200 to-rose-500 shadow-xl">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-rose-200 font-serif font-black text-2xl sm:text-3xl">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-rose-200 font-black text-2xl sm:text-3xl">
                       {formData.bride_photo_url ? (
                         <img src={formData.bride_photo_url} alt="Bride" className="w-full h-full object-cover" />
                       ) : (
@@ -333,7 +333,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                   )}
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white drop-shadow-md">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-md">
                   {formData.groom_name && formData.bride_name
                     ? `${formData.groom_name} & ${formData.bride_name}`
                     : (formData.story_title || 'Akash & Priya Vivah')}
@@ -356,7 +356,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                 <div className="text-[10px] font-bold text-amber-300 uppercase tracking-widest mb-0.5">
                   Auspicious Muhurat
                 </div>
-                <div className="text-2xl sm:text-3xl font-black font-serif text-white">
+                <div className="text-2xl sm:text-3xl font-black text-white">
                   {countdownDays > 0 ? (
                     <>
                       {countdownDays} <span className="text-xs font-semibold text-amber-200">Days to Go 🎉</span>
@@ -375,7 +375,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
       <div className="bg-white border border-amber-200/80 rounded-3xl p-6 md:p-8 shadow-xs space-y-5">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
-            <h3 className="text-base font-black font-serif text-zinc-900 flex items-center gap-2.5">
+            <h3 className="text-base font-black text-zinc-900 flex items-center gap-2.5">
               <Sparkles size={18} className="text-amber-500" />
               <span>Wedding Profile Completeness</span>
             </h3>
@@ -384,7 +384,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
             </p>
           </div>
           <div className="text-left sm:text-right">
-            <span className="text-2xl font-black font-serif text-[#9b1c1c]">
+            <span className="text-2xl font-black text-[#9b1c1c]">
               {completionPercent}%
             </span>
             <span className="text-xs text-zinc-400 ml-1.5 font-semibold">Completed</span>
@@ -673,7 +673,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
       {/* ── 5. Wedding Details Form ── */}
       <div className="bg-white border border-amber-200/80 rounded-3xl p-8 md:p-10 lg:p-12 shadow-xs space-y-8">
         <div>
-          <h3 className="text-lg md:text-xl font-black font-serif text-zinc-900 mb-1.5 flex items-center gap-2.5">
+          <h3 className="text-lg md:text-xl font-black text-zinc-900 mb-1.5 flex items-center gap-2.5">
             <span className="text-xl">💍</span>
             <span>Auspicious Ceremony & Couple Information</span>
           </h3>
@@ -696,7 +696,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                 value={formData.groom_name}
                 onChange={(e) => handleChange('groom_name', e.target.value)}
                 placeholder="e.g. Akash Tiwari"
-                className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-serif font-bold text-zinc-900 transition-all"
+                className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-zinc-900 transition-all"
               />
             </div>
 
@@ -710,7 +710,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                 value={formData.bride_name}
                 onChange={(e) => handleChange('bride_name', e.target.value)}
                 placeholder="e.g. Priya Sharma"
-                className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500 font-serif font-bold text-zinc-900 transition-all"
+                className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500 font-bold text-zinc-900 transition-all"
               />
             </div>
           </div>
@@ -816,7 +816,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
                   value={formData.estimated_budget}
                   onChange={(e) => handleChange('estimated_budget', e.target.value)}
                   placeholder="2500000"
-                  className="w-full pl-9 pr-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-serif font-bold text-zinc-900 transition-all"
+                  className="w-full pl-9 pr-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-zinc-900 transition-all"
                 />
               </div>
               {formData.estimated_budget && (
@@ -854,7 +854,7 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
               value={formData.story_title}
               onChange={(e) => handleChange('story_title', e.target.value)}
               placeholder="e.g. #AkashWedsPriya • A Royal Udaipur Celebration"
-              className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-serif font-bold text-zinc-900 transition-all"
+              className="w-full px-4.5 py-3.5 text-sm md:text-base bg-zinc-50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-zinc-900 transition-all"
             />
           </div>
 
@@ -863,9 +863,9 @@ export default function Profile({ weddingProfile: externalProfile, onProfileUpda
             <button
               type="submit"
               disabled={saving}
-              className="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-[#9b1c1c] via-[#b91c1c] to-[#d97706] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2.5 cursor-pointer disabled:opacity-50"
+              className="px-7 py-3 rounded-full bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <Save size={18} className="text-amber-200" />
+              <Save size={16} />
               <span>{saving ? 'Saving Changes...' : 'Save Wedding Profile'}</span>
             </button>
           </div>

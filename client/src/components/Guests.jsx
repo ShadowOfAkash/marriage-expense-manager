@@ -762,7 +762,7 @@ export default function Guests() {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
@@ -877,14 +877,14 @@ export default function Guests() {
           onClick={() => handleTabChange('invitations')}
           className={`flex items-center gap-2 px-5 py-3 text-sm md:text-base font-bold border-b-2 transition-all cursor-pointer rounded-t-2xl ${
             activeTab === 'invitations'
-              ? 'border-rose-600 text-rose-800 bg-rose-50/40'
+              ? 'border-zinc-900 text-zinc-900 bg-zinc-50'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
           <Mail size={17} />
           <span>All Mehmaan & Invitations</span>
           <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
-            activeTab === 'invitations' ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-600'
+            activeTab === 'invitations' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {guests.length}
           </span>
@@ -895,14 +895,14 @@ export default function Guests() {
           onClick={() => handleTabChange('confirmed')}
           className={`flex items-center gap-2 px-5 py-3 text-sm md:text-base font-bold border-b-2 transition-all cursor-pointer rounded-t-2xl ${
             activeTab === 'confirmed'
-              ? 'border-emerald-600 text-emerald-800 bg-emerald-50/40'
+              ? 'border-zinc-900 text-zinc-900 bg-zinc-50'
               : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300'
           }`}
         >
-          <CheckCircle2 size={17} className={activeTab === 'confirmed' ? 'text-emerald-600' : ''} />
+          <CheckCircle2 size={17} />
           <span>Confirmed & Attending</span>
           <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
-            activeTab === 'confirmed' ? 'bg-emerald-700 text-white' : 'bg-zinc-100 text-zinc-600'
+            activeTab === 'confirmed' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600'
           }`}>
             {confirmedGuests.length}
           </span>
@@ -1182,9 +1182,9 @@ export default function Guests() {
               <button
                 type="button"
                 onClick={() => setBulkInviteOpen(true)}
-                className="h-9 px-3.5 text-xs font-bold bg-[#234c6a] hover:bg-[#1b3c53] text-white rounded-xl border border-[#325a77] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                className="h-9 px-4 text-xs font-bold bg-zinc-900 hover:bg-black text-white rounded-full transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
               >
-                <Mail size={14} className="text-[#f3e5ab]" />
+                <Mail size={14} className="text-white" />
                 <span>Send Invitations ({selectedIds.length})</span>
               </button>
             )}
@@ -1219,7 +1219,7 @@ export default function Guests() {
                 <div className="w-16 h-16 rounded-2xl bg-amber-100/70 text-amber-700 flex items-center justify-center mx-auto mb-4">
                   <Users size={28} />
                 </div>
-                <h3 className="font-serif font-bold text-lg text-zinc-800">No Mehmaan Found</h3>
+                <h3 className="font-bold text-lg text-zinc-800">No Mehmaan Found</h3>
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1">Try adjusting your search query or ceremony filter.</p>
               </div>
             ) : (
@@ -1229,21 +1229,21 @@ export default function Guests() {
                   const isAttended = g.actual_attendance === 'Attended' || g.check_in_status;
                   const isGroomSide = g.relationship_category === 'Groom Family' || g.relationship_category === 'Groom Friend';
                   const isBrideSide = g.relationship_category === 'Bride Family' || g.relationship_category === 'Bride Friend';
-                  const sideText = isGroomSide ? 'Ladkewale 🎩' : isBrideSide ? 'Ladkiwale 👰' : (weddingProfile?.planning_side === 'Groom' ? 'Ladkewale 🎩' : weddingProfile?.planning_side === 'Bride' ? 'Ladkiwale 👰' : 'Mehmaan 🌸');
+                  const sideText = isGroomSide ? "Groom's Side" : isBrideSide ? "Bride's Side" : (weddingProfile?.planning_side === 'Groom' ? "Groom's Side" : weddingProfile?.planning_side === 'Bride' ? "Bride's Side" : 'Guest');
                   const rsvp = (g.rsvp_status === 'Not Responded' || !g.rsvp_status) ? 'Pending Invitation' : g.rsvp_status;
                   const rsvpColor = rsvp === 'Confirmed' || rsvp === 'Attending'
-                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     : rsvp === 'Declined'
-                    ? 'bg-rose-100 text-rose-800 border-rose-300'
-                    : 'bg-amber-100 text-amber-800 border-amber-300';
-                  const foodIcon = g.food_preference === 'Jain' ? '🥕 Jain' : g.food_preference === 'Non-Veg' ? '🍗 Non-Veg' : '🌿 Pure Veg';
-                  const stayText = g.stay_preference === 'Hotel' ? '🏨 Hotel Room' : g.stay_preference === 'Home' ? '🏡 Guest House' : '🚗 Local';
+                    ? 'bg-rose-50 text-rose-800 border-rose-200'
+                    : 'bg-zinc-100 text-zinc-700 border-zinc-200';
+                  const foodText = g.food_preference === 'Jain' ? 'Jain' : g.food_preference === 'Non-Veg' ? 'Non-Veg' : 'Pure Veg';
+                  const stayText = g.stay_preference === 'Hotel' ? 'Hotel Room' : g.stay_preference === 'Home' ? 'Guest House' : 'Local Stay';
 
                   return (
                     <div 
                       key={g.id} 
-                      className={`festive-card p-6 md:p-7 rounded-2xl relative overflow-hidden transition-all duration-200 flex flex-col justify-between space-y-4 ${
-                        isSelected ? 'border-amber-400 ring-2 ring-amber-300/50 bg-zinc-50/20' : 'bg-white border-zinc-200'
+                      className={`p-6 md:p-7 rounded-3xl relative overflow-hidden transition-all duration-200 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md ${
+                        isSelected ? 'border-zinc-900 ring-2 ring-zinc-900 bg-zinc-50/40' : 'bg-white border border-zinc-200 hover:border-zinc-300'
                       }`}
                     >
                       <div>
@@ -1254,9 +1254,9 @@ export default function Guests() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleSelectRow(g.id)}
-                              className="rounded border-zinc-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                              className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
                             />
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-50 text-amber-800 border border-amber-200">
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
                               {sideText}
                             </span>
                           </div>
@@ -1267,11 +1267,11 @@ export default function Guests() {
 
                         {/* Guest Header with Avatar */}
                         <div className="flex items-start gap-3 mb-3">
-                          <div className="w-11 h-11 rounded-2xl bg-zinc-900 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-sm ring-1 ring-amber-200">
+                          <div className="w-11 h-11 rounded-2xl bg-zinc-900 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-sm">
                             {g.name ? g.name.charAt(0).toUpperCase() : 'M'}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="font-serif font-bold text-base text-zinc-900 tracking-tight leading-snug truncate">
+                            <h3 className="font-extrabold text-base text-zinc-900 tracking-tight leading-snug truncate">
                               {g.name}
                             </h3>
                             <p className="text-xs text-zinc-500 font-medium truncate">
@@ -1279,8 +1279,8 @@ export default function Guests() {
                               {g.household_name && ` • ${g.household_name}`}
                             </p>
                             {g.phone && (
-                              <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
-                                📞 {g.phone}
+                              <p className="text-[11px] text-zinc-400 font-medium mt-0.5">
+                                {g.phone}
                               </p>
                             )}
                           </div>
@@ -1288,13 +1288,13 @@ export default function Guests() {
 
                         {/* Attributes Pills */}
                         <div className="flex flex-wrap gap-1.5 mb-3">
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80 inline-flex items-center gap-1">
-                            👥 {g.expected_attendees || 1} Mehmaan
+                          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200 inline-flex items-center gap-1">
+                            <Users size={11} className="text-zinc-500" /> {g.expected_attendees || 1} Guests
                           </span>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80">
-                            {foodIcon}
+                          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200">
+                            {foodText}
                           </span>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80">
+                          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200">
                             {stayText}
                           </span>
                         </div>
@@ -1304,8 +1304,8 @@ export default function Guests() {
                           <div className="mb-3">
                             <div className="flex flex-wrap gap-1">
                               {g.events.map(ev => (
-                                <span key={ev} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
-                                  🪔 {ev}
+                                <span key={ev} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-zinc-50 text-zinc-600 border border-zinc-200">
+                                  {ev}
                                 </span>
                               ))}
                             </div>
@@ -1318,7 +1318,7 @@ export default function Guests() {
                         <button
                           type="button"
                           onClick={() => handleQuickWhatsApp(g)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                          className="flex-1 py-2 px-3 rounded-full bg-zinc-900 hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                         >
                           <MessageCircle size={14} />
                           <span>WhatsApp Invite</span>
@@ -1448,7 +1448,7 @@ export default function Guests() {
                         {/* Guest Info */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#1b3c53] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                            <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                               {initials}
                             </div>
                             <div className="min-w-0">
@@ -1947,7 +1947,7 @@ export default function Guests() {
         <div className="space-y-4">
           {/* Header Info */}
           <div className="p-3.5 bg-zinc-50/70 border border-amber-200/80 rounded-xl flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1b3c53] text-[#f3e5ab] flex items-center justify-center shrink-0 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center shrink-0 shadow-sm">
               {inviteChannel === 'telegram' ? <Send size={20} className="text-[#0088cc]" /> : <Mail size={20} />}
             </div>
             <div className="text-xs text-zinc-700 min-w-0">
@@ -2292,10 +2292,10 @@ export default function Guests() {
                     Cancel
                   </Button>
                   <Button
-                    radius="sm"
+                    radius="full"
                     type="submit"
                     disabled={sendingInvite}
-                    className="text-xs font-semibold bg-[#1b3c53] hover:bg-[#132e40] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+                    className="text-xs font-semibold bg-zinc-900 hover:bg-black text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm rounded-full"
                   >
                     {sendingInvite ? (
                       <>
@@ -2304,7 +2304,7 @@ export default function Guests() {
                       </>
                     ) : (
                       <>
-                        <Send size={13} className="text-[#f3e5ab]" />
+                        <Send size={13} className="text-white" />
                         <span>Send Invitation Email</span>
                       </>
                     )}
@@ -2324,8 +2324,8 @@ export default function Guests() {
         maxWidth="max-w-lg"
       >
         <div className="space-y-4">
-          <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1b3c53] text-[#f3e5ab] flex items-center justify-center shrink-0 shadow-sm">
+          <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center shrink-0 shadow-sm">
               <Mail size={20} />
             </div>
             <div className="text-xs text-zinc-700 min-w-0">
@@ -2433,11 +2433,11 @@ export default function Guests() {
                 Cancel
               </Button>
               <Button
-                radius="sm"
+                radius="full"
                 type="button"
                 disabled={bulkSendingInvite || guests.filter(g => selectedIds.includes(g.id) && g.email && g.email.trim()).length === 0}
                 onClick={handleBulkSendInvitations}
-                className="text-xs font-semibold bg-[#1b3c53] hover:bg-[#132e40] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+                className="text-xs font-semibold bg-zinc-900 hover:bg-black text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm rounded-full"
               >
                 {bulkSendingInvite ? (
                   <>
@@ -2446,7 +2446,7 @@ export default function Guests() {
                   </>
                 ) : (
                   <>
-                    <Send size={13} className="text-[#f3e5ab]" />
+                    <Send size={13} className="text-white" />
                     <span>Send {guests.filter(g => selectedIds.includes(g.id) && g.email && g.email.trim()).length} Invitations</span>
                   </>
                 )}

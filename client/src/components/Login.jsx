@@ -58,7 +58,7 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white border border-zinc-200 shadow-sm mb-4">
             <Heart size={20} className="fill-zinc-800 text-zinc-800" />
           </div>
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-zinc-900 tracking-tight mb-2">Hitchd.</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-zinc-900 tracking-tight mb-2">Hitchd.</h1>
           <p className="text-zinc-500 text-sm font-medium">Premium Wedding Registry & Planner</p>
         </div>
 

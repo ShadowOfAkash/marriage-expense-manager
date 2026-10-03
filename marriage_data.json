@@ -1,6 +1,6 @@
 {
   "budget": {
-    "amount": 600000,
+    "amount": 1000000,
     "updated_at": "2026-08-24T04:57:12.231Z"
   },
   "expenses": [
@@ -520,6 +520,32 @@
       "booking_id": 1788946387545,
       "payment_type": "Normal",
       "created_at": "2026-09-09T10:02:36.931Z"
+    },
+    {
+      "id": 55,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Decoration",
+      "description": "Ghar sajan ka payment",
+      "amount": 1200,
+      "date": "2026-10-03",
+      "status": "approved",
+      "receipt_url": "",
+      "booking_id": 1788946387545,
+      "payment_type": "Normal",
+      "created_at": "2026-10-03T14:56:45.537Z"
+    },
+    {
+      "id": 56,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Decoration",
+      "description": "Ghar sajan ka payment",
+      "amount": 1200,
+      "date": "2026-10-03",
+      "status": "approved",
+      "receipt_url": "",
+      "booking_id": 1788946387545,
+      "payment_type": "Normal",
+      "created_at": "2026-10-03T14:56:45.556Z"
     }
   ],
   "savings": [
@@ -587,7 +613,7 @@
       "created_at": "2026-08-24T22:12:09.833Z"
     }
   ],
-  "_nextExpenseId": 55,
+  "_nextExpenseId": 57,
   "_nextSavingsId": 15,
   "telegram_codes": {
     "195202": "test_dev_user_123",
@@ -630,6 +656,32 @@
       "advance": 1500,
       "status": "Pending",
       "notes": "4 dyas of decoration"
+    },
+    {
+      "id": 1791039506317,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "vendor": "Vishal PhotoGrapher",
+      "service": "Album and reels",
+      "category": "Photography",
+      "booking_date": "2026-10-03",
+      "event_date": "2027-01-25",
+      "amount": 35000,
+      "advance": 2000,
+      "status": "Pending",
+      "notes": ""
+    },
+    {
+      "id": 1791039506340,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "vendor": "Vishal PhotoGrapher",
+      "service": "Album and reels",
+      "category": "Photography",
+      "booking_date": "2026-10-03",
+      "event_date": "2027-01-25",
+      "amount": 35000,
+      "advance": 2000,
+      "status": "Pending",
+      "notes": ""
     }
   ],
   "payments": [
@@ -1149,9 +1201,35 @@
       "booking_id": 1788946387545,
       "payment_type": "Normal",
       "created_at": "2026-09-09T10:02:36.931Z"
+    },
+    {
+      "id": 55,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Decoration",
+      "description": "Ghar sajan ka payment",
+      "amount": 1200,
+      "date": "2026-10-03",
+      "status": "approved",
+      "receipt_url": "",
+      "booking_id": 1788946387545,
+      "payment_type": "Normal",
+      "created_at": "2026-10-03T14:56:45.537Z"
+    },
+    {
+      "id": 56,
+      "user_id": "jzSCJChQ1OTinp3PESQzSNeCGlp1",
+      "category": "Decoration",
+      "description": "Ghar sajan ka payment",
+      "amount": 1200,
+      "date": "2026-10-03",
+      "status": "approved",
+      "receipt_url": "",
+      "booking_id": 1788946387545,
+      "payment_type": "Normal",
+      "created_at": "2026-10-03T14:56:45.556Z"
     }
   ],
-  "_nextPaymentId": 55,
+  "_nextPaymentId": 57,
   "guests": [
     {
       "id": 1788969300000,
@@ -2921,9 +2999,9 @@
       "lng": 80.9462
     },
     "jzSCJChQ1OTinp3PESQzSNeCGlp1": {
-      "location": "Muradabad, Uttar Pradesh, India",
-      "lat": 28.505582999999998,
-      "lng": 77.6922635
+      "location": "Saket Nagar, Kanpur, Uttar Pradesh, India",
+      "lat": 26.4329432,
+      "lng": 80.3125991
     }
   },
   "vendor_quotes": [
@@ -13265,7 +13343,7 @@
       "user_role": "Groom",
       "groom_name": "Akash",
       "bride_name": "Shivangi",
-      "wedding_date": "2027-03-01",
+      "wedding_date": "2027-01-25",
       "wedding_location": "Saket Nagar, Kanpur, Uttar Pradesh, India",
       "wedding_lat": 26.4329432,
       "wedding_lng": 80.3125991,
@@ -13276,9 +13354,7 @@
       "cover_photo_url": "",
       "onboarding_completed": 1,
       "created_at": "2026-09-16T20:55:53.985Z",
-      "updated_at": "2026-09-17T05:13:43.791Z",
-      "groom_photo_url": "",
-      "bride_photo_url": ""
+      "updated_at": "2026-10-03T15:01:55.510Z"
     }
   },
   "user_budget": {}

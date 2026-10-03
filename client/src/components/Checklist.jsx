@@ -322,7 +322,7 @@ export default function Checklist() {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
@@ -400,7 +400,7 @@ export default function Checklist() {
               onClick={() => setViewMode('timeline')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'timeline'
-                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200 font-serif'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -412,7 +412,7 @@ export default function Checklist() {
               onClick={() => setViewMode('category')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'category'
-                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200 font-serif'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
@@ -429,7 +429,7 @@ export default function Checklist() {
               placeholder="Search rituals, tasks, notes, assignees..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-[#9b1c1c] outline-none transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-zinc-900 outline-none transition-colors"
             />
           </div>
 
@@ -469,7 +469,7 @@ export default function Checklist() {
                 onClick={() => setStatusFilter(pill.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   statusFilter === pill.id
-                    ? 'bg-[#9b1c1c] text-white shadow-2xs font-bold'
+                    ? 'bg-zinc-900 text-white font-bold'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
                 }`}
               >
@@ -483,7 +483,7 @@ export default function Checklist() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
+              className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:border-zinc-900"
             >
               <option value="all">All Categories</option>
               {CHECKLIST_CATEGORIES.map(c => (
@@ -494,7 +494,7 @@ export default function Checklist() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:border-[#9b1c1c]"
+              className="px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-700 outline-none focus:border-zinc-900"
             >
               <option value="all">All Priorities</option>
               {TASK_PRIORITIES.map(p => (
@@ -561,7 +561,7 @@ export default function Checklist() {
                       {isCollapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
                     </span>
                     <div>
-                      <h2 className="text-base font-bold text-zinc-900 tracking-tight font-serif flex items-center gap-2.5">
+                      <h2 className="text-base font-bold text-zinc-900 tracking-tight flex items-center gap-2.5">
                         {groupName}
                         {pct === 100 && totalCount > 0 && (
                           <span className="text-xs text-emerald-600 font-semibold inline-flex items-center gap-1">
@@ -625,8 +625,8 @@ export default function Checklist() {
                               onClick={(e) => handleToggleTask(task, e)}
                               className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                 task.completed
-                                  ? 'bg-[#9b1c1c] text-white shadow-2xs'
-                                  : 'border-2 border-zinc-200 hover:border-[#9b1c1c] bg-white'
+                                  ? 'bg-zinc-900 text-white shadow-xs'
+                                  : 'border-2 border-zinc-200 hover:border-zinc-900 bg-white'
                               }`}
                             >
                               {task.completed && <CheckCircle2 size={15} className="stroke-[3]" />}
@@ -878,10 +878,10 @@ export default function Checklist() {
               Cancel
             </Button>
             <Button
-              radius="sm"
+              radius="full"
               type="submit"
               disabled={savingTask}
-              className="text-xs font-semibold bg-[#1b3c53] hover:bg-[#132e40] text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+              className="text-xs font-semibold bg-zinc-900 hover:bg-black text-white disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm rounded-full"
             >
               {savingTask ? (
                 <>
@@ -1135,11 +1135,11 @@ export default function Checklist() {
                 Cancel
               </Button>
               <Button
-                radius="sm"
+                radius="full"
                 size="sm"
                 disabled={isSeeding}
                 onClick={handleSeedDefaults}
-                className="text-xs font-bold bg-[#1b3c53] hover:bg-[#132e40] text-white shadow-sm"
+                className="text-xs font-bold bg-zinc-900 hover:bg-black text-white shadow-sm rounded-full"
               >
                 {isSeeding ? 'Seeding...' : 'Confirm & Reset Roadmap'}
               </Button>

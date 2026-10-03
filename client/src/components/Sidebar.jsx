@@ -139,7 +139,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, weddingProfile, onE
                 )}
               </div>
               <div className="min-w-0">
-                <div className="font-serif font-bold text-base tracking-tight text-zinc-900 leading-tight truncate group-hover:text-rose-700 transition-colors">
+                <div className="font-bold text-base tracking-tight text-zinc-900 leading-tight truncate group-hover:text-rose-700 transition-colors">
                   {coupleDisplayName}
                 </div>
                 <div className="flex items-center gap-1.5 mt-1">

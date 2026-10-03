@@ -33,7 +33,7 @@ export default class ErrorBoundary extends React.Component {
               <AlertTriangle size={32} />
             </div>
             
-            <h2 className="font-serif font-bold text-2xl text-zinc-900 mb-2">
+            <h2 className="font-bold text-2xl text-zinc-900 mb-2">
               Something went unexpected
             </h2>
             <p className="text-zinc-600 text-sm mb-6 leading-relaxed">

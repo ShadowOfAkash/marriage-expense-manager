@@ -3,7 +3,8 @@ import {
   MapPin, Search, ArrowLeft, Star, Phone, Globe, ExternalLink, Clock, X,
   Send, ChevronRight, Navigation, Mail, Users, Calendar, MessageSquare,
   Loader2, AlertCircle, Store, Edit3, Filter, MapPinned, CheckCircle2,
-  ArrowUpDown
+  ArrowUpDown, ArrowUpRight, Building2, Camera, Video, Utensils, Flower2,
+  Sparkles, Shirt, Music, PartyPopper, Car, Hotel
 } from 'lucide-react';
 import { api, fmt } from '../utils/api';
 
@@ -190,7 +191,7 @@ function LocationSetup({ onLocationSaved }) {
           <button
             onClick={() => handleManualSave()}
             disabled={saving || !query.trim()}
-            className="px-5 py-3.5 rounded-xl bg-[#234c6a] text-white font-semibold text-sm hover:bg-[#1b3c53] transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="px-5 py-3.5 rounded-full bg-zinc-900 text-white font-semibold text-sm hover:bg-black transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             {saving ? 'Finding...' : 'Set Location'}
@@ -261,12 +262,31 @@ function LocationSetup({ onLocationSaved }) {
   );
 }
 
+function getCategoryIcon(name) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('venue')) return <Building2 size={24} />;
+  if (n.includes('photo')) return <Camera size={24} />;
+  if (n.includes('video')) return <Video size={24} />;
+  if (n.includes('cater')) return <Utensils size={24} />;
+  if (n.includes('florist') || n.includes('decor')) return <Flower2 size={24} />;
+  if (n.includes('makeup')) return <Sparkles size={24} />;
+  if (n.includes('wear') || n.includes('bridal')) return <Shirt size={24} />;
+  if (n.includes('music') || n.includes('dj')) return <Music size={24} />;
+  if (n.includes('planner')) return <PartyPopper size={24} />;
+  if (n.includes('car') || n.includes('transport')) return <Car size={24} />;
+  if (n.includes('hotel') || n.includes('stay')) return <Hotel size={24} />;
+  if (n.includes('card') || n.includes('invitation')) return <Mail size={24} />;
+  return <Store size={24} />;
+}
+
 // ── Category Grid View ───────────────────────────────
 function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation }) {
+  const cityShort = (location?.location || 'Kanpur').split(',')[0].trim();
+
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
@@ -275,47 +295,51 @@ function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation
             </div>
             <button
               onClick={onChangeLocation}
-              className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2"
+              className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2 cursor-pointer"
             >
-              <MapPin size={15} /> {location?.location || 'Change City'}
+              <MapPin size={15} /> {cityShort}
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-6">
             <div>
               <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{categories.length}</div>
-              <div className="text-sm text-zinc-500 font-medium">Service categories</div>
+              <div className="text-sm text-zinc-400 font-medium">Service categories</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2 truncate">{location?.location || 'All Cities'}</div>
-              <div className="text-sm text-zinc-500 font-medium">Active destination</div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2 truncate">{cityShort}</div>
+              <div className="text-sm text-zinc-400 font-medium">Active destination</div>
             </div>
             <div>
               <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">Verified</div>
-              <div className="text-sm text-zinc-500 font-medium">Artisans & venues</div>
+              <div className="text-sm text-zinc-400 font-medium">Artisans & venues</div>
             </div>
             <div>
               <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">Instant</div>
-              <div className="text-sm text-zinc-500 font-medium">WhatsApp quotes</div>
+              <div className="text-sm text-zinc-400 font-medium">WhatsApp quotes</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {/* Category Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => onSelectCategory(cat)}
-              className="group relative flex flex-col items-center text-center p-7 md:p-8 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
+              className="group relative flex flex-col items-start p-7 rounded-3xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm text-left"
             >
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                {cat.icon}
+              <div className="flex items-center justify-between w-full mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-700 group-hover:bg-zinc-900 group-hover:text-white transition-all shadow-xs">
+                  {getCategoryIcon(cat.name)}
+                </div>
+                <div className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-zinc-900 group-hover:border-zinc-400 transition-colors">
+                  <ArrowUpRight size={15} />
+                </div>
               </div>
-              <h3 className="font-bold text-base text-zinc-900 mb-1.5">{cat.name}</h3>
-              <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">{cat.description}</p>
-              <ChevronRight size={18} className="absolute top-4 right-4 text-zinc-300 group-hover:text-zinc-600 transition-colors" />
+              <h3 className="font-extrabold text-lg text-zinc-900 mb-1.5 group-hover:text-black">{cat.name}</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-normal">{cat.description}</p>
             </button>
           ))}
         </div>
@@ -383,7 +407,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
       {/* Info */}
       <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          <h3 className="font-bold text-base text-zinc-900 mb-1.5 line-clamp-1 group-hover:text-zinc-900 transition-colors font-serif">
+          <h3 className="font-bold text-base text-zinc-900 mb-1.5 line-clamp-1 group-hover:text-zinc-900 transition-colors">
             {vendor.name}
           </h3>
           <StarRating rating={vendor.rating} count={vendor.ratingCount} />
@@ -512,7 +536,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <button
@@ -605,15 +629,15 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           <p className="text-sm text-rose-600 mb-3">{error}</p>
           <button
             onClick={fetchVendors}
-            className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-semibold cursor-pointer"
+            className="px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-black text-white text-xs font-semibold cursor-pointer shadow-sm transition-colors"
           >
             Retry
           </button>
         </div>
       ) : vendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-zinc-200 p-10 text-center shadow-sm space-y-3">
+        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-zinc-200 p-10 text-center shadow-sm space-y-3">
           <Store size={44} className="text-zinc-300 mx-auto" />
-          <h3 className="text-lg font-bold text-zinc-800 font-serif">
+          <h3 className="text-lg font-bold text-zinc-800">
             No {category.name.toLowerCase()} found within {radiusKm} km
           </h3>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
@@ -623,7 +647,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             {radius < 20000 && (
               <button
                 onClick={() => setRadius(20000)}
-                className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-bold cursor-pointer shadow-sm"
+                className="px-5 py-2.5 rounded-full bg-zinc-900 hover:bg-black text-white text-xs font-bold cursor-pointer shadow-sm transition-colors"
               >
                 Expand to 20 km
               </button>
@@ -631,7 +655,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             {radius < 50000 && (
               <button
                 onClick={() => setRadius(50000)}
-                className="px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 text-xs font-bold hover:bg-zinc-50 cursor-pointer"
+                className="px-5 py-2.5 rounded-full border border-zinc-200 text-zinc-700 text-xs font-bold hover:bg-zinc-50 cursor-pointer transition-colors"
               >
                 Expand to 50 km
               </button>

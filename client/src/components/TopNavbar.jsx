@@ -26,12 +26,12 @@ export default function TopNavbar({ weddingProfile, onEditProfile }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-[#1A1A1A]">
+      <header className="sticky top-0 z-50 w-full bg-[#111111] border-b border-zinc-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <div
-              className="font-serif text-white text-xl font-bold tracking-tight cursor-pointer select-none"
+              className="text-white text-2xl font-bold tracking-tight cursor-pointer select-none"
               onClick={() => navigate('/dashboard')}
             >
               hitchd

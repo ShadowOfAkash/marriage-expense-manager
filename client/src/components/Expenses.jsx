@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Card, Chip, Input, TextField, Label } from '@heroui/react';
-import { Search, Plus, Filter, Tag, ChevronDown, Receipt, Calendar, Pencil, Trash2, Image as ImageIcon, Paperclip, X, IndianRupee, AlignLeft, CalendarCheck, CreditCard, Unlink } from 'lucide-react';
+import { Search, Plus, Filter, Tag, ChevronDown, Receipt, Calendar, Pencil, Trash2, Image as ImageIcon, Paperclip, X, IndianRupee, AlignLeft, CalendarCheck, CreditCard, Unlink, LayoutGrid, Table as TableIcon } from 'lucide-react';
 import { api, fmt, formatDate } from '../utils/api';
 import { AddExpenseModal } from './SharedModals';
 import { TailwindModal } from './TailwindModal';
@@ -164,14 +164,14 @@ export default function Expenses() {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Payments</h1>
               <p className="text-zinc-400 text-sm font-medium">Track expenses, advances & settlements</p>
             </div>
-            <button onClick={() => setIsAddOpen(true)} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2">
+            <button onClick={() => setIsAddOpen(true)} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2 cursor-pointer">
               <Plus size={16} /> Add Payment
             </button>
           </div>
@@ -230,22 +230,24 @@ export default function Expenses() {
               onClick={() => setViewMode('cards')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'cards'
-                  ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-800'
               }`}
             >
-              <span>🎴 Cards</span>
+              <LayoutGrid size={14} />
+              <span>Cards</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('table')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'table'
-                  ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-800'
               }`}
             >
-              <span>📄 Table</span>
+              <TableIcon size={14} />
+              <span>Table</span>
             </button>
           </div>
 
@@ -265,7 +267,7 @@ export default function Expenses() {
             <ChevronDown size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
           </div>
 
-          <div className="hidden sm:flex items-center px-4 py-2.5 rounded-2xl bg-zinc-50 border border-amber-200/80 text-xs font-bold text-amber-900 whitespace-nowrap">
+          <div className="hidden sm:flex items-center px-4 py-2.5 rounded-2xl bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-900 whitespace-nowrap">
             Total: {fmt(filteredTotal)}
           </div>
         </div>
@@ -278,7 +280,7 @@ export default function Expenses() {
             {viewMode === 'cards' ? (
               <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
                 {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
-                  <div key={e.id} className="p-6 md:p-7 relative overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
+                  <div key={e.id} className="p-6 md:p-7 relative overflow-hidden bg-white border border-zinc-200 rounded-3xl shadow-sm hover:shadow-md hover:border-zinc-300 transition-all flex flex-col justify-between space-y-5">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <span className="text-xs font-semibold text-zinc-500 flex items-center gap-1.5">
@@ -287,14 +289,14 @@ export default function Expenses() {
                         </span>
                         <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
                           e.payment_type === 'Advance' 
-                            ? 'bg-amber-100 text-amber-800 border-amber-200'
-                            : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            ? 'bg-zinc-100 text-zinc-800 border-zinc-200'
+                            : 'bg-zinc-900 text-white border-zinc-900'
                         }`}>
-                          {e.payment_type === 'Advance' ? 'Advance Deposit 💰' : 'Direct Payment ✅'}
+                          {e.payment_type === 'Advance' ? 'Advance Deposit' : 'Direct Payment'}
                         </span>
                       </div>
 
-                      <div className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight mb-3">
+                      <div className="text-2xl md:text-3xl font-extrabold text-zinc-900 tracking-tight mb-3">
                         {fmt(e.amount)}
                       </div>
 
@@ -304,8 +306,8 @@ export default function Expenses() {
 
                       {e.booking_id && getBookingName(e.booking_id) !== '-' && (
                         <div>
-                          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200">
-                            <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-900"></span>
                             {getBookingName(e.booking_id)}
                           </span>
                         </div>
@@ -553,7 +555,7 @@ export default function Expenses() {
             <Button radius="sm" variant="light" onClick={() => setDetachTarget(null)}>Cancel</Button>
             <Button 
               radius="sm" 
-              className="bg-[#234c6a] text-white hover:bg-[#1b3c53] font-semibold text-xs" 
+              className="bg-zinc-900 text-white hover:bg-black font-semibold text-xs rounded-full" 
               onPress={handleDetach}
               onClick={handleDetach}
               isLoading={detaching}

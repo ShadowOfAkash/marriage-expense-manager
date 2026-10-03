@@ -70,7 +70,7 @@ export default function Savings() {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
@@ -155,11 +155,11 @@ export default function Savings() {
               {savings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s, i) => (
                 <div 
                   key={s.id || i}
-                  className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden space-y-4"
+                  className="bg-white border border-zinc-200 rounded-3xl p-7 shadow-sm hover:shadow-md hover:border-zinc-300 transition-all flex flex-col justify-between group relative overflow-hidden space-y-4"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-bold">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-xs font-bold">
                         <Calendar size={13} className="text-zinc-900" />
                         <span>{s.month} {s.year}</span>
                       </span>
@@ -175,8 +175,8 @@ export default function Savings() {
                     </div>
 
                     <div className="my-3">
-                      <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Deposited</div>
-                      <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight">
+                      <div className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase mb-1">DEPOSITED AMOUNT</div>
+                      <div className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-zinc-900 tracking-tight">
                         {fmt(s.amount)}
                       </div>
                     </div>

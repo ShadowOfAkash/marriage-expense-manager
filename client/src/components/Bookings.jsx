@@ -4,7 +4,7 @@ import { Button, Card, Chip, Input, TextField, Label } from '@heroui/react';
 import { 
   Search, Plus, CalendarCheck, IndianRupee, AlignLeft, 
   Calendar, User, Briefcase, CreditCard, ChevronDown, 
-  Tag, ExternalLink, Pencil, Trash2 
+  Tag, ExternalLink, Pencil, Trash2, LayoutGrid, Table as TableIcon 
 } from 'lucide-react';
 import { api, fmt, formatDate, CATEGORIES } from '../utils/api';
 import { TailwindModal } from './TailwindModal';
@@ -160,14 +160,14 @@ export default function Bookings() {
   return (
     <>
       {/* Dark Hero */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Contracts</h1>
               <p className="text-zinc-400 text-sm font-medium">Vendor bookings, advances & agreements</p>
             </div>
-            <button onClick={openAdd} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2">
+            <button onClick={openAdd} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2 cursor-pointer">
               <Plus size={16} /> Create Booking
             </button>
           </div>
@@ -219,22 +219,24 @@ export default function Bookings() {
             onClick={() => setViewMode('cards')}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'cards'
-                ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                 : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
-            <span>🎴 Cards</span>
+            <LayoutGrid size={14} />
+            <span>Cards</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode('table')}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'table'
-                ? 'bg-white text-rose-700 shadow-2xs border border-rose-200'
+                ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                 : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
-            <span>📄 Table</span>
+            <TableIcon size={14} />
+            <span>Table</span>
           </button>
         </div>
       </div>
@@ -255,25 +257,25 @@ export default function Bookings() {
                   const remaining = Math.max(0, tAmt - paid);
 
                   return (
-                    <div key={b.id} className="festive-card p-6 md:p-7 relative overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
+                    <div key={b.id} className="bg-white border border-zinc-200 rounded-3xl p-7 shadow-sm hover:shadow-md hover:border-zinc-300 transition-all flex flex-col justify-between space-y-5">
                       <div>
                         {/* Top Header */}
                         <div className="flex items-center justify-between gap-2 mb-3.5">
-                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono">
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200 font-mono">
                             #BK-{String(b.id).slice(-4)}
                           </span>
-                          <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-zinc-200">
+                          <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
                             {b.category || 'Vendor'}
                           </span>
                         </div>
 
                         {/* Vendor Name & Service */}
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-zinc-900 via-rose-500 to-rose-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-md ring-1 ring-amber-200">
+                          <div className="w-12 h-12 rounded-2xl bg-zinc-900 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-sm">
                             {b.vendor ? b.vendor.charAt(0).toUpperCase() : 'V'}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <Link to={`/bookings/${b.id}`} className="font-serif font-bold text-base md:text-lg text-zinc-900 hover:text-rose-700 transition-colors block truncate">
+                            <Link to={`/bookings/${b.id}`} className="font-bold text-base md:text-lg text-zinc-900 hover:text-black transition-colors block truncate">
                               {b.vendor}
                             </Link>
                             <p className="text-xs md:text-sm text-zinc-500 font-medium truncate mt-0.5">
@@ -281,7 +283,7 @@ export default function Bookings() {
                             </p>
                             {b.event_date && (
                               <p className="text-xs text-zinc-500 font-medium mt-1.5 flex items-center gap-1.5">
-                                <Calendar size={13} className="text-amber-600" />
+                                <Calendar size={13} className="text-zinc-600" />
                                 <span>Ceremony: {formatDate(b.event_date)}</span>
                               </p>
                             )}
@@ -289,22 +291,20 @@ export default function Bookings() {
                         </div>
 
                         {/* Payment Progress Bar */}
-                        <div className="p-4 bg-zinc-50/50 rounded-2xl border border-amber-100/80 mb-4">
+                        <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 mb-4">
                           <div className="flex items-baseline justify-between text-xs mb-2">
                             <span className="font-bold text-zinc-900">{fmt(paid)} <span className="text-zinc-400 font-normal text-[11px]">paid</span></span>
                             <span className="font-bold text-zinc-900">{fmt(tAmt)} <span className="text-zinc-400 font-normal text-[11px]">total</span></span>
                           </div>
-                          <div className="w-full bg-zinc-200 rounded-full h-2.5 overflow-hidden mb-2">
+                          <div className="w-full bg-zinc-200 rounded-full h-2 overflow-hidden mb-2">
                             <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                pct >= 100 ? 'bg-emerald-600' : 'bg-gradient-to-r from-zinc-900 to-rose-500'
-                              }`}
+                              className="h-full rounded-full transition-all duration-500 bg-zinc-900"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-rose-700">Due: {fmt(remaining)}</span>
-                            <span className="font-bold text-zinc-600">{pct}% Complete</span>
+                            <span className="font-semibold text-zinc-700">Due: {fmt(remaining)}</span>
+                            <span className="font-bold text-zinc-500">{pct}% Complete</span>
                           </div>
                         </div>
                       </div>
@@ -314,7 +314,7 @@ export default function Bookings() {
                         <button
                           type="button"
                           onClick={() => openPay(b.id)}
-                          className="flex-1 py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-zinc-900 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                          className="flex-1 py-2.5 px-4 rounded-full bg-zinc-900 hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                         >
                           <CreditCard size={15} /> Pay Installment
                         </button>

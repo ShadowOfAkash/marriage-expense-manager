@@ -9,7 +9,7 @@ import {
   ChevronRight, IndianRupee,
   Smartphone, Users, Heart, Calendar, MapPin,
   Sparkles, CheckCircle2, Store, ListChecks,
-  ArrowRight, Edit3, Clock, Check, Send, Plus,
+  ArrowRight, ArrowUpRight, Edit3, Clock, Check, Send, Plus,
   PiggyBank, Camera
 } from 'lucide-react'
 import {
@@ -26,32 +26,32 @@ import { useToast } from '../contexts/ToastContext'
 import { useAuth } from '../contexts/AuthContext'
 
 const CAT_COLORS = [
-  '#9b1c1c', // Royal Sindoor
-  '#b45309', // Marigold Amber
-  '#047857', // Mehendi Emerald
-  '#d97706', // Warm Gold
-  '#be123c', // Festive Crimson
-  '#0e7490', // Royal Teal
-  '#4338ca', // Royal Indigo
-  '#a16207', // Mustard Gold
-  '#854d0e', // Warm Ochre
-  '#15803d', // Forest Leaf
-  '#b91c1c', // Crimson Red
-  '#92400e'  // Deep Sandalwood
+  '#18181B', // Charcoal Black
+  '#3F3F46', // Dark Zinc
+  '#52525B', // Neutral Zinc
+  '#71717A', // Medium Zinc
+  '#A1A1AA', // Light Slate
+  '#D4D4D8', // Soft Silver
+  '#27272A', // Deep Zinc
+  '#09090B', // Pitch Black
+  '#E4E4E7', // Pale Zinc
+  '#1E293B', // Slate Dark
+  '#334155', // Slate Mid
+  '#64748B'  // Slate Light
 ]
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-zinc-200/50 rounded-2xl p-3.5 shadow-xl text-sm min-w-[160px]">
-      <div className="font-bold text-zinc-800 mb-2 text-xs">{label}</div>
+    <div className="bg-[#111111] text-white border border-zinc-800 rounded-2xl p-3.5 shadow-2xl text-xs min-w-[160px]">
+      <div className="font-semibold text-zinc-400 mb-2">{label}</div>
       {payload.map((p, i) => (
-        <div key={i} className="flex items-center justify-between gap-4">
+        <div key={i} className="flex items-center justify-between gap-4 py-0.5">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-            <span className="text-zinc-600 text-xs">{p.name}</span>
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color || '#fff' }} />
+            <span className="text-zinc-300">{p.name}</span>
           </div>
-          <span className="font-bold text-zinc-900 text-xs">{fmt(p.value)}</span>
+          <span className="font-bold text-white">{fmt(p.value)}</span>
         </div>
       ))}
     </div>
@@ -254,58 +254,63 @@ export default function Dashboard() {
     )
   }
 
-  const firstName = currentUser?.displayName?.split(' ')[0] || weddingProfile?.groom_name || 'there';
+  const firstName = weddingProfile?.groom_name 
+    || (currentUser?.displayName && !currentUser.displayName.includes('@') && !currentUser.displayName.includes('.')
+        ? currentUser.displayName.split(' ')[0] 
+        : 'Akash');
 
   const coupleTitle = weddingProfile?.groom_name && weddingProfile?.bride_name
     ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}`
-    : 'Our Wedding';
+    : 'Akash & Shivangi';
 
-  const locationStr = weddingProfile?.wedding_location || '';
+  const locationStr = weddingProfile?.wedding_location || 'Saket Nagar, Kanpur, Uttar Pradesh, India';
 
   const avgContribution = savings.length > 0
     ? Math.round(totalSavings / savings.length)
     : 0;
+
+  const defaultAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80';
 
   return (
     <>
       {/* ═══════════════════════════════════════════════════════════
           SECTION 1 — Dark Hero  (Full width edge-to-edge)
           ═══════════════════════════════════════════════════════════ */}
-      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#111111] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Greeting */}
           <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] leading-tight tracking-tight mb-12">
-            <span className="font-bold">{firstName},</span>{' '}
-            <span className="font-serif italic font-normal text-zinc-400">here's</span>
+            <span className="font-extrabold text-white">{firstName},</span>{' '}
+            <span className="font-normal text-zinc-400">here's</span>
             <br />
-            <span className="font-serif italic font-normal text-zinc-400">what's happening</span>
+            <span className="font-normal text-zinc-400">what's happening</span>
           </h1>
 
           {/* 4 Stat Numbers — inline like Hitchd */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-8">
             <div>
-              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2 text-white">
                 {fmt(totalSavings)}
               </div>
-              <div className="text-sm text-zinc-500 font-medium">Total received</div>
+              <div className="text-sm text-zinc-400 font-medium">Total received</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2 text-white">
                 {fmt(0)}
               </div>
-              <div className="text-sm text-zinc-500 font-medium">Received today</div>
+              <div className="text-sm text-zinc-400 font-medium">Received today</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2 text-white">
                 {fmt(avgContribution)}
               </div>
-              <div className="text-sm text-zinc-500 font-medium">Average contribution</div>
+              <div className="text-sm text-zinc-400 font-medium">Average contribution</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+            <div className="md:border-l md:border-zinc-800 md:pl-10">
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2 text-white">
                 {savings.length}
               </div>
-              <div className="text-sm text-zinc-500 font-medium">Contributions</div>
+              <div className="text-sm text-zinc-400 font-medium">Contributions</div>
             </div>
           </div>
         </div>
@@ -314,194 +319,308 @@ export default function Dashboard() {
       {/* ═══════════════════════════════════════════════════════════
           MAIN CONTENT AREA
           ═══════════════════════════════════════════════════════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        {/* SECTION 2 — Couple Info Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        {/* SECTION 2 — Couple Info Bar (Hitchd Style) */}
         <div>
-        <div className="bg-[#F5F5F0] rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* Couple Avatar */}
-            <div className="w-11 h-11 rounded-full bg-zinc-300 overflow-hidden shrink-0 border-2 border-white shadow-sm">
-              {weddingProfile?.groom_photo_url ? (
-                <img src={weddingProfile.groom_photo_url} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-zinc-400 flex items-center justify-center text-white font-bold text-sm">
-                  {(weddingProfile?.groom_name?.[0] || 'A').toUpperCase()}
+          <div className="bg-white border border-zinc-200/90 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {/* Couple Avatar */}
+              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-zinc-200 shadow-sm">
+                <img 
+                  src={weddingProfile?.groom_photo_url || defaultAvatar} 
+                  alt="" 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+              <div>
+                <div className="font-bold text-zinc-900 text-base">{coupleTitle}</div>
+                <div className="text-xs text-zinc-400 font-normal mt-0.5">
+                  {locationStr && <span>{locationStr}</span>}
+                  {locationStr && <span> · </span>}
+                  <span>{countdownDays != null && countdownDays > 0 ? `${countdownDays} days left until ceremony` : '122 days left until ceremony'}</span>
                 </div>
-              )}
+              </div>
             </div>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button
+                onClick={() => setIsAddExpOpen(true)}
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-zinc-900 text-white text-xs sm:text-sm font-bold hover:bg-black transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <Plus size={14} /> Log Expense
+              </button>
+              <button
+                onClick={() => setIsAddSavOpen(true)}
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-white text-zinc-900 text-xs sm:text-sm font-bold border border-zinc-200 hover:bg-zinc-50 transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <Plus size={14} /> Add Contribution
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 3 — Wedding Portals & Overview (Exact Hitchd Cards)
+            ═══════════════════════════════════════════════════════════ */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Wedding Portals & Overview</h2>
+            <span className="text-xs text-zinc-400 font-normal hidden sm:block">Real-time status across key areas</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { badge: 'PAYMENTS & KHARCHA', title: 'Shaadi Payments', path: '/expenses' },
+              { badge: 'BOOKINGS & ADVANCES', title: 'Vendor Contracts', path: '/bookings' },
+              { badge: 'FAMILY & INVITATIONS', title: 'Guests & RSVPs', path: '/guests' },
+              { badge: 'MILESTONES & TASKS', title: 'Wedding Roadmap', path: '/checklist' },
+            ].map(card => (
+              <div
+                key={card.path}
+                onClick={() => navigate(card.path)}
+                className="bg-white border border-zinc-200 rounded-3xl p-7 min-h-[160px] flex flex-col justify-between cursor-pointer hover:border-zinc-300 hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase">{card.badge}</span>
+                  <div className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-zinc-900 group-hover:border-zinc-400 transition-colors">
+                    <ArrowUpRight size={15} />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-zinc-900 tracking-tight mt-6 group-hover:text-black">
+                  {card.title}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 4 — Financial Analytics & Dynamics (Monochrome Premium Theme)
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Card 1: Cashflow Overview */}
+          <div className="bg-white border border-zinc-200/90 rounded-3xl p-7 sm:p-8 shadow-sm hover:border-zinc-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="font-bold text-zinc-900 text-[15px]">{coupleTitle}</div>
-              <div className="text-xs text-zinc-500 mt-0.5">
-                {locationStr && <span>{locationStr}</span>}
-                {locationStr && countdownDays != null && <span> · </span>}
-                {countdownDays != null && (
-                  <span>{countdownDays > 0 ? `${countdownDays} days left until ceremony` : 'Wedding day!'}</span>
-                )}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase">CASHFLOW & LIQUIDITY</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
+                  {fmt(totalSavings)} Total
+                </span>
               </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsAddExpOpen(true)}
-              className="px-4 py-2.5 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-colors flex items-center gap-1.5 shadow-sm"
-            >
-              <Plus size={14} /> Log Expense
-            </button>
-            <button
-              onClick={() => setIsAddSavOpen(true)}
-              className="px-4 py-2.5 rounded-full bg-white text-zinc-900 text-xs font-bold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1.5 shadow-sm"
-            >
-              <Plus size={14} /> Add Contribution
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 3 — Wedding Portals & Overview
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-zinc-900">Wedding Portals & Overview</h2>
-          <span className="text-xs text-zinc-400 font-medium hidden sm:block">Real-time status across key areas</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { badge: 'Payments & Kharcha', title: 'Shaadi Payments', path: '/expenses', value: fmt(totalExpenses) },
-            { badge: 'Bookings & Advances', title: 'Vendor Contracts', path: '/bookings', value: `${bookings.length} bookings` },
-            { badge: 'Family & Invitations', title: 'Guests & RSVPs', path: '/guests', value: `${weddingProfile?.guest_count || 0} guests` },
-            { badge: 'Milestones & Tasks', title: 'Wedding Roadmap', path: '/checklist', value: `${checklistPercent}% done` },
-          ].map(card => (
-            <div
-              key={card.path}
-              onClick={() => navigate(card.path)}
-              className="bg-white border border-zinc-200 rounded-2xl p-5 cursor-pointer hover:shadow-md hover:border-zinc-300 transition-all group"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{card.badge}</span>
-                <ArrowRight size={14} className="text-zinc-300 group-hover:text-zinc-600 transition-colors" />
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight mt-1 mb-1">
+                Cumulative Treasury
               </div>
-              <div className="font-bold text-zinc-900 text-base">{card.title}</div>
-              <div className="text-xs text-zinc-500 mt-1 font-medium">{card.value}</div>
+              <p className="text-xs text-zinc-400 font-normal mb-6">
+                Net received contributions and liquid reserves over time
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 4 — Charts
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
-          <h3 className="font-bold text-base text-zinc-900 mb-6">Cashflow Overview</h3>
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={savingsTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorCum" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#18181B" stopOpacity={0.12}/>
-                    <stop offset="95%" stopColor="#18181B" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F4F4F5" />
-                <XAxis dataKey="name" stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} tickFormatter={fmtK} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="cumulative" name="Total Saved" stroke="#18181B" strokeWidth={2} fill="url(#colorCum)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
-          <h3 className="font-bold text-base text-zinc-900 mb-6">Monthly Breakdown</h3>
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyComparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F4F4F5" />
-                <XAxis dataKey="name" stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} tickFormatter={fmtK} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F4F4F5' }} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} iconType="circle" />
-                <Bar dataKey="expenses" name="Expenses" fill="#F43F5E" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="savings" name="Savings" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 5 — Category Breakdown + Recent Activity
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
-          <h3 className="font-bold text-base text-zinc-900 mb-6">Categories</h3>
-          {pieData.length === 0 ? (
-            <div className="h-[220px] flex items-center justify-center text-zinc-400 text-sm">No expenses yet</div>
-          ) : (
-            <div className="h-[240px]">
+            <div className="h-[260px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%" cy="50%"
-                    innerRadius={65}
-                    outerRadius={90}
-                    paddingAngle={4}
-                    stroke="none"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={CAT_COLORS[index % CAT_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => fmt(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }} />
-                </PieChart>
+                <AreaChart data={savingsTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorCum" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#18181B" stopOpacity={0.16}/>
+                      <stop offset="95%" stopColor="#18181B" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F4F4F5" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#A1A1AA" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tick={{ fill: '#71717A', fontSize: 11, fontFamily: "'Outfit', sans-serif" }}
+                  />
+                  <YAxis 
+                    stroke="#A1A1AA" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={fmtK}
+                    tick={{ fill: '#71717A', fontSize: 11, fontFamily: "'Outfit', sans-serif" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="cumulative" name="Total Saved" stroke="#18181B" strokeWidth={2.5} fill="url(#colorCum)" />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
-          )}
-        </div>
-
-        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-base text-zinc-900">Recent Activity</h3>
-            <button
-              onClick={() => navigate('/expenses')}
-              className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors"
-            >
-              View all <ArrowRight size={14} />
-            </button>
           </div>
 
-          {expenses.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 py-10">
-              <Receipt size={48} className="mb-4 opacity-20" />
-              <p className="text-sm">No activity recorded yet</p>
+          {/* Card 2: Monthly Comparison */}
+          <div className="bg-white border border-zinc-200/90 rounded-3xl p-7 sm:p-8 shadow-sm hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase">MONTHLY BREAKDOWN</span>
+                <div className="flex items-center gap-3 text-xs font-semibold text-zinc-600">
+                  <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-zinc-900" /> Expenses</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-zinc-300" /> Savings</span>
+                </div>
+              </div>
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight mt-1 mb-1">
+                Cashflow Activity
+              </div>
+              <p className="text-xs text-zinc-400 font-normal mb-6">
+                Month-by-month spending vs inward savings
+              </p>
             </div>
-          ) : (
-            <div className="space-y-1">
-              {expenses.slice(0, 5).map(e => (
-                <div key={e.id} className="group flex items-center justify-between p-3.5 rounded-xl hover:bg-zinc-50 transition-colors">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-white group-hover:shadow-sm transition-all shrink-0">
-                      <Receipt size={16} />
+            <div className="h-[260px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyComparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F4F4F5" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#A1A1AA" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tick={{ fill: '#71717A', fontSize: 11, fontFamily: "'Outfit', sans-serif" }}
+                  />
+                  <YAxis 
+                    stroke="#A1A1AA" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={fmtK}
+                    tick={{ fill: '#71717A', fontSize: 11, fontFamily: "'Outfit', sans-serif" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F4F4F5' }} />
+                  <Bar dataKey="expenses" name="Expenses" fill="#18181B" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                  <Bar dataKey="savings" name="Savings" fill="#D4D4D8" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 5 — Category Distribution & Recent Activity
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card 3: Categories Split */}
+          <div className="bg-white border border-zinc-200/90 rounded-3xl p-7 sm:p-8 shadow-sm hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase">BUDGET ALLOCATION</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200">
+                  {categories.length} Categories
+                </span>
+              </div>
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight mt-1 mb-1">
+                Category Split
+              </div>
+              <p className="text-xs text-zinc-400 font-normal mb-6">
+                Spending distribution across services
+              </p>
+            </div>
+
+            {pieData.length === 0 ? (
+              <div className="h-[220px] flex items-center justify-center text-zinc-400 text-xs">No expenses recorded</div>
+            ) : (
+              <div>
+                <div className="h-[200px] relative flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%" cy="50%"
+                        innerRadius={60}
+                        outerRadius={84}
+                        paddingAngle={3}
+                        stroke="none"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={CAT_COLORS[index % CAT_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Donut Center Label */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-lg font-extrabold text-zinc-900 leading-none">{fmt(totalExpenses)}</span>
+                    <span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider mt-1">Total Spent</span>
+                  </div>
+                </div>
+
+                {/* Top Category Legend Pills */}
+                <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-zinc-100">
+                  {pieData.slice(0, 4).map((c, i) => (
+                    <span key={c.name} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-200/80 text-[11px] font-medium text-zinc-700">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: CAT_COLORS[i % CAT_COLORS.length] }} />
+                      <span className="truncate max-w-[90px]">{c.name}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card 4: Recent Activity */}
+          <div className="lg:col-span-2 bg-white border border-zinc-200/90 rounded-3xl p-7 sm:p-8 shadow-sm hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold tracking-[0.08em] text-zinc-400 uppercase">LATEST TRANSACTIONS</span>
+                <button
+                  onClick={() => navigate('/expenses')}
+                  className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:border-zinc-400 transition-colors cursor-pointer group"
+                  title="View all payments"
+                >
+                  <ArrowUpRight size={15} />
+                </button>
+              </div>
+              <div className="text-2xl font-extrabold text-zinc-900 tracking-tight mt-1 mb-1">
+                Recent Activity
+              </div>
+              <p className="text-xs text-zinc-400 font-normal mb-6">
+                Real-time transactions and advance payments logged
+              </p>
+            </div>
+
+            {expenses.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 py-10">
+                <Receipt size={40} className="mb-3 opacity-20" />
+                <p className="text-xs">No activity recorded yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {expenses.slice(0, 5).map(e => (
+                  <div 
+                    key={e.id} 
+                    onClick={() => navigate('/expenses')}
+                    className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl hover:bg-zinc-50 border border-transparent hover:border-zinc-200/80 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-10 h-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all shrink-0">
+                        <Receipt size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-zinc-900 text-sm truncate group-hover:text-black">
+                          {e.description || e.category}
+                        </div>
+                        <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
+                          <span>{formatDate(e.date)}</span>
+                          <span>•</span>
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 text-[10px] font-semibold">{e.category}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold text-zinc-900 text-sm">{e.description || e.category}</div>
-                      <div className="text-xs text-zinc-400 mt-0.5">{formatDate(e.date)} · {e.category}</div>
+                    <div className="text-right shrink-0 ml-4">
+                      <div className="font-extrabold text-zinc-900 text-sm sm:text-base tracking-tight">
+                        {fmt(e.amount)}
+                      </div>
+                      <div className="text-[10px] text-zinc-400 font-medium">
+                        {e.payment_type || 'Direct'}
+                      </div>
                     </div>
                   </div>
-                  <div className="font-bold text-zinc-900 text-sm">{fmt(e.amount)}</div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* ── Modals ── */}
