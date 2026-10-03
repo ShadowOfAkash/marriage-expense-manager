@@ -250,7 +250,7 @@ function LocationSetup({ onLocationSaved }) {
               key={city}
               onClick={() => { setQuery(city); handleManualSave(city); }}
               disabled={saving}
-              className="px-3.5 py-2 rounded-lg bg-white border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-[#234c6a] hover:text-white hover:border-[#234c6a] transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 rounded-lg bg-white border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-[#234c6a] hover:text-white hover:border-[#234c6a] transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               {city}
             </button>
@@ -264,49 +264,63 @@ function LocationSetup({ onLocationSaved }) {
 // ── Category Grid View ───────────────────────────────
 function CategoryGrid({ categories, location, onSelectCategory, onChangeLocation }) {
   return (
-    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
-      {/* Location Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-amber-200/70 pb-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 font-serif tracking-tight">
-              Shaadi Vendor Bazaar
-            </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-xs font-bold">
-              शुभ विवाह
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
-            <MapPin size={15} className="text-[#9b1c1c] shrink-0" />
-            <span>Handcrafted wedding services & verified artisans near <span className="font-bold text-zinc-800 underline decoration-amber-300">{location.location}</span></span>
+    <>
+      {/* Dark Hero */}
+      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Vendors</h1>
+              <p className="text-zinc-400 text-sm font-medium">Discover verified artisans & wedding services</p>
+            </div>
             <button
               onClick={onChangeLocation}
-              className="ml-2 text-[#9b1c1c] hover:underline font-bold cursor-pointer inline-flex items-center gap-1.5 text-xs bg-amber-50 px-3 py-1 rounded-xl border border-amber-200/80 transition-all hover:bg-amber-100"
+              className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2"
             >
-              <Edit3 size={12} /> Change City
+              <MapPin size={15} /> {location?.location || 'Change City'}
             </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-6">
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{categories.length}</div>
+              <div className="text-sm text-zinc-500 font-medium">Service categories</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2 truncate">{location?.location || 'All Cities'}</div>
+              <div className="text-sm text-zinc-500 font-medium">Active destination</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">Verified</div>
+              <div className="text-sm text-zinc-500 font-medium">Artisans & venues</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">Instant</div>
+              <div className="text-sm text-zinc-500 font-medium">WhatsApp quotes</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Category Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-7">
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => onSelectCategory(cat)}
-            className={`group relative flex flex-col items-center text-center p-7 md:p-8 rounded-3xl bg-gradient-to-br ${cat.color} border ${cat.border} hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer shadow-xs`}
-          >
-            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-              {cat.icon}
-            </div>
-            <h3 className="font-bold text-base text-zinc-800 mb-1.5 font-serif">{cat.name}</h3>
-            <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">{cat.description}</p>
-            <ChevronRight size={18} className="absolute top-4 right-4 text-amber-300 group-hover:text-amber-700 transition-colors" />
-          </button>
-        ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Category Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => onSelectCategory(cat)}
+              className="group relative flex flex-col items-center text-center p-7 md:p-8 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
+            >
+              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
+                {cat.icon}
+              </div>
+              <h3 className="font-bold text-base text-zinc-900 mb-1.5">{cat.name}</h3>
+              <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">{cat.description}</p>
+              <ChevronRight size={18} className="absolute top-4 right-4 text-zinc-300 group-hover:text-zinc-600 transition-colors" />
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -330,7 +344,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
 
   return (
     <div
-      className="bg-white rounded-3xl border border-amber-200/70 overflow-hidden hover:shadow-lg hover:border-amber-300 transition-all duration-200 group cursor-pointer flex flex-col shadow-xs"
+      className="bg-white rounded-2xl border border-zinc-200 overflow-hidden hover:shadow-lg hover:border-amber-300 transition-all duration-200 group cursor-pointer flex flex-col shadow-sm"
       onClick={() => onSelect(vendor)}
     >
       {/* Photo */}
@@ -369,7 +383,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
       {/* Info */}
       <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          <h3 className="font-bold text-base text-zinc-900 mb-1.5 line-clamp-1 group-hover:text-[#9b1c1c] transition-colors font-serif">
+          <h3 className="font-bold text-base text-zinc-900 mb-1.5 line-clamp-1 group-hover:text-zinc-900 transition-colors font-serif">
             {vendor.name}
           </h3>
           <StarRating rating={vendor.rating} count={vendor.ratingCount} />
@@ -388,10 +402,10 @@ function VendorCard({ vendor, onSelect, onQuote }) {
               <a
                 href={`tel:${vendor.phone}`}
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-[#9b1c1c] transition-colors"
+                className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-900 transition-colors"
                 title="Call"
               >
-                <Phone size={13} className="text-amber-700" />
+                <Phone size={13} className="text-zinc-700" />
                 <span className="truncate max-w-[120px]">{vendor.phone}</span>
               </a>
             )}
@@ -401,7 +415,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors ml-auto"
+                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-900 transition-colors ml-auto"
                 title="Visit Website"
               >
                 <Globe size={14} />
@@ -413,7 +427,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-[#9b1c1c] transition-colors"
+                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-900 transition-colors"
                 title="Open in Google Maps"
               >
                 <Navigation size={14} />
@@ -432,7 +446,7 @@ function VendorCard({ vendor, onSelect, onQuote }) {
             </button>
             <button
               onClick={e => { e.stopPropagation(); onQuote(vendor); }}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs border border-rose-900/40"
+              className="flex-1 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs border border-rose-900/40"
             >
               <Send size={12} className="text-amber-200" /> <span>Quote</span>
             </button>
@@ -441,10 +455,10 @@ function VendorCard({ vendor, onSelect, onQuote }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="py-2.5 px-3 rounded-xl border border-amber-200/80 text-zinc-600 hover:text-zinc-900 text-xs font-semibold hover:bg-amber-50/50 transition-colors flex items-center justify-center"
+              className="py-2.5 px-3 rounded-xl border border-zinc-200 text-zinc-600 hover:text-zinc-900 text-xs font-semibold hover:bg-zinc-50/50 transition-colors flex items-center justify-center"
               title="Open in Maps"
             >
-              <MapPinned size={15} className="text-amber-700" />
+              <MapPinned size={15} className="text-zinc-700" />
             </a>
           </div>
         </div>
@@ -496,33 +510,42 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
   const radiusKm = radius / 1000;
 
   return (
-    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
-      {/* Header with breadcrumb */}
-      <div className="flex items-center gap-4 border-b border-amber-200/70 pb-6">
-        <button
-          onClick={onBack}
-          className="p-2.5 rounded-xl hover:bg-amber-50 text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer border border-amber-200/70"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
-            <button onClick={onBack} className="hover:text-[#9b1c1c] font-medium cursor-pointer">Vendors</button>
-            <ChevronRight size={13} />
-            <span className="text-zinc-600 font-medium truncate">{category.name}</span>
+    <>
+      {/* Dark Hero */}
+      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              onClick={onBack}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border border-white/20"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <div className="flex items-center gap-2 text-xs text-zinc-400">
+              <button onClick={onBack} className="hover:text-white font-medium cursor-pointer">Vendors</button>
+              <ChevronRight size={13} />
+              <span className="text-white font-medium truncate">{category.name}</span>
+            </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-zinc-900 truncate font-serif">
-            {category.icon} {category.name}
-          </h1>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">
+                {category.name}
+              </h1>
+              <p className="text-zinc-400 text-sm font-medium">Near {location.location} · {vendors.length} vendors discovered</p>
+            </div>
+          </div>
         </div>
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Filter & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-6 md:p-7 bg-white rounded-3xl border border-amber-200/70 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 md:p-6 bg-white rounded-2xl border border-zinc-200 shadow-sm">
         {/* Radius Filter */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 font-bold mr-1">
-            <Filter size={16} className="text-[#9b1c1c]" />
+            <Filter size={16} className="text-zinc-900" />
             <span>Search Radius:</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -532,8 +555,8 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
                 onClick={() => setRadius(opt.meters)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   radius === opt.meters
-                    ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
-                    : 'bg-zinc-100 text-zinc-700 hover:bg-amber-50 hover:text-[#9b1c1c]'
+                    ? 'bg-zinc-900 text-white shadow-sm'
+                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                 }`}
               >
                 {opt.label}
@@ -544,11 +567,11 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
 
         {/* Sort Controls & Proximity Location */}
         <div className="flex items-center gap-4 ml-auto">
-          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/60 p-1.5 rounded-2xl">
+          <div className="flex items-center gap-1.5 bg-zinc-100 border border-zinc-200 p-1.5 rounded-2xl">
             <button
               onClick={() => setSortBy('distance')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                sortBy === 'distance' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
+                sortBy === 'distance' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               📍 Nearest
@@ -556,7 +579,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             <button
               onClick={() => setSortBy('rating')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                sortBy === 'rating' ? 'bg-white text-[#9b1c1c] shadow-xs' : 'text-zinc-500 hover:text-zinc-900'
+                sortBy === 'rating' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               ⭐ Top Rated
@@ -564,7 +587,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           </div>
 
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-zinc-400">
-            <MapPin size={14} className="text-[#9b1c1c]" />
+            <MapPin size={14} className="text-zinc-600" />
             <span className="truncate max-w-[200px]" title={location.location}>{location.location}</span>
           </div>
         </div>
@@ -573,7 +596,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
       {/* Content */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24">
-          <Loader2 size={36} className="text-[#9b1c1c] animate-spin mb-4" />
+          <Loader2 size={36} className="text-zinc-900 animate-spin mb-4" />
           <p className="text-xs sm:text-sm text-zinc-500 font-semibold">Searching for {category.name.toLowerCase()} within {radiusKm} km...</p>
         </div>
       ) : error ? (
@@ -588,7 +611,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           </button>
         </div>
       ) : vendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-amber-200/70 p-10 text-center shadow-xs space-y-3">
+        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-zinc-200 p-10 text-center shadow-sm space-y-3">
           <Store size={44} className="text-zinc-300 mx-auto" />
           <h3 className="text-lg font-bold text-zinc-800 font-serif">
             No {category.name.toLowerCase()} found within {radiusKm} km
@@ -600,7 +623,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             {radius < 20000 && (
               <button
                 onClick={() => setRadius(20000)}
-                className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-bold cursor-pointer shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-[#9b1c1c] text-white text-xs font-bold cursor-pointer shadow-sm"
               >
                 Expand to 20 km
               </button>
@@ -608,7 +631,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
             {radius < 50000 && (
               <button
                 onClick={() => setRadius(50000)}
-                className="px-5 py-2.5 rounded-xl border border-amber-200/80 text-zinc-700 text-xs font-bold hover:bg-amber-50 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 text-xs font-bold hover:bg-zinc-50 cursor-pointer"
               >
                 Expand to 50 km
               </button>
@@ -619,7 +642,7 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-xs sm:text-sm text-zinc-600">
-              Showing <span className="font-bold text-zinc-900">{vendors.length}</span> {category.name.toLowerCase()} within <span className="font-bold text-[#9b1c1c]">{radiusKm} km</span> of {location.location}
+              Showing <span className="font-bold text-zinc-900">{vendors.length}</span> {category.name.toLowerCase()} within <span className="font-bold text-zinc-900">{radiusKm} km</span> of {location.location}
             </p>
             <span className="text-xs text-zinc-400 font-medium">
               {sortBy === 'distance' ? 'Sorted by proximity' : 'Sorted by rating'}
@@ -647,7 +670,8 @@ function VendorMarketplace({ category, location, onBack, onQuote }) {
           onQuote={onQuote}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -839,7 +863,7 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
             </button>
             <button
               onClick={() => onQuote(details)}
-              className="flex-1 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs border border-rose-900/40"
+              className="flex-1 py-2.5 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs border border-rose-900/40"
             >
               <Send size={14} className="text-amber-200" /> <span>Request Quotation</span>
             </button>
@@ -847,9 +871,9 @@ function VendorDetailModal({ vendor, onClose, onQuote }) {
               href={details.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-3.5 rounded-2xl border border-amber-200/80 text-zinc-700 font-semibold text-xs sm:text-sm hover:bg-amber-50/50 transition-colors flex items-center justify-center gap-1.5"
+              className="py-2.5 px-3.5 rounded-2xl border border-zinc-200 text-zinc-700 font-semibold text-xs sm:text-sm hover:bg-zinc-50/50 transition-colors flex items-center justify-center gap-1.5"
             >
-              <Navigation size={14} className="text-amber-700" /> Directions
+              <Navigation size={14} className="text-zinc-700" /> Directions
             </a>
           </div>
         </div>
@@ -907,7 +931,7 @@ function QuoteRequestModal({ vendor, onClose }) {
           </p>
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-sm cursor-pointer shadow-md"
+            className="w-full py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm cursor-pointer shadow-md"
           >
             Done
           </button>
@@ -1022,22 +1046,22 @@ function QuoteRequestModal({ vendor, onClose }) {
             </div>
 
             {/* Vendor Contact (optional) */}
-            <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/50">
-              <p className="text-[10px] font-bold text-amber-700 mb-2">Vendor's Contact (if known)</p>
+            <div className="p-3 bg-zinc-50/50 rounded-xl border border-zinc-200/50">
+              <p className="text-[10px] font-bold text-zinc-700 mb-2">Vendor's Contact (if known)</p>
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="email"
                   value={form.vendorEmail}
                   onChange={e => setForm(f => ({ ...f, vendorEmail: e.target.value }))}
                   placeholder="vendor@email.com"
-                  className="px-3 py-2 rounded-lg border border-amber-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300/30 bg-white"
+                  className="px-3 py-2 rounded-lg border border-zinc-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300/30 bg-white"
                 />
                 <input
                   type="tel"
                   value={form.vendorPhone}
                   onChange={e => setForm(f => ({ ...f, vendorPhone: e.target.value }))}
                   placeholder="Phone number"
-                  className="px-3 py-2 rounded-lg border border-amber-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300/30 bg-white"
+                  className="px-3 py-2 rounded-lg border border-zinc-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300/30 bg-white"
                 />
               </div>
             </div>
@@ -1052,7 +1076,7 @@ function QuoteRequestModal({ vendor, onClose }) {
             <button
               type="submit"
               disabled={sending}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-md border border-rose-900/40"
+              className="w-full py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-md border border-rose-900/40"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} className="text-amber-200" />}
               {sending ? 'Sending...' : 'Send Quotation Request'}

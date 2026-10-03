@@ -43,7 +43,7 @@ const CAT_COLORS = [
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-rose-100 rounded-2xl p-3.5 shadow-xl text-sm min-w-[160px]">
+    <div className="bg-white border border-zinc-200/50 rounded-2xl p-3.5 shadow-xl text-sm min-w-[160px]">
       <div className="font-bold text-zinc-800 mb-2 text-xs">{label}</div>
       {payload.map((p, i) => (
         <div key={i} className="flex items-center justify-between gap-4">
@@ -55,38 +55,6 @@ const CustomTooltip = ({ active, payload, label }) => {
         </div>
       ))}
     </div>
-  )
-}
-
-function StatCard({ label, value, Icon, helpText, arrowType, onClick, subtext, baseColor = '#D97757', isAlert = false }) {
-  return (
-    <Card 
-      isPressable={!!onClick} onClick={onClick} className={`border ${isAlert ? 'border-rose-200 bg-rose-50/20' : 'border-rose-100/80 bg-white'} shadow-xs rounded-2xl transition-all duration-200 ${onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md' : ''} p-4 md:p-5`}>
-        <div>
-        <div className="flex justify-between items-start">
-          <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1 truncate">{label}</div>
-            <div className={`text-xl md:text-2xl font-extrabold tracking-tight ${isAlert ? 'text-rose-700' : 'text-zinc-900'}`}>{value}</div>
-            {helpText && (
-              <div className={`text-xs font-semibold mt-1.5 flex items-center gap-1 ${
-                isAlert ? 'text-rose-600' : arrowType === 'increase' ? 'text-emerald-600' : 'text-zinc-500'
-              }`}>
-                {arrowType === 'increase' && <span>↑</span>}
-                {arrowType === 'decrease' && <span>↓</span>}
-                {helpText}
-              </div>
-            )}
-            {subtext && <div className="text-[11px] text-zinc-400 mt-0.5 font-medium truncate">{subtext}</div>}
-          </div>
-          <div 
-            className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs" 
-            style={{ backgroundColor: baseColor + '15', color: baseColor }}
-          >
-            <Icon size={20} />
-          </div>
-        </div>
-      </div>
-    </Card>
   )
 }
 
@@ -279,764 +247,273 @@ export default function Dashboard() {
     return (
       <div className="h-[70vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[#D97757] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-zinc-700 border-t-transparent rounded-full animate-spin"></div>
           <span className="text-zinc-500 text-sm font-medium">Opening your wedding suite...</span>
         </div>
       </div>
     )
   }
 
-  // Display couple title
-  const coupleTitle = weddingProfile?.story_title || 
-    (weddingProfile?.groom_name && weddingProfile?.bride_name
-      ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}'s Wedding`
-      : 'Our Wedding Celebration');
+  const firstName = currentUser?.displayName?.split(' ')[0] || weddingProfile?.groom_name || 'there';
 
-  const sideLabel = weddingProfile?.planning_side === 'Groom'
-    ? "🤵 Groom's Side Planning"
-    : weddingProfile?.planning_side === 'Bride'
-    ? "👰 Bride's Side Planning"
-    : "💍 Joint Wedding Planning";
+  const coupleTitle = weddingProfile?.groom_name && weddingProfile?.bride_name
+    ? `${weddingProfile.groom_name} & ${weddingProfile.bride_name}`
+    : 'Our Wedding';
+
+  const locationStr = weddingProfile?.wedding_location || '';
+
+  const avgContribution = savings.length > 0
+    ? Math.round(totalSavings / savings.length)
+    : 0;
 
   return (
-    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-10">
-      {/* ── 0. Top Profile Progress Card with generous breathing room ── */}
-      <div className="bg-gradient-to-r from-[#FAF7F2] via-white to-[#FDF9F3] border border-amber-200/90 rounded-3xl p-6 md:p-8 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-200/20 via-rose-100/20 to-transparent rounded-full pointer-events-none" />
+    <>
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 1 — Dark Hero  (Full width edge-to-edge)
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Greeting */}
+          <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] leading-tight tracking-tight mb-12">
+            <span className="font-bold">{firstName},</span>{' '}
+            <span className="font-serif italic font-normal text-zinc-400">here's</span>
+            <br />
+            <span className="font-serif italic font-normal text-zinc-400">what's happening</span>
+          </h1>
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4 flex-1 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-rose-600 to-amber-500 text-amber-100 flex items-center justify-center shrink-0 shadow-md shadow-rose-900/10 ring-2 ring-amber-200/60">
-              <Sparkles size={24} className="animate-pulse" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-                <h3 className="font-serif font-black text-base md:text-lg text-zinc-900 tracking-tight">
-                  {profileProgress === 100 ? '✨ Shubh Vivah Profile Complete!' : 'Personalize Your Couple Wedding Vibe'}
-                </h3>
-                <span className="text-[11px] font-extrabold px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
-                  {profileProgress}% Completed
-                </span>
+          {/* 4 Stat Numbers — inline like Hitchd */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-8">
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+                {fmt(totalSavings)}
               </div>
+              <div className="text-sm text-zinc-500 font-medium">Total received</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+                {fmt(0)}
+              </div>
+              <div className="text-sm text-zinc-500 font-medium">Received today</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+                {fmt(avgContribution)}
+              </div>
+              <div className="text-sm text-zinc-500 font-medium">Average contribution</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold tracking-tight leading-none mb-2">
+                {savings.length}
+              </div>
+              <div className="text-sm text-zinc-500 font-medium">Contributions</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <p className="text-xs md:text-sm text-zinc-500 line-clamp-1 mb-3">
-                {profileProgress === 100 
-                  ? 'Your couple portraits, Muhurat countdown, and wedding theme are active across the entire portal.' 
-                  : `Add ${pendingMilestones.slice(0, 2).map(m => m.label).join(' & ')} to give the portal your unique wedding vibe.`}
-              </p>
-
-              {/* Progress bar */}
-              <div className="w-full max-w-lg bg-zinc-100 h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-amber-400 via-rose-500 to-[#9b1c1c] h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${profileProgress}%` }} 
-                />
+      {/* ═══════════════════════════════════════════════════════════
+          MAIN CONTENT AREA
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+        {/* SECTION 2 — Couple Info Bar */}
+        <div>
+        <div className="bg-[#F5F5F0] rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Couple Avatar */}
+            <div className="w-11 h-11 rounded-full bg-zinc-300 overflow-hidden shrink-0 border-2 border-white shadow-sm">
+              {weddingProfile?.groom_photo_url ? (
+                <img src={weddingProfile.groom_photo_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-zinc-400 flex items-center justify-center text-white font-bold text-sm">
+                  {(weddingProfile?.groom_name?.[0] || 'A').toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="font-bold text-zinc-900 text-[15px]">{coupleTitle}</div>
+              <div className="text-xs text-zinc-500 mt-0.5">
+                {locationStr && <span>{locationStr}</span>}
+                {locationStr && countdownDays != null && <span> · </span>}
+                {countdownDays != null && (
+                  <span>{countdownDays > 0 ? `${countdownDays} days left until ceremony` : 'Wedding day!'}</span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 self-stretch sm:self-auto justify-end shrink-0">
+          <div className="flex items-center gap-3">
             <button
-              type="button"
-              onClick={() => navigate('/profile')}
-              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs md:text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer border border-rose-900/40"
+              onClick={() => setIsAddExpOpen(true)}
+              className="px-4 py-2.5 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-colors flex items-center gap-1.5 shadow-sm"
             >
-              <Heart size={15} className="fill-white/80" />
-              <span>{profileProgress === 100 ? 'View Couple Profile' : 'Upload Photos & Complete Profile'}</span>
-              <ChevronRight size={15} />
+              <Plus size={14} /> Log Expense
+            </button>
+            <button
+              onClick={() => setIsAddSavOpen(true)}
+              className="px-4 py-2.5 rounded-full bg-white text-zinc-900 text-xs font-bold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1.5 shadow-sm"
+            >
+              <Plus size={14} /> Add Contribution
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── 1. Couple Hero Banner with luxurious whitespace ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FAF7F2] via-[#FFFDFB] to-[#F5ECE0] border border-amber-200/80 p-8 md:p-10 lg:p-12 shadow-xs">
-        {/* Cover Photo Backdrop if Available */}
-        {weddingProfile?.cover_photo_url && (
-          <img 
-            src={weddingProfile.cover_photo_url} 
-            alt="Wedding Cover" 
-            className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" 
-          />
-        )}
-        {/* Subtle romantic accents */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 bg-amber-200/30 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-rose-200/20 rounded-full blur-2xl pointer-events-none" />
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 3 — Wedding Portals & Overview
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-zinc-900">Wedding Portals & Overview</h2>
+          <span className="text-xs text-zinc-400 font-medium hidden sm:block">Real-time status across key areas</span>
+        </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          
-          {/* Left Hero Section: Portraits + Names */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left flex-1 min-w-0">
-            
-            {/* Ornate Circular Couple Portraits */}
-            <div 
-              onClick={() => navigate('/profile')}
-              className="flex items-center justify-center -space-x-4 cursor-pointer group shrink-0"
-              title="Click to manage bride & groom photos"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { badge: 'Payments & Kharcha', title: 'Shaadi Payments', path: '/expenses', value: fmt(totalExpenses) },
+            { badge: 'Bookings & Advances', title: 'Vendor Contracts', path: '/bookings', value: `${bookings.length} bookings` },
+            { badge: 'Family & Invitations', title: 'Guests & RSVPs', path: '/guests', value: `${weddingProfile?.guest_count || 0} guests` },
+            { badge: 'Milestones & Tasks', title: 'Wedding Roadmap', path: '/checklist', value: `${checklistPercent}% done` },
+          ].map(card => (
+            <div
+              key={card.path}
+              onClick={() => navigate(card.path)}
+              className="bg-white border border-zinc-200 rounded-2xl p-5 cursor-pointer hover:shadow-md hover:border-zinc-300 transition-all group"
             >
-              {/* Groom Avatar */}
-              <div className="relative">
-                <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-amber-200 to-amber-500 shadow-md group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-amber-200 font-serif font-black text-xl">
-                    {weddingProfile?.groom_photo_url ? (
-                      <img src={weddingProfile.groom_photo_url} alt="Groom" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="flex flex-col items-center justify-center text-[10px] font-bold text-amber-200">
-                        <span>🤵</span>
-                        <span className="text-[9px] text-amber-300/80">+ Photo</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-zinc-900/90 border border-amber-300 text-[9px] font-bold text-amber-200 whitespace-nowrap shadow-xs">
-                  {weddingProfile?.groom_name ? weddingProfile.groom_name.split(' ')[0] : 'वर (Groom)'}
-                </span>
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{card.badge}</span>
+                <ArrowRight size={14} className="text-zinc-300 group-hover:text-zinc-600 transition-colors" />
               </div>
-
-              {/* Auspicious Center Heart Connector */}
-              <div className="relative z-10 w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-[#9b1c1c] border-2 border-amber-200 text-white flex items-center justify-center shadow-lg transform -translate-y-1">
-                <Heart size={14} className="fill-white animate-pulse" />
-              </div>
-
-              {/* Bride Avatar */}
-              <div className="relative">
-                <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full p-1 bg-gradient-to-tr from-rose-400 via-amber-200 to-rose-500 shadow-md group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center text-rose-200 font-serif font-black text-xl">
-                    {weddingProfile?.bride_photo_url ? (
-                      <img src={weddingProfile.bride_photo_url} alt="Bride" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="flex flex-col items-center justify-center text-[10px] font-bold text-rose-200">
-                        <span>👰</span>
-                        <span className="text-[9px] text-rose-300/80">+ Photo</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-zinc-900/90 border border-rose-300 text-[9px] font-bold text-rose-200 whitespace-nowrap shadow-xs">
-                  {weddingProfile?.bride_name ? weddingProfile.bride_name.split(' ')[0] : 'वधू (Bride)'}
-                </span>
-              </div>
+              <div className="font-bold text-zinc-900 text-base">{card.title}</div>
+              <div className="text-xs text-zinc-500 mt-1 font-medium">{card.value}</div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            {/* Couple Text & Details */}
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mb-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-200/80 text-[#9b1c1c] text-xs font-bold shadow-2xs">
-                  <Heart size={12} className="fill-[#9b1c1c]" />
-                  <span>{sideLabel}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs">
-                  <Sparkles size={11} className="text-amber-600" />
-                  <span>शुभ विवाह • Shubh Vivah</span>
-                </span>
-                {weddingProfile?.wedding_location && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-zinc-200/80 text-zinc-600 text-xs font-medium">
-                    <MapPin size={12} className="text-[#047857]" />
-                    <span>{weddingProfile.wedding_location}</span>
-                  </span>
-                )}
-              </div>
-
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight leading-tight mb-2 font-serif">
-                {coupleTitle}
-              </h1>
-
-              <p className="text-xs sm:text-sm text-zinc-600 font-medium flex items-center justify-center sm:justify-start gap-2">
-                {weddingDateStr ? (
-                  <>
-                    <Calendar size={14} className="text-[#9b1c1c]" />
-                    <span>{new Date(weddingDateStr).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  </>
-                ) : (
-                  <span>Set your wedding date to unlock the countdown & auspicious ceremony timeline</span>
-                )}
-              </p>
-            </div>
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 4 — Charts
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
+          <h3 className="font-bold text-base text-zinc-900 mb-6">Cashflow Overview</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={savingsTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorCum" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#18181B" stopOpacity={0.12}/>
+                    <stop offset="95%" stopColor="#18181B" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F4F4F5" />
+                <XAxis dataKey="name" stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} tickFormatter={fmtK} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="cumulative" name="Total Saved" stroke="#18181B" strokeWidth={2} fill="url(#colorCum)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
+        </div>
 
-          {/* Right Hero Side: Live Countdown & Edit Profile */}
-          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3.5 w-full sm:w-auto justify-between sm:justify-end">
-            {countdownDays !== null && (
-              <div className="bg-white/95 backdrop-blur-xs border border-amber-200/80 rounded-2xl px-6 py-4 shadow-xs text-center min-w-[180px]">
-                <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest flex items-center justify-center gap-1.5 mb-0.5">
-                  <Sparkles size={11} className="text-amber-500" /> Auspicious Muhurat
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 font-serif">
-                  {countdownDays > 0 ? (
-                    <>
-                      {countdownDays} <span className="text-sm font-semibold text-[#9b1c1c]">Days to Go! 🎉</span>
-                    </>
-                  ) : countdownDays === 0 ? (
-                    <span className="text-xl text-[#9b1c1c]">Today! 🎊</span>
-                  ) : (
-                    <span className="text-sm text-zinc-600">Celebrated ✨</span>
-                  )}
-                </div>
-              </div>
-            )}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
+          <h3 className="font-bold text-base text-zinc-900 mb-6">Monthly Breakdown</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyComparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F4F4F5" />
+                <XAxis dataKey="name" stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#A1A1AA" fontSize={11} tickLine={false} axisLine={false} tickFormatter={fmtK} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F4F4F5' }} />
+                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} iconType="circle" />
+                <Bar dataKey="expenses" name="Expenses" fill="#F43F5E" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="savings" name="Savings" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 5 — Category Breakdown + Recent Activity
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
+          <h3 className="font-bold text-base text-zinc-900 mb-6">Categories</h3>
+          {pieData.length === 0 ? (
+            <div className="h-[220px] flex items-center justify-center text-zinc-400 text-sm">No expenses yet</div>
+          ) : (
+            <div className="h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%" cy="50%"
+                    innerRadius={65}
+                    outerRadius={90}
+                    paddingAngle={4}
+                    stroke="none"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CAT_COLORS[index % CAT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => fmt(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-base text-zinc-900">Recent Activity</h3>
             <button
-              onClick={() => navigate('/profile')}
-              className="px-4 py-2.5 rounded-xl bg-white border border-amber-200 hover:border-amber-300 text-xs font-semibold text-zinc-700 hover:text-zinc-900 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              onClick={() => navigate('/expenses')}
+              className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors"
             >
-              <Heart size={14} className="text-rose-600 fill-rose-500/20" />
-              <span>Couple Profile</span>
+              View all <ArrowRight size={14} />
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* ── 2. View Mode Tabs ── */}
-      <div className="flex items-center justify-between pb-3 border-b border-amber-200/60">
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setActiveTab('suite')}
-            className={`px-5 py-2.5 rounded-2xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-              activeTab === 'suite'
-                ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
-            }`}
-          >
-            <span>🌸 Vivah Suite</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`px-5 py-2.5 rounded-2xl text-xs md:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-              activeTab === 'analytics'
-                ? 'bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-amber-50/70'
-            }`}
-          >
-            <span>📊 Financial Deep-Dive</span>
-          </button>
-        </div>
-
-        {/* Action button */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsAddExpOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white text-xs md:text-sm font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border border-rose-900/40"
-          >
-            <Plus size={15} className="text-amber-200" /> Add Payment
-          </button>
-        </div>
-      </div>
-
-      {/* ── 3. B2C Wedding Suite View ── */}
-      {activeTab === 'suite' && (
-        <div className="space-y-10 animate-in fade-in-50 duration-200">
-          
-          {/* Sacred Ceremony Journey Ribbon with breathing space */}
-          <div className="bg-white rounded-3xl border border-amber-200/70 p-6 md:p-8 shadow-xs">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="text-xs md:text-sm font-bold text-zinc-600 uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles size={14} className="text-amber-500" /> Sacred Ceremonies & Rituals
-                </span>
-              </div>
-              <button
-                onClick={() => navigate('/checklist')}
-                className="text-xs md:text-sm font-bold text-[#9b1c1c] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>View Ceremony Roadmap</span>
-                <ChevronRight size={15} />
-              </button>
+          {expenses.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 py-10">
+              <Receipt size={48} className="mb-4 opacity-20" />
+              <p className="text-sm">No activity recorded yet</p>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 md:gap-4">
-              {[
-                { id: 'roka', name: 'Roka & Sagai', icon: '🌿', sub: 'Engagement' },
-                { id: 'haldi', name: 'Haldi Rasam', icon: '💛', sub: 'Turmeric Glow' },
-                { id: 'mehendi', name: 'Mehendi Magic', icon: '✨', sub: 'Henna Day' },
-                { id: 'sangeet', name: 'Sangeet Night', icon: '🪕', sub: 'Music & Dance' },
-                { id: 'vivah', name: 'Baraat & Vivah', icon: '🔥', sub: 'Sacred Pheras' },
-                { id: 'reception', name: 'Grand Reception', icon: '🥂', sub: 'Vidai & Feast' }
-              ].map((ceremony, idx) => (
-                <div
-                  key={ceremony.id}
-                  onClick={() => navigate('/checklist')}
-                  className="p-4 md:p-5 rounded-2xl bg-[#FAF7F2] hover:bg-[#F5ECE0] border border-amber-200/60 hover:border-amber-300 transition-all cursor-pointer group text-center flex flex-col justify-between shadow-2xs"
-                >
-                  <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{ceremony.icon}</div>
-                  <div>
-                    <div className="text-xs md:text-sm font-bold text-zinc-900 group-hover:text-[#9b1c1c] transition-colors">{ceremony.name}</div>
-                    <div className="text-[11px] text-zinc-500 mt-0.5">{ceremony.sub}</div>
+          ) : (
+            <div className="space-y-1">
+              {expenses.slice(0, 5).map(e => (
+                <div key={e.id} className="group flex items-center justify-between p-3.5 rounded-xl hover:bg-zinc-50 transition-colors">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-white group-hover:shadow-sm transition-all shrink-0">
+                      <Receipt size={16} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-zinc-900 text-sm">{e.description || e.category}</div>
+                      <div className="text-xs text-zinc-400 mt-0.5">{formatDate(e.date)} · {e.category}</div>
+                    </div>
                   </div>
-                  <div className="mt-3 text-[10px] font-semibold text-amber-800/80 flex items-center justify-center gap-0.5">
-                    <span>Ritual {idx + 1}</span>
-                  </div>
+                  <div className="font-bold text-zinc-900 text-sm">{fmt(e.amount)}</div>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* 5 Planning Pulse Cards with generous gap & padding */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 md:gap-6">
-            {/* Countdown / Milestone */}
-            <div 
-              onClick={() => navigate('/checklist')}
-              className="bg-white p-6 md:p-7 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Countdown</span>
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                    <Clock size={18} />
-                  </div>
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 mb-1 font-serif">
-                  {countdownDays !== null ? `${countdownDays} Days` : 'Set Date'}
-                </div>
-                <p className="text-xs text-zinc-500 line-clamp-1">
-                  {countdownDays > 0 ? `~${Math.round(countdownDays / 30)} months to prepare` : 'Wedding timeline'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-amber-100/60 flex items-center gap-1 text-xs font-bold text-[#9b1c1c] group-hover:translate-x-0.5 transition-transform">
-                <span>View Timeline</span> <ChevronRight size={14} />
-              </div>
-            </div>
-
-            {/* Checklist Progress */}
-            <div 
-              onClick={() => navigate('/checklist')}
-              className="bg-white p-6 md:p-7 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Checklist Pulse</span>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                    <ListChecks size={18} />
-                  </div>
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 mb-1 font-serif">
-                  {completedTasksCount} <span className="text-sm font-medium text-zinc-400">/ {totalTasksCount || 51} done</span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden mt-3 mb-1.5">
-                  <div 
-                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" 
-                    style={{ width: `${checklistPercent}%` }} 
-                  />
-                </div>
-                <div className="flex justify-between text-[11px] text-zinc-400 font-medium">
-                  <span>{checklistPercent}% Complete</span>
-                  <span className="text-[#9b1c1c] font-semibold flex items-center gap-0.5">Tasks <ChevronRight size={12} /></span>
-                </div>
-              </div>
-              <div className="mt-4 pt-3 border-t border-amber-100/60 flex items-center gap-1 text-xs font-bold text-[#047857] group-hover:translate-x-0.5 transition-transform">
-                <span>Checklist Roadmap</span> <ChevronRight size={14} />
-              </div>
-            </div>
-
-            {/* Guest RSVP Pulse */}
-            <div 
-              onClick={() => navigate('/guests')}
-              className="bg-white p-6 md:p-7 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Mehmaan RSVPs</span>
-                  <div className="w-10 h-10 rounded-xl bg-rose-50 text-[#9b1c1c] flex items-center justify-center">
-                    <Users size={18} />
-                  </div>
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 mb-1 font-serif">
-                  {guestSummary?.confirmed || 0} <span className="text-sm font-medium text-zinc-400">Confirmed</span>
-                </div>
-                <p className="text-xs text-zinc-500 line-clamp-1">
-                  {guestSummary?.total || 0} total invited ({guestSummary?.pending || 0} awaiting RSVP)
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-amber-100/60 flex items-center gap-1 text-xs font-bold text-[#047857] group-hover:translate-x-0.5 transition-transform">
-                <span>Dispatch Invites</span> <ChevronRight size={14} />
-              </div>
-            </div>
-
-            {/* Budget Snapshot */}
-            <div 
-              onClick={() => navigate('/expenses')}
-              className="bg-white p-6 md:p-7 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Kharcha & Budget</span>
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#9b1c1c] flex items-center justify-center">
-                    <IndianRupee size={18} />
-                  </div>
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 mb-1 font-serif">
-                  {fmt(totalExpenses)}
-                </div>
-                {/* Progress bar */}
-                <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden mt-3 mb-1.5">
-                  <div 
-                    className="bg-gradient-to-r from-amber-400 to-[#9b1c1c] h-full rounded-full transition-all duration-500" 
-                    style={{ width: `${Math.min(100, budgetUtilization)}%` }} 
-                  />
-                </div>
-                <div className="flex justify-between text-[11px] text-zinc-400 font-medium">
-                  <span>{budgetUtilization}% of {fmt(budgetTotal)}</span>
-                  <span className="text-[#9b1c1c] font-semibold flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
-                </div>
-              </div>
-              <div className="mt-4 pt-3 border-t border-amber-100/60 flex items-center gap-1 text-xs font-bold text-[#9b1c1c] group-hover:translate-x-0.5 transition-transform">
-                <span>Expense Ledger</span> <ChevronRight size={14} />
-              </div>
-            </div>
-
-            {/* Vivah Fund & Shagun Pulse */}
-            <div 
-              onClick={() => navigate('/savings')}
-              className="bg-white p-6 md:p-7 rounded-3xl border border-amber-200/70 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Vivah Fund</span>
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
-                    <PiggyBank size={18} />
-                  </div>
-                </div>
-                <div className="text-2xl md:text-3xl font-black text-zinc-900 mb-1 font-serif text-[#9b1c1c]">
-                  {fmt(totalSavings)}
-                </div>
-                <p className="text-xs text-zinc-500 line-clamp-1">
-                  {savings.length} {savings.length === 1 ? 'deposit' : 'deposits'} & family blessings
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-amber-100/60 flex items-center gap-1 text-xs font-bold text-[#d97706] group-hover:translate-x-0.5 transition-transform">
-                <span>View Treasury</span> <ChevronRight size={14} />
-              </div>
-            </div>
-          </div>
-
-          {/* ── Upcoming Tasks & Quick Actions 2-Column with generous breathing space ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Next Milestones (2 Cols) */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-amber-200/70 p-7 md:p-8 shadow-xs">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-50 text-[#9b1c1c] flex items-center justify-center shadow-xs">
-                    <Sparkles size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-base md:text-lg text-zinc-900 font-serif">Next Upcoming Milestones</h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">Check off tasks as rituals approach</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => navigate('/checklist')}
-                  className="text-xs md:text-sm font-bold text-[#9b1c1c] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>All Tasks ({totalTasksCount})</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-
-              {upcomingTasks.length === 0 ? (
-                <div className="py-12 text-center text-zinc-400 text-sm">
-                  <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-2.5" />
-                  <p className="font-bold text-zinc-700">All caught up!</p>
-                  <p className="text-xs text-zinc-400 mt-1">Add more custom tasks in your checklist.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-amber-100/60">
-                  {upcomingTasks.map(task => (
-                    <div key={task.id || task.task_id} className="py-4 px-2 flex items-center justify-between gap-4 group rounded-2xl hover:bg-amber-50/40 transition-colors">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <button
-                          onClick={() => handleToggleTask(task.id || task.task_id)}
-                          className="w-6 h-6 rounded-lg border-2 border-amber-300 hover:border-[#9b1c1c] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                          title="Mark complete"
-                        >
-                          <Check size={13} className="text-transparent group-hover:text-[#9b1c1c]" />
-                        </button>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-zinc-800 truncate">{task.title}</p>
-                          <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-1">
-                            <span className="px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200/60 font-medium text-amber-900">{task.category || 'General'}</span>
-                            {task.timeline_stage && <span>• {task.timeline_stage}</span>}
-                          </div>
-                        </div>
-                      </div>
-
-                      {task.estimated_cost > 0 && (
-                        <span className="text-xs font-bold text-zinc-700 shrink-0 font-serif">
-                          ~{fmt(task.estimated_cost)}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions & Vendor Shortcuts (1 Col) */}
-            <div className="space-y-6">
-              {/* Quick Action Buttons */}
-              <div className="bg-white rounded-3xl border border-amber-200/70 p-7 md:p-8 shadow-xs">
-                <h3 className="font-extrabold text-sm md:text-base text-zinc-900 mb-4 font-serif">Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <button
-                    onClick={() => navigate('/guests')}
-                    className="p-4 md:p-5 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <Users size={19} className="mb-2.5 text-emerald-700" />
-                    <span>WhatsApp Invites</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/vendors')}
-                    className="p-4 md:p-5 rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200 text-amber-900 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <Store size={19} className="mb-2.5 text-amber-700" />
-                    <span>Vendor Bazaar</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/savings')}
-                    className="p-4 md:p-5 rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-300 text-amber-950 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <PiggyBank size={19} className="mb-2.5 text-amber-700" />
-                    <span>Vivah Fund & Shagun</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsAddExpOpen(true)}
-                    className="p-4 md:p-5 rounded-2xl bg-rose-50/80 hover:bg-rose-100/80 border border-rose-200 text-[#9b1c1c] text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <Receipt size={19} className="mb-2.5 text-[#9b1c1c]" />
-                    <span>Log Kharcha</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className="p-4 md:p-5 rounded-2xl bg-pink-50/80 hover:bg-pink-100/80 border border-pink-200 text-pink-900 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <Heart size={19} className="mb-2.5 text-rose-600 fill-rose-500/20" />
-                    <span>Couple Profile</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsTelegramModalOpen(true)}
-                    className="p-4 md:p-5 rounded-2xl bg-sky-50/80 hover:bg-sky-100/80 border border-sky-200 text-sky-800 text-xs font-bold text-left transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
-                  >
-                    <Send size={19} className="mb-2.5 text-sky-700" />
-                    <span>Telegram Bot</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Vendor Category Hub Banner */}
-              <div 
-                onClick={() => navigate('/vendors')}
-                className="bg-gradient-to-br from-[#FAF7F2] to-[#F5ECE0] border border-amber-200/80 rounded-3xl p-6 md:p-7 shadow-xs cursor-pointer hover:shadow-md transition-all group"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold text-[#9b1c1c] uppercase tracking-wider mb-1.5">
-                  <Store size={15} /> Vendor Discovery
-                </div>
-                <h4 className="font-extrabold text-base md:text-lg text-zinc-900 mb-1.5 font-serif">
-                  Explore 12 Wedding Categories
-                </h4>
-                <p className="text-xs md:text-sm text-zinc-500 mb-4 leading-relaxed">
-                  Find photographers, banquet venues, decorators, and caterers near {weddingProfile?.wedding_location || 'you'}.
-                </p>
-                <span className="text-xs font-bold text-[#9b1c1c] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Explore Marketplace <ChevronRight size={14} />
-                </span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
-
-      {/* ── 4. Financial Deep-Dive View (Preserved ERP Charts & Tables) ── */}
-      {activeTab === 'analytics' && (
-        <div className="space-y-10 animate-in fade-in-50 duration-200">
-          {/* Top 4 Financial Metric Cards with generous gap */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              label="Total Expenses"
-              value={fmt(totalExpenses)}
-              Icon={Receipt}
-              helpText={`${budgetUtilization}% of budget`}
-              isAlert={budgetUtilization > 100}
-              baseColor="#9b1c1c"
-              onClick={() => navigate('/expenses')}
-            />
-            <StatCard
-              label="Remaining Budget"
-              value={fmt(remainingBudget)}
-              Icon={Wallet}
-              helpText={budgetUtilization > 100 ? 'Budget exceeded' : 'Available to spend'}
-              isAlert={budgetUtilization > 100}
-              baseColor="#047857"
-              onClick={() => navigate('/expenses')}
-            />
-            <StatCard
-              label="Total Savings"
-              value={fmt(totalSavings)}
-              Icon={TrendingUp}
-              helpText="Accumulated funds"
-              baseColor="#d97706"
-              onClick={() => navigate('/savings')}
-            />
-            <StatCard
-              label="Net Position"
-              value={fmt(totalSavings - totalExpenses)}
-              Icon={IndianRupee}
-              helpText={totalSavings >= totalExpenses ? 'Fully funded' : 'Savings deficit'}
-              isAlert={totalSavings < totalExpenses}
-              baseColor="#b45309"
-            />
-          </div>
-
-          {/* Recharts Analytics: Area + Bar */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Savings Accumulation Area Chart */}
-            <div className="bg-white p-7 md:p-8 rounded-3xl border border-amber-200/70 shadow-xs">
-              <h3 className="font-extrabold text-base text-zinc-800 mb-5 font-serif">Savings vs Cumulative Growth</h3>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={savingsTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="cumColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#047857" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#047857" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="name" stroke="#888" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#888" fontSize={11} tickLine={false} tickFormatter={fmtK} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="cumulative" name="Total Savings" stroke="#047857" strokeWidth={2} fillOpacity={1} fill="url(#cumColor)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Monthly Comparison Bar Chart */}
-            <div className="bg-white p-7 md:p-8 rounded-3xl border border-amber-200/70 shadow-xs">
-              <h3 className="font-extrabold text-base text-zinc-800 mb-5 font-serif">Monthly Expenses vs Savings</h3>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyComparison} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="name" stroke="#888" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#888" fontSize={11} tickLine={false} tickFormatter={fmtK} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                    <Bar dataKey="expenses" name="Expenses" fill="#9b1c1c" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="savings" name="Savings" fill="#047857" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Category Breakdown Pie + Transactions Table */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Pie Chart */}
-            <div className="bg-white p-7 md:p-8 rounded-3xl border border-rose-100 shadow-xs">
-              <h3 className="font-extrabold text-base text-zinc-800 mb-5">Expenses by Category</h3>
-              {pieData.length === 0 ? (
-                <div className="h-[220px] flex items-center justify-center text-xs text-zinc-400">
-                  No expense records yet
-                </div>
-              ) : (
-                <div className="h-[240px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} innerRadius={50} paddingAngle={2}>
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={CAT_COLORS[index % CAT_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => fmt(value)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </div>
-
-            {/* Recent Transactions Table */}
-            <div className="lg:col-span-2 bg-white p-7 md:p-8 rounded-3xl border border-rose-100 shadow-xs">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-extrabold text-sm text-zinc-800">Recent Transactions</h3>
-                <button
-                  onClick={() => navigate('/expenses')}
-                  className="text-xs font-bold text-[#D97757] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>View All ({expenses.length})</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-
-              {expenses.length === 0 ? (
-                <div className="h-[180px] flex items-center justify-center text-xs text-zinc-400">
-                  No expenses recorded yet.
-                </div>
-              ) : (
-                <div className="divide-y divide-zinc-100 overflow-x-auto">
-                  {expenses.slice(0, 5).map(e => (
-                    <div key={e.id} className="py-3 flex items-center justify-between text-xs">
-                      <div>
-                        <div className="font-bold text-zinc-800">{e.description || e.category}</div>
-                        <div className="text-[11px] text-zinc-400">{formatDate(e.date)} • {e.category}</div>
-                      </div>
-                      <div className="font-extrabold text-zinc-900">{fmt(e.amount)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
+      </div>
 
       {/* ── Modals ── */}
       {isAddExpOpen && (
-        <AddExpenseModal
-          isOpen={isAddExpOpen}
-          onClose={() => setIsAddExpOpen(false)}
-          onSuccess={() => { setIsAddExpOpen(false); loadAll(); }}
-        />
+        <AddExpenseModal isOpen={isAddExpOpen} onClose={() => setIsAddExpOpen(false)} onSuccess={() => { setIsAddExpOpen(false); loadAll(); }} />
       )}
-
       {isAddSavOpen && (
-        <AddSavingModal
-          isOpen={isAddSavOpen}
-          onClose={() => setIsAddSavOpen(false)}
-          onSuccess={() => { setIsAddSavOpen(false); loadAll(); }}
-        />
+        <AddSavingModal isOpen={isAddSavOpen} onClose={() => setIsAddSavOpen(false)} onSuccess={() => { setIsAddSavOpen(false); loadAll(); }} />
       )}
-
-      {isTelegramModalOpen && (
-        <TelegramModal
-          isOpen={isTelegramModalOpen}
-          onClose={() => setIsTelegramModalOpen(false)}
-          telegramCode={telegramCode}
-          telegramId={telegramId}
-          telegramBotUsername={telegramBotUsername}
-          isTelegramLinked={isTelegramLinked}
-          generatingCode={generatingCode}
-          onGenerateCode={handleGenerateTelegramCode}
-          onRefresh={loadAll}
-        />
-      )}
-
       {isEditProfileOpen && (
-        <OnboardingWizard
-          initialProfile={weddingProfile}
-          onComplete={(p) => {
-            setWeddingProfile(p);
-            setIsEditProfileOpen(false);
-            loadAll();
-          }}
-          onDismiss={() => setIsEditProfileOpen(false)}
-        />
+        <OnboardingWizard initialProfile={weddingProfile} onComplete={(p) => { setWeddingProfile(p); setIsEditProfileOpen(false); loadAll(); }} onDismiss={() => setIsEditProfileOpen(false)} />
       )}
-    </div>
+    </>
   )
 }

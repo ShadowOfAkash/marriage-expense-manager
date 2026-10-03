@@ -162,70 +162,40 @@ export default function Expenses() {
   }, [filtered]);
 
   return (
-    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
-      {/* 1. Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
-        <div>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight flex items-center gap-3">
-            <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-500 to-rose-600 flex items-center justify-center text-white shadow-md">
-              <Receipt size={24} />
-            </span>
-            <span>Shaadi Kharcha & Payments</span>
-          </h1>
-          <p className="text-zinc-500 text-sm md:text-base mt-2">
-            Track ceremony expenses, advance deposits, vendor settlements, and receipts
-          </p>
+    <>
+      {/* Dark Hero */}
+      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Payments</h1>
+              <p className="text-zinc-400 text-sm font-medium">Track expenses, advances & settlements</p>
+            </div>
+            <button onClick={() => setIsAddOpen(true)} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2">
+              <Plus size={16} /> Add Payment
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-x-10">
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{fmt(filteredTotal)}</div>
+              <div className="text-sm text-zinc-500 font-medium">Total payments</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{fmt(advanceTotal)}</div>
+              <div className="text-sm text-zinc-500 font-medium">Advance deposits</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{fmt(normalTotal)}</div>
+              <div className="text-sm text-zinc-500 font-medium">Final payments</div>
+            </div>
+          </div>
         </div>
-        <Button 
-          radius="sm" 
-          className="bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold text-sm h-11 px-5 rounded-2xl shadow-md cursor-pointer flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all" 
-          onClick={() => setIsAddOpen(true)}
-        >
-          <Plus size={18} /> Add Kharcha / Payment
-        </Button>
       </div>
 
-      {/* 2. Top Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-rose-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
-              <IndianRupee size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Kharcha</div>
-              <div className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight">{fmt(filteredTotal)}</div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
-              <CreditCard size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Advance Deposits</div>
-              <div className="text-2xl md:text-3xl font-black text-amber-700 tracking-tight">{fmt(advanceTotal)}</div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs hover:shadow-md transition-all bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md">
-              <Receipt size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Direct & Final Payments</div>
-              <div className="text-2xl md:text-3xl font-black text-emerald-700 tracking-tight">{fmt(normalTotal)}</div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* 3. Search and Filters Bar */}
-      <div className="bg-white border border-amber-200/70 rounded-3xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* 3. Search and Filters Bar */}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex-1 flex items-center gap-3 w-full bg-zinc-50 border border-zinc-200/80 rounded-2xl px-4 py-2.5 focus-within:border-amber-400 focus-within:bg-white transition-all">
           <Search size={18} className="text-zinc-400 shrink-0" />
           <input
@@ -295,24 +265,24 @@ export default function Expenses() {
             <ChevronDown size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
           </div>
 
-          <div className="hidden sm:flex items-center px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs font-bold text-amber-900 whitespace-nowrap">
+          <div className="hidden sm:flex items-center px-4 py-2.5 rounded-2xl bg-zinc-50 border border-amber-200/80 text-xs font-bold text-amber-900 whitespace-nowrap">
             Total: {fmt(filteredTotal)}
           </div>
         </div>
       </div>
 
       {/* 4. Primary Content Container */}
-      <div className="shadow-xs border border-amber-200/70 rounded-3xl overflow-hidden bg-white/80 backdrop-blur-xs">
+      <div className="shadow-sm border border-zinc-200 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-xs">
         {filtered.length > 0 ? (
           <>
             {viewMode === 'cards' ? (
               <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
                 {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
-                  <div key={e.id} className="festive-card p-6 md:p-7 relative overflow-hidden bg-white border border-amber-200/70 rounded-3xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5">
+                  <div key={e.id} className="p-6 md:p-7 relative overflow-hidden bg-white border border-zinc-200 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <span className="text-xs font-semibold text-zinc-500 flex items-center gap-1.5">
-                          <Calendar size={14} className="text-amber-600" />
+                          <Calendar size={14} className="text-zinc-600" />
                           {formatDate(e.date)}
                         </span>
                         <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
@@ -347,7 +317,7 @@ export default function Expenses() {
                         <button
                           type="button"
                           onClick={() => setViewerUrl(e.receipt_url)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-700 hover:text-amber-800 hover:underline cursor-pointer"
                         >
                           <Paperclip size={15} /> Receipt Attached
                         </button>
@@ -392,7 +362,7 @@ export default function Expenses() {
                   </thead>
                   <tbody className="divide-y divide-zinc-100">
                     {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
-                    <tr key={e.id} className="hover:bg-amber-50/40 transition-colors">
+                    <tr key={e.id} className="hover:bg-zinc-50/40 transition-colors">
                       <td className="py-4 px-6 whitespace-nowrap">
                         <span className="text-xs font-medium text-zinc-600 flex items-center gap-2">
                           <Calendar size={14} className="text-zinc-400" />
@@ -472,13 +442,14 @@ export default function Expenses() {
           </>
         ) : (
           <div className="py-24 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-3 text-amber-600">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-50 flex items-center justify-center mb-3 text-zinc-600">
               <Receipt size={34} />
             </div>
             <h3 className="text-zinc-800 font-bold text-base">No payments found</h3>
             <p className="text-zinc-500 text-xs mt-1">Try adjusting your search query or filter.</p>
           </div>
         )}
+      </div>
       </div>
 
       <AddExpenseModal 
@@ -609,6 +580,6 @@ export default function Expenses() {
         const isPdf = viewerUrl.toLowerCase().includes('.pdf');
         return <FullScreenViewer url={viewerUrl} isPdf={isPdf} onClose={() => setViewerUrl(null)} />;
       })()}
-    </div>
+    </>
   );
 }

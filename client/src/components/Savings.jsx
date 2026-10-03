@@ -68,40 +68,46 @@ export default function Savings() {
   };
 
   return (
-    <div className="px-4 sm:px-8 lg:px-12 py-8 md:py-10 max-w-7xl mx-auto min-h-screen space-y-8 animate-in fade-in duration-200">
-      {/* ── 1. Header & Actions ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-amber-200/70 pb-6">
-        <div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#9b1c1c] via-[#b91c1c] to-[#d97706] flex items-center justify-center text-amber-100 shadow-md shadow-amber-900/15 shrink-0">
-              <PiggyBank size={26} className="text-amber-200" />
+    <>
+      {/* Dark Hero */}
+      <div className="w-full bg-[#1A1A1A] text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Contributions</h1>
+              <p className="text-zinc-400 text-sm font-medium">Savings, shagun & family contributions</p>
+            </div>
+            <button onClick={() => setIsAddOpen(true)} className="px-5 py-3 rounded-full bg-white text-zinc-900 text-sm font-bold hover:bg-zinc-100 transition-all shadow-sm flex items-center gap-2 cursor-pointer">
+              <Plus size={16} /> Add Contribution
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-6">
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{fmt(total)}</div>
+              <div className="text-sm text-zinc-500 font-medium">Total received</div>
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight font-serif flex items-center gap-2">
-                  Vivah Fund & Shagun Treasury
-                </h1>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-800 text-xs font-bold">
-                  <Sparkles size={12} className="text-amber-600" /> शुभ बचत व शगुन
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-zinc-500 mt-1 max-w-xl leading-relaxed">
-                Track family contributions, monthly savings & shagun treasury for your grand celebration
-              </p>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{fmt(avgContribution)}</div>
+              <div className="text-sm text-zinc-500 font-medium">Average contribution</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold tracking-tight leading-none mb-2">{savings.length}</div>
+              <div className="text-sm text-zinc-500 font-medium">Total entries</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center gap-3.5 self-stretch sm:self-auto justify-between sm:justify-end">
-          {/* View Mode Toggle */}
-          <div className="inline-flex p-1.5 bg-amber-50/70 border border-amber-200/60 rounded-2xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div className="flex justify-end mb-6">
+          <div className="inline-flex p-1.5 bg-zinc-50/70 border border-zinc-200 rounded-2xl">
             <button
               type="button"
               onClick={() => setViewMode('cards')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'cards'
-                  ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                  : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <LayoutGrid size={14} />
@@ -112,218 +118,157 @@ export default function Savings() {
               onClick={() => setViewMode('table')}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-white text-[#9b1c1c] shadow-xs border border-amber-200/40'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                  : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <TableIcon size={14} />
               <span>Table</span>
             </button>
           </div>
-
-          <Button 
-            radius="sm" 
-            className="bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] hover:from-[#801717] hover:to-[#9b1c1c] text-white shadow-md font-bold text-xs sm:text-sm py-2.5 px-5 cursor-pointer border border-rose-900/40" 
-            onClick={() => setIsAddOpen(true)}
-          >
-            <Plus size={16} className="text-amber-200" /> Log Shagun / Deposit
-          </Button>
         </div>
-      </div>
 
-      {/* ── 2. Top Metrics Bar ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#7c1717] to-[#9b1c1c] text-amber-200 rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <TrendingUp size={26} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Accumulated Fund</div>
-              <div className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight font-serif">{fmt(total)}</div>
-            </div>
+        {loading ? (
+          <div className="py-24 text-center bg-white border border-zinc-200 rounded-2xl shadow-sm">
+            <div className="w-10 h-10 border-3 border-zinc-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-xs md:text-sm text-zinc-500 font-semibold">Loading your records...</p>
           </div>
-        </Card>
-
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <Layers size={26} />
+        ) : savings.length === 0 ? (
+          <div className="py-24 flex flex-col items-center justify-center bg-white border border-zinc-200 rounded-2xl shadow-sm p-8">
+            <div className="w-18 h-18 rounded-2xl bg-zinc-50 flex items-center justify-center mb-4 text-zinc-400">
+              <PiggyBank size={40} />
             </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Deposits Logged</div>
-              <div className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight font-serif">
-                {savings.length} {savings.length === 1 ? 'Deposit' : 'Deposits'}
-              </div>
-            </div>
+            <h3 className="text-zinc-900 font-bold text-lg">No savings logged yet</h3>
+            <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 max-w-sm text-center leading-relaxed">
+              Start tracking your contributions and savings.
+            </p>
+            <button 
+              className="mt-6 px-5 py-3 rounded-full bg-zinc-900 text-white font-bold text-xs sm:text-sm shadow-sm transition-all hover:bg-zinc-800 flex items-center gap-2 cursor-pointer"
+              onClick={() => setIsAddOpen(true)}
+            >
+              <Plus size={16} /> Log First Contribution
+            </button>
           </div>
-        </Card>
-
-        <Card className="p-6 md:p-7 border border-amber-200/70 shadow-xs bg-white rounded-3xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center shrink-0 shadow-xs">
-              <IndianRupee size={26} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Average Contribution</div>
-              <div className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight font-serif">{fmt(avgContribution)}</div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* ── 3. Savings View: Festive Cards vs Table ── */}
-      {loading ? (
-        <div className="py-24 text-center bg-white border border-amber-200/70 rounded-3xl shadow-xs">
-          <div className="w-10 h-10 border-3 border-[#9b1c1c] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs md:text-sm text-zinc-500 font-semibold">Loading your wedding fund records...</p>
-        </div>
-      ) : savings.length === 0 ? (
-        <div className="py-24 flex flex-col items-center justify-center bg-white border border-amber-200/70 rounded-3xl shadow-xs p-8">
-          <div className="w-18 h-18 rounded-3xl bg-amber-50 flex items-center justify-center mb-4 text-amber-500">
-            <PiggyBank size={40} />
-          </div>
-          <h3 className="text-zinc-800 font-bold text-lg font-serif">No savings logged yet</h3>
-          <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 max-w-sm text-center leading-relaxed">
-            Start tracking your wedding funds, monthly salary contributions, or family shagun blessings.
-          </p>
-          <Button 
-            radius="sm" 
-            className="mt-6 bg-gradient-to-r from-[#9b1c1c] to-[#b91c1c] text-white font-bold text-xs sm:text-sm py-2.5 px-6 cursor-pointer shadow-md"
-            onClick={() => setIsAddOpen(true)}
-          >
-            <Plus size={16} className="text-amber-200" /> Log First Contribution
-          </Button>
-        </div>
-      ) : viewMode === 'cards' ? (
-        /* 🎴 Festive Cards Grid */
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s, i) => (
-              <div 
-                key={s.id || i}
-                className="bg-white border border-amber-200/70 rounded-3xl p-6 md:p-7 shadow-xs hover:shadow-md hover:border-amber-300 transition-all flex flex-col justify-between group relative overflow-hidden space-y-4"
-              >
-                {/* Subtle festive background accent */}
-                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-amber-100/30 to-transparent rounded-bl-full pointer-events-none" />
-
-                <div>
-                  {/* Top Badging Row */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF7F2] border border-amber-200/80 text-zinc-700 text-xs font-bold">
-                      <Calendar size={13} className="text-[#9b1c1c]" />
-                      <span>{s.month} {s.year}</span>
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => confirmDelete(s.id)}
-                      className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                      title="Delete entry"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-
-                  {/* Amount Display */}
-                  <div className="my-3">
-                    <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Deposited Shagun</div>
-                    <div className="text-2xl md:text-3xl lg:text-4xl font-black text-zinc-900 tracking-tight font-serif text-[#9b1c1c]">
-                      {fmt(s.amount)}
-                    </div>
-                  </div>
-
-                  {/* Note / Memo */}
-                  <p className="text-xs sm:text-sm text-zinc-600 mt-3 bg-amber-50/40 p-3.5 rounded-2xl border border-amber-100/60 leading-relaxed min-h-[56px]">
-                    {s.note ? (
-                      <span>📝 {s.note}</span>
-                    ) : (
-                      <span className="text-zinc-400 italic">Wedding contribution deposit</span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Footer status */}
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-amber-100/60 text-xs text-zinc-400">
-                  <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> Added to Treasury
-                  </span>
-                  <span className="font-mono text-[11px]">#{String(s.id || '').slice(0, 6) || (i + 1)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white border border-amber-200/70 rounded-2xl shadow-2xs overflow-hidden">
-            <TablePagination
-              currentPage={currentPage}
-              totalItems={savings.length}
-              pageSize={pageSize}
-              pageSizeOptions={[6, 12, 24, 48]}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-            />
-          </div>
-        </div>
-      ) : (
-        /* 📄 Detailed Table Mode */
-        <div className="shadow-xs border border-amber-200/70 rounded-3xl overflow-hidden bg-white">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 bg-[#FAF7F2] backdrop-blur-xs z-10 border-b border-amber-200/70">
-                <tr className="text-zinc-600 font-bold text-xs tracking-wider">
-                  <th className="py-4 px-6 whitespace-nowrap">MONTH</th>
-                  <th className="py-4 px-6 whitespace-nowrap">YEAR</th>
-                  <th className="py-4 px-6 min-w-[240px]">PURPOSE & NOTE</th>
-                  <th className="py-4 px-6 text-right whitespace-nowrap">AMOUNT</th>
-                  <th className="py-4 px-6 text-right whitespace-nowrap">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-amber-100/60">
-                {savings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s, i) => (
-                  <tr key={s.id || i} className="hover:bg-amber-50/40 transition-colors">
-                    <td className="py-4 px-6 whitespace-nowrap">
-                      <span className="font-bold text-zinc-900 font-serif text-sm">{s.month}</span>
-                    </td>
-                    <td className="py-4 px-6 whitespace-nowrap">
-                      <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200">
-                        {s.year}
+        ) : viewMode === 'cards' ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s, i) => (
+                <div 
+                  key={s.id || i}
+                  className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden space-y-4"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-bold">
+                        <Calendar size={13} className="text-zinc-900" />
+                        <span>{s.month} {s.year}</span>
                       </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-sm text-zinc-600">{s.note || <span className="text-zinc-300">—</span>}</span>
-                    </td>
-                    <td className="py-4 px-6 text-right whitespace-nowrap">
-                      <span className="font-black text-zinc-900 font-serif text-base text-[#9b1c1c]">{fmt(s.amount)}</span>
-                    </td>
-                    <td className="py-4 px-6 text-right whitespace-nowrap">
+
                       <button
                         type="button"
                         onClick={() => confirmDelete(s.id)}
                         className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                         title="Delete entry"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+
+                    <div className="my-3">
+                      <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Deposited</div>
+                      <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 tracking-tight">
+                        {fmt(s.amount)}
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-zinc-600 mt-3 bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 leading-relaxed min-h-[56px]">
+                      {s.note ? (
+                        <span>{s.note}</span>
+                      ) : (
+                        <span className="text-zinc-400 italic">Contribution deposit</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-200 text-xs text-zinc-400">
+                    <span className="inline-flex items-center gap-1.5 text-zinc-500 font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Added to Treasury
+                    </span>
+                    <span className="font-mono text-[11px]">#{String(s.id || '').slice(0, 6) || (i + 1)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden">
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={savings.length}
+                pageSize={pageSize}
+                pageSizeOptions={[6, 12, 24, 48]}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
           </div>
+        ) : (
+          <div className="shadow-sm border border-zinc-200 rounded-2xl overflow-hidden bg-white">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 bg-zinc-50 backdrop-blur-sm z-10 border-b border-zinc-200">
+                  <tr className="text-zinc-500 font-bold text-xs tracking-wider">
+                    <th className="py-4 px-6 whitespace-nowrap">MONTH</th>
+                    <th className="py-4 px-6 whitespace-nowrap">YEAR</th>
+                    <th className="py-4 px-6 min-w-[240px]">PURPOSE & NOTE</th>
+                    <th className="py-4 px-6 text-right whitespace-nowrap">AMOUNT</th>
+                    <th className="py-4 px-6 text-right whitespace-nowrap">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200">
+                  {savings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s, i) => (
+                    <tr key={s.id || i} className="hover:bg-zinc-50 transition-colors">
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <span className="font-bold text-zinc-900 text-sm">{s.month}</span>
+                      </td>
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-50 text-zinc-900 border border-zinc-200">
+                          {s.year}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-sm text-zinc-600">{s.note || <span className="text-zinc-300">—</span>}</span>
+                      </td>
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <span className="font-bold text-zinc-900 text-base">{fmt(s.amount)}</span>
+                      </td>
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => confirmDelete(s.id)}
+                          className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete entry"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <TablePagination
-            currentPage={currentPage}
-            totalItems={savings.length}
-            pageSize={pageSize}
-            pageSizeOptions={[5, 10, 20, 50, 100]}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
-        </div>
-      )}
+            <TablePagination
+              currentPage={currentPage}
+              totalItems={savings.length}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        )}
+      </div>
 
-      {/* Add Modal */}
       <AddSavingModal 
         isOpen={isAddOpen} 
         onClose={() => setIsAddOpen(false)} 
@@ -335,17 +280,16 @@ export default function Savings() {
         }} 
       />
 
-      {/* Delete Confirmation Modal */}
       <TailwindModal isOpen={isDelOpen} onClose={() => setIsDelOpen(false)} title="Delete Saving Entry?">
         <div className="p-2">
           <p className="text-zinc-600 mb-6 text-sm">
-            Are you sure you want to permanently delete this saving record? This will adjust your total accumulated wedding fund balance.
+            Are you sure you want to permanently delete this saving record? This will adjust your total accumulated balance.
           </p>
           <div className="flex justify-end gap-2.5">
             <button
               type="button"
               onClick={() => setIsDelOpen(false)}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-100 transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-100 transition-colors border border-zinc-200"
             >
               Cancel
             </button>
@@ -353,13 +297,13 @@ export default function Savings() {
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-colors cursor-pointer disabled:opacity-50"
             >
               {deleting ? "Deleting..." : "Delete Entry"}
             </button>
           </div>
         </div>
       </TailwindModal>
-    </div>
+    </>
   );
 }
