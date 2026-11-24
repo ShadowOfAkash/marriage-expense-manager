@@ -101,8 +101,8 @@ export const api = {
   deleteSavings: (id)   => fetchWithAuth(`/api/savings/${id}`, { method: 'DELETE' }),
 
   // GUESTS
-  getGuests:        (params = '') => fetchWithAuth(`/api/guests${params}`),
-  getGuestSummary:  ()            => fetchWithAuth('/api/guests/summary'),
+  getGuests:        (params = '', options) => fetchWithAuth(`/api/guests${params}`, options),
+  getGuestSummary:  (options)     => fetchWithAuth('/api/guests/summary', options),
   addGuest:         (data)        => fetchWithAuth('/api/guests', { method: 'POST', body: JSON.stringify(data) }),
   updateGuest:      (id, data)    => fetchWithAuth(`/api/guests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteGuest:      (id)          => fetchWithAuth(`/api/guests/${id}`, { method: 'DELETE' }),

@@ -2,6 +2,7 @@ const express = require('express');
 const { getApps } = require('../config/firebase');
 const { requireAuth } = require('../middleware/auth');
 const { isLibSQL, dbGet, dbRun, readJSON, writeJSON } = require('../db');
+const { getWebsiteGuestOwnerEmail, getWebsiteGuestOwner, saveWebsiteGuest } = require('../services/websiteGuestService');
 const groups = require('../config/wedding-fields.json');
 
 const router = express.Router();
@@ -19,9 +20,9 @@ function validValue(key, value) {
 }
 
 function requireSiteOwner(req, res, next) {
-  const owner = process.env.WEDDING_SITE_ADMIN_EMAIL?.trim().toLowerCase();
-  if (!owner || getApps().length === 0) {
-    return res.status(503).json({ error: 'Configure Firebase Admin and WEDDING_SITE_ADMIN_EMAIL to edit the wedding website.' });
+  const owner = getWebsiteGuestOwnerEmail();
+  if (getApps().length === 0) {
+    return res.status(503).json({ error: 'Configure Firebase Admin to edit the wedding website.' });
   }
   return requireAuth(req, res, () => {
     if (!req.user.email_verified || req.user.email?.toLowerCase() !== owner) {
@@ -47,6 +48,38 @@ async function getContent() {
 router.get('/public/wedding-site', async (_req, res, next) => {
   try {
     res.set('Cache-Control', 'no-store').json({ content: await getContent() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+const eventKeys = ['haldi', 'mehndi', 'wedding'];
+
+router.post('/public/wedding-site/rsvps', async (req, res, next) => {
+  const { id, name, attendance, events, guests } = req.body || {};
+  if (typeof id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(id) ||
+      typeof name !== 'string' || !name.trim() || name.length > 120 ||
+      !['yes', 'no'].includes(attendance) ||
+      (attendance === 'yes' && (!Array.isArray(events) || events.length < 1 ||
+        events.length > eventKeys.length || !events.every(event => eventKeys.includes(event)) ||
+        !Number.isInteger(guests) || guests < 1 || guests > 50))) {
+    return res.status(400).json({ error: 'Enter your name and check your RSVP details.' });
+  }
+
+  const response = {
+    id,
+    name: name.trim(),
+    attendance,
+    events: attendance === 'yes' ? [...new Set(events)] : [],
+    guests: attendance === 'yes' ? guests : 0,
+    receivedAt: new Date().toISOString(),
+  };
+
+  try {
+    const owner = getWebsiteGuestOwner();
+    if (!owner) return res.status(503).json({ error: 'Online RSVP is unavailable.' });
+    await saveWebsiteGuest(response, owner);
+    res.status(201).json({ success: true });
   } catch (error) {
     next(error);
   }

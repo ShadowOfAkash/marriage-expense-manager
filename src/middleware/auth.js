@@ -51,5 +51,5 @@ async function requireAuth(req, res, next) {
 }
 
 module.exports = {
-  requireAuth
+  requireAuth, LEGACY_ADMIN_EMAIL, LEGACY_ADMIN_UID
 };

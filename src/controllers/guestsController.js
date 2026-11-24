@@ -1,3 +1,4 @@
+const { migrateWebsiteGuests } = require('../services/websiteGuestService');
 const { isLibSQL, dbGet, dbAll, dbRun, readJSON, writeJSON, generateRsvpToken } = require('../db');
 const { getPublicBaseUrl, sendInvitationEmail, getUserEmailConfig } = require('../services/emailService');
 const { generateInvitationPDF } = require('../services/pdfService');
@@ -6,6 +7,7 @@ const { generateTelegramInvitationText, sendTelegramReply, sendTelegramDocument 
 function formatGuest(g) {
   if (!g) return null;
   const token = g.rsvp_token || generateRsvpToken(g.id);
+  const websiteDecline = g.guest_id?.startsWith('WEB-') && g.rsvp_status === 'Declined';
   return {
     ...g,
     rsvp_token: token,
@@ -19,15 +21,16 @@ function formatGuest(g) {
     dependents: typeof g.dependents === 'string' ? JSON.parse(g.dependents || '[]') : (Array.isArray(g.dependents) ? g.dependents : []),
     plus_one_allowed: Boolean(g.plus_one_allowed),
     check_in_status: Boolean(g.check_in_status),
-    expected_adults: Number(g.expected_adults) || 1,
+    expected_adults: websiteDecline ? Number(g.expected_adults) : Number(g.expected_adults) || 1,
     expected_children: Number(g.expected_children) || 0,
-    expected_attendees: Number(g.expected_attendees) || (Number(g.expected_adults) || 1) + (Number(g.expected_children) || 0),
+    expected_attendees: websiteDecline ? Number(g.expected_attendees) : Number(g.expected_attendees) || (Number(g.expected_adults) || 1) + (Number(g.expected_children) || 0),
     actual_attendees: Number(g.actual_attendees) || 0
   };
 }
 
 async function listGuests(req, res) {
   try {
+    await migrateWebsiteGuests(req.user);
     const { search, side, relationship_category, rsvp_status, actual_attendance, event, household_name } = req.query;
     let guests = [];
 
@@ -83,6 +86,7 @@ async function listGuests(req, res) {
 
 async function getSummary(req, res) {
   try {
+    await migrateWebsiteGuests(req.user);
     let guests = [];
     if (isLibSQL()) {
       const rows = await dbAll('SELECT * FROM guests WHERE user_id = ?', [req.user.uid]);
@@ -859,6 +863,7 @@ async function sendBulkInvitations(req, res) {
       }
       try {
         const token = g.rsvp_token || generateRsvpToken(g.id);
+  const websiteDecline = g.guest_id?.startsWith('WEB-') && g.rsvp_status === 'Declined';
         g.rsvp_token = token;
         await sendInvitationEmail({
           guest: g,

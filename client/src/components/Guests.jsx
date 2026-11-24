@@ -115,6 +115,29 @@ export default function Guests() {
 
   useEffect(() => {
     loadData();
+    const controller = new AbortController();
+    let timer;
+    async function refresh() {
+      try {
+        const options = { signal: controller.signal, cache: 'no-store' };
+        const [list, totals] = await Promise.all([
+          api.getGuests('', options), api.getGuestSummary(options)
+        ]);
+        if (!controller.signal.aborted) {
+          setGuests(list);
+          setSummary(totals);
+        }
+      } catch {
+        // Keep the last successful result while a background refresh retries.
+      } finally {
+        if (!controller.signal.aborted) timer = setTimeout(refresh, 3000);
+      }
+    }
+    timer = setTimeout(refresh, 3000);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
   }, [loadData]);
 
   // Tab change handler

@@ -9,11 +9,11 @@
       "default": "Join Akash Tiwari and Shivangi Mishra for Haldi, Mehendi, and their wedding in Kanpur, 23–25 January 2027."
     },
     "firstName": {
-      "label": "First name",
+      "label": "Groom’s first name",
       "default": "Akash"
     },
     "secondName": {
-      "label": "Second name",
+      "label": "Bride’s first name",
       "default": "Shivangi"
     },
     "city": {
@@ -31,11 +31,11 @@
   },
   "Families": {
     "firstFullName": {
-      "label": "First full name",
+      "label": "Groom’s full name",
       "default": "Akash Tiwari"
     },
     "secondFullName": {
-      "label": "Second full name",
+      "label": "Bride’s full name",
       "default": "Shivangi Mishra"
     },
     "firstParentOne": {
