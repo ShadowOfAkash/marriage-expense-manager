@@ -61,9 +61,12 @@ router.post('/public/wedding-site/rsvps', async (req, res, next) => {
     food = '', stay = '', requirements = '' } = req.body || {};
   const attending = attendance === 'yes';
   const validText = (value, limit) => typeof value === 'string' && value.length <= limit;
+  if (!validText(phone, 30) || !/^\+?[0-9]{7,15}$/.test(phone.trim().replace(/[ ()-]/g, ''))) {
+    return res.status(400).json({ error: 'Enter a valid mobile number.' });
+  }
   if (!['Groom', 'Bride', 'Both'].includes(side) ||
       !['Family', 'Friend', 'Colleague', 'Other'].includes(relationship) ||
-      !validText(phone, 30) || !validText(email, 254) ||
+      !validText(email, 254) ||
       (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) ||
       (attending && (!['', 'Vegetarian', 'Non-Veg', 'Jain', 'Vegan', 'Other'].includes(food) ||
         !['', 'No need of stay', 'Hotel', 'Home Stay'].includes(stay) ||
