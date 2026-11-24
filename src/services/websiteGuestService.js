@@ -18,13 +18,18 @@ function toGuest(response, owner) {
     guest_id: 'WEB-' + response.id,
     user_id: owner,
     name: response.name,
-    side: 'Both',
-    relationship_category: 'Other',
+    side: response.side ?? 'Both',
+    relationship_category: response.relationship ?? 'Other',
+    phone: response.phone ?? '',
+    email: response.email ?? '',
+    food_preference: response.food ?? '',
+    stay_preference: response.stay ?? 'No need of stay',
+    special_requirements: response.requirements ?? '',
     relationship_detail: 'Wedding website RSVP',
     guest_type: response.guests > 1 ? 'Group' : 'Individual',
     rsvp_status: response.attendance === 'yes' ? 'Confirmed' : 'Declined',
-    expected_adults: response.guests,
-    expected_children: 0,
+    expected_adults: response.adults ?? response.guests,
+    expected_children: response.children ?? 0,
     expected_attendees: response.guests,
     actual_attendance: 'Pending',
     tags: ['Website RSVP'],
@@ -46,13 +51,15 @@ async function insertSqlGuest(guest) {
   await dbRun(
     `INSERT INTO guests (guest_id, user_id, name, side, relationship_category,
       relationship_detail, guest_type, rsvp_status, expected_adults, expected_children,
-      expected_attendees, tags, events, rsvp_token, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      expected_attendees, tags, events, rsvp_token, created_at, updated_at,
+      phone, email, food_preference, stay_preference, special_requirements)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(guest_id) DO NOTHING`,
     [guest.guest_id, guest.user_id, guest.name, guest.side, guest.relationship_category,
       guest.relationship_detail, guest.guest_type, guest.rsvp_status, guest.expected_adults,
       guest.expected_children, guest.expected_attendees, JSON.stringify(guest.tags),
-      JSON.stringify(guest.events), guest.rsvp_token, guest.created_at, guest.updated_at]
+      JSON.stringify(guest.events), guest.rsvp_token, guest.created_at, guest.updated_at,
+      guest.phone, guest.email, guest.food_preference, guest.stay_preference, guest.special_requirements]
   );
 }
 

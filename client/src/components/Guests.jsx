@@ -1250,17 +1250,17 @@ export default function Guests() {
                 {paginatedGuests.map((g) => {
                   const isSelected = selectedIds.includes(g.id);
                   const isAttended = g.actual_attendance === 'Attended' || g.check_in_status;
-                  const isGroomSide = g.relationship_category === 'Groom Family' || g.relationship_category === 'Groom Friend';
-                  const isBrideSide = g.relationship_category === 'Bride Family' || g.relationship_category === 'Bride Friend';
-                  const sideText = isGroomSide ? "Groom's Side" : isBrideSide ? "Bride's Side" : (weddingProfile?.planning_side === 'Groom' ? "Groom's Side" : weddingProfile?.planning_side === 'Bride' ? "Bride's Side" : 'Guest');
+                  const isGroomSide = g.side === 'Groom' || ['Groom Family', 'Groom Friend'].includes(g.relationship_category);
+                  const isBrideSide = g.side === 'Bride' || ['Bride Family', 'Bride Friend'].includes(g.relationship_category);
+                  const sideText = isGroomSide ? "Groom's Side" : isBrideSide ? "Bride's Side" : (g.side === 'Both' ? 'Both sides' : weddingProfile?.planning_side === 'Groom' ? "Groom's Side" : weddingProfile?.planning_side === 'Bride' ? "Bride's Side" : 'Guest');
                   const rsvp = (g.rsvp_status === 'Not Responded' || !g.rsvp_status) ? 'Pending Invitation' : g.rsvp_status;
                   const rsvpColor = rsvp === 'Confirmed' || rsvp === 'Attending'
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     : rsvp === 'Declined'
                     ? 'bg-rose-50 text-rose-800 border-rose-200'
                     : 'bg-zinc-100 text-zinc-700 border-zinc-200';
-                  const foodText = g.food_preference === 'Jain' ? 'Jain' : g.food_preference === 'Non-Veg' ? 'Non-Veg' : 'Pure Veg';
-                  const stayText = g.stay_preference === 'Hotel' ? 'Hotel Room' : g.stay_preference === 'Home' ? 'Guest House' : 'Local Stay';
+                  const foodText = g.food_preference || 'Meal not specified';
+                  const stayText = g.stay_preference === 'Hotel' ? 'Hotel Room' : ['Home Stay', 'Home'].includes(g.stay_preference) ? 'Home Stay' : 'No stay needed';
 
                   return (
                     <div 

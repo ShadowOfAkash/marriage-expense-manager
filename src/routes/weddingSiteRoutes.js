@@ -56,7 +56,21 @@ router.get('/public/wedding-site', async (_req, res, next) => {
 const eventKeys = ['haldi', 'mehndi', 'wedding'];
 
 router.post('/public/wedding-site/rsvps', async (req, res, next) => {
-  const { id, name, attendance, events, guests } = req.body || {};
+  const { id, name, attendance, events, guests, adults = guests, children = 0,
+    side = 'Both', relationship = 'Other', phone = '', email = '',
+    food = '', stay = '', requirements = '' } = req.body || {};
+  const attending = attendance === 'yes';
+  const validText = (value, limit) => typeof value === 'string' && value.length <= limit;
+  if (!['Groom', 'Bride', 'Both'].includes(side) ||
+      !['Family', 'Friend', 'Colleague', 'Other'].includes(relationship) ||
+      !validText(phone, 30) || !validText(email, 254) ||
+      (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) ||
+      (attending && (!['', 'Vegetarian', 'Non-Veg', 'Jain', 'Vegan', 'Other'].includes(food) ||
+        !['', 'No need of stay', 'Hotel', 'Home Stay'].includes(stay) ||
+        !validText(requirements, 500) || !Number.isInteger(adults) || adults < 1 ||
+        !Number.isInteger(children) || children < 0 || adults + children !== guests))) {
+    return res.status(400).json({ error: 'Check your contact details and guest preferences.' });
+  }
   if (typeof id !== 'string' || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(id) ||
       typeof name !== 'string' || !name.trim() || name.length > 120 ||
       !['yes', 'no'].includes(attendance) ||
@@ -72,6 +86,12 @@ router.post('/public/wedding-site/rsvps', async (req, res, next) => {
     attendance,
     events: attendance === 'yes' ? [...new Set(events)] : [],
     guests: attendance === 'yes' ? guests : 0,
+    adults: attending ? adults : 0,
+    children: attending ? children : 0,
+    side, relationship, phone: phone.trim(), email: email.trim(),
+    food: attending ? food : '',
+    stay: attending && stay ? stay : 'No need of stay',
+    requirements: attending ? requirements.trim() : '',
     receivedAt: new Date().toISOString(),
   };
 
