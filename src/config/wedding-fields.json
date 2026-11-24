@@ -1,0 +1,146 @@
+{
+  "Invitation": {
+    "siteTitle": {
+      "label": "Browser title",
+      "default": "Akash Tiwari and Shivangi Mishra"
+    },
+    "siteDescription": {
+      "label": "Search description",
+      "default": "Join Akash Tiwari and Shivangi Mishra for Haldi, Mehendi, and their wedding in Kanpur, 23–25 January 2027."
+    },
+    "firstName": {
+      "label": "First name",
+      "default": "Akash"
+    },
+    "secondName": {
+      "label": "Second name",
+      "default": "Shivangi"
+    },
+    "city": {
+      "label": "Wedding city",
+      "default": "Kanpur"
+    },
+    "invocation": {
+      "label": "Invocation",
+      "default": "श्री गणेशाय नमः"
+    },
+    "invitation": {
+      "label": "Invitation message",
+      "default": "With the blessing of our elders,\nwe invite you and your family to celebrate the marriage of…"
+    }
+  },
+  "Families": {
+    "firstFullName": {
+      "label": "First full name",
+      "default": "Akash Tiwari"
+    },
+    "secondFullName": {
+      "label": "Second full name",
+      "default": "Shivangi Mishra"
+    },
+    "firstParentOne": {
+      "label": "First parent",
+      "default": "Sri Chand Prakash Tiwari"
+    },
+    "firstParentTwo": {
+      "label": "Second parent",
+      "default": "Sri Matai Savita Tiwari"
+    },
+    "secondParentOne": {
+      "label": "First parent of second partner",
+      "default": "Sri Shyam Manohar Mishra"
+    },
+    "secondParentTwo": {
+      "label": "Second parent of second partner",
+      "default": "Shrimati Krishna Devi Mishra"
+    }
+  },
+  "Haldi": {
+    "haldiName": {
+      "label": "Event name",
+      "default": "Haldi"
+    },
+    "haldiAt": {
+      "label": "Date and time (IST)",
+      "default": "2027-01-23T19:00"
+    },
+    "haldiVenue": {
+      "label": "Venue",
+      "default": "Mahkaleshwer Society, Mandhana, Kanpur"
+    },
+    "haldiDetails": {
+      "label": "Description",
+      "default": "An evening of turmeric, teasing and plenty of laughter."
+    }
+  },
+  "Mehndi": {
+    "mehndiName": {
+      "label": "Event name",
+      "default": "Mehndi"
+    },
+    "mehndiAt": {
+      "label": "Date and time (IST)",
+      "default": "2027-01-24T19:00"
+    },
+    "mehndiVenue": {
+      "label": "Venue",
+      "default": "Mahkaleshwer Society, Mandhana, Kanpur"
+    },
+    "mehndiDetails": {
+      "label": "Description",
+      "default": "Join both families for mehndi, dholak and an evening of singing."
+    }
+  },
+  "Wedding": {
+    "weddingName": {
+      "label": "Event name",
+      "default": "Wedding"
+    },
+    "weddingAt": {
+      "label": "Date and time (IST)",
+      "default": "2027-01-25T19:00"
+    },
+    "weddingVenue": {
+      "label": "Venue",
+      "default": "Alankar Guest House, Saket Nagar, Kanpur"
+    },
+    "weddingDetails": {
+      "label": "Description",
+      "default": "The baraat arrives with a band and a ghodi, followed by the jaimala, dinner and seven pheras."
+    }
+  },
+  "Travel": {
+    "trainName": {
+      "label": "Train station",
+      "default": "Kanpur Central"
+    },
+    "trainDetails": {
+      "label": "Train details",
+      "default": "Railway station · CNB"
+    },
+    "airportName": {
+      "label": "Airport",
+      "default": "Kanpur Airport"
+    },
+    "airportDetails": {
+      "label": "Flight details",
+      "default": "Chakeri. Fly into Lucknow for more flight options."
+    },
+    "roadName": {
+      "label": "Road",
+      "default": "NH 19"
+    },
+    "roadDetails": {
+      "label": "Driving details",
+      "default": "Delhi–Kolkata highway"
+    },
+    "travelNoteTitle": {
+      "label": "Travel tip title",
+      "default": "Pack a layer"
+    },
+    "travelNote": {
+      "label": "Travel tip",
+      "default": "Late January evenings can be chilly. Bring a shawl or jacket for the celebrations."
+    }
+  }
+}

@@ -16,6 +16,7 @@ const vendorRoutes    = require('./vendorRoutes');
 const weddingRoutes   = require('./weddingProfileRoutes');
 
 // Mount routes
+router.use(require("./weddingSiteRoutes"));
 router.use('/auth', authRoutes);
 router.use('/', budgetRoutes);
 router.use('/', paymentsRoutes);

@@ -17,6 +17,7 @@ export default function TopNavbar({ weddingProfile, onEditProfile }) {
     { label: 'Guests', path: '/guests' },
     { label: 'Roadmap', path: '/checklist' },
     { label: 'Contracts', path: '/bookings' },
+    { label: 'Wedding Website', path: '/wedding-site' },
   ];
 
   async function handleSignOut() {

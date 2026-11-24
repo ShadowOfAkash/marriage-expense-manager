@@ -55,6 +55,12 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 export const api = {
+  getWeddingSite: () => fetchWithAuth('/api/wedding-site'),
+  saveWeddingSite: (content) => fetchWithAuth('/api/wedding-site', {
+    method: 'PUT',
+    body: JSON.stringify({ content }),
+  }),
+
   // BOOKINGS
   getBookings:   ()       => fetchWithAuth('/api/bookings'),
   addBooking:    (data)   => fetchWithAuth('/api/bookings', { method: 'POST', body: JSON.stringify(data) }),

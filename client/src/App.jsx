@@ -10,6 +10,7 @@ import BookingDetail from './components/BookingDetail'
 import Guests    from './components/Guests'
 import GuestRsvpPortal from './components/GuestRsvpPortal'
 import Checklist from './components/Checklist'
+import WeddingSite from './components/WeddingSite'
 import VendorDiscovery from './components/VendorDiscovery'
 import OnboardingWizard from './components/OnboardingWizard'
 import Profile from './components/Profile'
@@ -62,6 +63,7 @@ function MainApp() {
       <main className="flex-1 min-w-0 w-full">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/wedding-site" element={<WeddingSite />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile weddingProfile={weddingProfile} onProfileUpdated={setWeddingProfile} />} />
           <Route path="/checklist" element={<Checklist />} />

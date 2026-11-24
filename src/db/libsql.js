@@ -20,6 +20,11 @@ async function initLibSQL() {
 
     // Create tables in Turso
     await db.executeMultiple(`
+      CREATE TABLE IF NOT EXISTS wedding_site (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        content TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS telegram_links (
         chat_id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL
